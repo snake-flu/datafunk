@@ -44,6 +44,6 @@ and end with the entry point
 ```
     subparser_remove_dat_junk.set_defaults(func=datafunk.subcommands.remove_dat_junk.run)
 ```
-4. Create file `datafunk/subcommands/remove_dat_junk.py` which defines how to `run` given the command line parameters
+4. Create file `datafunk/subcommands/remove_dat_junk.py` which defines how to `run` given the command line parameters. Alternatively, specify the entrypoint within the main script file.
 5. If you have tests, add the test data to a subdirectory e.g. `tests/data/remove_dat_junk`, and add the test file
 `tests/remove_dat_junk.py`
