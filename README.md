@@ -47,3 +47,4 @@ and end with the entry point
 4. Create file `datafunk/subcommands/remove_dat_junk.py` which defines how to `run` given the command line parameters. Alternatively, specify the entrypoint within the main script file.
 5. If you have tests, add the test data to a subdirectory e.g. `tests/data/remove_dat_junk`, and add the test file
 `tests/remove_dat_junk.py`
+6. If the script has any new dependencies, update `install_requires` section of `setup.py` - this means that it can be pip installed from a conda environment file without a hitch.
