@@ -1,0 +1,7 @@
+.idea/
+build/
+datafunk.egg-info/
+dist/
+.eggs/
+*/__pycache__/
+*/*/__pycache__/
