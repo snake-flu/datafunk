@@ -44,6 +44,7 @@ def main(args=None):
 
     # _________________________________ repair_names ____________________________#
     subparser_repair_names = subparsers.add_parser("repair_names",
+        aliases=['rename_dat_punk'],
         usage="datafunk repair_names --fasta <fasta> --tree <tree> --out <outfile>",
         help="Returns iqtree taxa names to their former glory",
     )
