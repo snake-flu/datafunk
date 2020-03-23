@@ -2,6 +2,7 @@ import argparse
 import sys
 
 import datafunk
+import datafunk.subcommands
 
 def main(args=None):
     parser = argparse.ArgumentParser(
@@ -40,6 +41,18 @@ def main(args=None):
     )
 
     subparser_remove_dat_junk.set_defaults(func=datafunk.subcommands.remove_dat_junk.run)
+
+    # _________________________________ repair_names ____________________________#
+    subparser_repair_names = subparsers.add_parser("repair_names",
+        usage="datafunk repair_names --fasta <fasta> --tree <tree> --out <outfile>",
+        help="Returns iqtree taxa names to their former glory",
+    )
+
+    subparser_repair_names.add_argument("--fasta", action="store", type=str, dest="fasta")
+    subparser_repair_names.add_argument("--tree", action="store", type=str, dest="tree")
+    subparser_repair_names.add_argument("--out", action="store", type=str, dest="out")
+
+    subparser_repair_names.set_defaults(func=datafunk.subcommands.repair_names.run)
 
     # ___________________________________________________________________________#
 

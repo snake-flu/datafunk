@@ -1,17 +1,4 @@
 from Bio import SeqIO
-import argparse
-
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(description='Returns iqtree taxa names to their former glory.')
-
-    parser.add_argument("--fasta", action="store", type=str, dest="fasta")
-    parser.add_argument("--tree", action="store", type=str, dest="tree")
-    parser.add_argument("--out", action="store", type=str, dest="out")
-
-    return parser.parse_args()
-
 
 def make_record_dict(fasta):
     record_dict = {}
@@ -41,14 +28,6 @@ def fix_names(fasta, tree, out):
 
             fw.write(new_l + '\n')
     fw.close()
-
-if __name__ == '__main__':
-
-    args = parse_args()
-
-    fix_names(args.fasta, args.tree, args.out)
-
-
 
 
 
