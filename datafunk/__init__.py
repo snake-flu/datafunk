@@ -5,6 +5,6 @@ try:
 except:
     __version__ = "local"
 
-__all__ = ["remove_dat_junk"]
+__all__ = ["remove_dat_junk","repair_names"]
 
 from datafunk import *
