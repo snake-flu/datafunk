@@ -48,3 +48,17 @@ and end with the entry point
 5. If you have tests, add the test data to a subdirectory e.g. `tests/data/remove_dat_junk`, and add the test file
 `tests/remove_dat_junk_test.py`. This file should contain unit tests which have names `test_*` and ideally be informative about which function they test/the result.
 6. If the script has any new dependencies, update `install_requires` section of `setup.py` - this means that it can be pip installed from a conda environment file without a hitch.
+
+
+
+Newly added functions in version 0.00000001 (Prototype)
+
+       - clean_names (clean_dat_name)
+       - merge_fasta (merge_dat_fasta)
+       - remove_fasta (remove_dat_fasta)
+
+Examples to use for comparison in test_files (will be deleted soon)
+readme_test for commands
+
+Slack me for bugs (there will be many)
+Will update for them in v0.000000002 (Prototype2)
