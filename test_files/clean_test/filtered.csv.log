@@ -1,0 +1,20 @@
+Fail to parse country: Korea, South for label ID:     province/state country/region   lat   long  1/22/20  ...  3/13/20  3/14/20  3/15/20  3/16/20  3/17/20
+156            NaN   Korea, South  36.0  128.0        1  ...     7979     8086     8162     8236     8320
+
+[1 rows x 60 columns]
+Fail to parse country: Cruise Ship for label ID:        province/state country/region      lat     long  1/22/20  ...  3/13/20  3/14/20  3/15/20  3/16/20  3/17/20
+165  Diamond Princess    Cruise Ship  35.4437  139.638        0  ...      696      696      696      696      696
+
+[1 rows x 60 columns]
+Fail to parse country: Congo (Kinshasa) for label ID:     province/state    country/region     lat     long  1/22/20  ...  3/13/20  3/14/20  3/15/20  3/16/20  3/17/20
+203            NaN  Congo (Kinshasa) -4.0383  21.7587        0  ...        2        2        2        2        3
+
+[1 rows x 60 columns]
+Fail to parse country: Cote d'Ivoire for label ID:     province/state country/region   lat    long  1/22/20  ...  3/13/20  3/14/20  3/15/20  3/16/20  3/17/20
+204            NaN  Cote d'Ivoire  7.54 -5.5471        0  ...        1        1        1        1        5
+
+[1 rows x 60 columns]
+Fail to parse country: Congo (Brazzaville) for label ID:     province/state       country/region     lat     long  ...  3/14/20  3/15/20  3/16/20  3/17/20
+439            NaN  Congo (Brazzaville) -4.0383  21.7587  ...        0        1        1        1
+
+[1 rows x 60 columns]

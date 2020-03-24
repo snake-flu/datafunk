@@ -11,6 +11,8 @@ setup(
     tests_require=["nose >= 1.3"],
     install_requires=[
         "biopython>=1.70",
+        "pandas>=0.25.0",
+        "pycountry>=pycountry-19.8.18"
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
