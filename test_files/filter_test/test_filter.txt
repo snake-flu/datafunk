@@ -1,0 +1,3 @@
+PG14-UG500028   #Gaps exceeding 10% of sequence
+PG14-UG503626   
+PG14-UG501647   #Gaps exceeding 10% of sequence
