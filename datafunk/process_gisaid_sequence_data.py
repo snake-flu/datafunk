@@ -1,5 +1,5 @@
 from Bio import SeqIO
-import json, re, argparse
+import json, re
 
 
 def fix_seq_in_gisaid_json_dict(gisaid_json_dict):
