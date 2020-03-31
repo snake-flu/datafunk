@@ -249,6 +249,52 @@ def main(args=None):
 
     # ___________________________________________________________________________#
 
+    # _________________________________ process_gisaid_sequence_data ____________________________#
+    subparser_process_gisaid_sequence_data = subparsers.add_parser(
+        "process_gisaid_sequence_data",
+        aliases=['get_new_horrors'],
+        usage="datafunk process_gisaid_sequence_data -i <input_fasta> -t <threshold> [-o <output_fasta>]",
+        help="Process raw sequence data in fasta or json format",
+    )
+
+    subparser_process_gisaid_sequence_data.add_argument(
+        '-i',
+        '--input',
+        required=True,
+        metavar='GISAID.fasta/GISAID.json',
+        help='Sequence data in FASTA/json format'
+    )
+
+    subparser_process_gisaid_sequence_data.add_argument(
+        '-o',
+        '--output',
+        required=False,
+        metavar = 'OUTPUT.fasta',
+        help='FASTA format file to write.'
+    )
+
+    subparser_process_gisaid_sequence_data.add_argument(
+        '-e',
+        '--exclude',
+        action='append',
+        required=False,
+        metavar = 'FILE',
+        help='A file that contains (anywhere) EPI_ISL_###### IDs to exclude (can provide many files, '
+             'e.g. -e FILE1 -e FILE2 ...)'
+    )
+
+
+    subparser_process_gisaid_sequence_data.add_argument(
+        '--stdout',
+        required=False,
+        action='store_true',
+        help='Overides -o/--output if present and prints output to stdout',
+    )
+
+    subparser_process_gisaid_sequence_data.set_defaults(func=datafunk.subcommands.process_gisaid_sequence_data.run)
+
+    # ___________________________________________________________________________#
+
     args = parser.parse_args()
 
     if hasattr(args, "func"):

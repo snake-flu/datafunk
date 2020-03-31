@@ -5,7 +5,7 @@ try:
 except:
     __version__ = "local"
 
-__all__ = ["remove_dat_junk","repair_names","clean_names","remove_fasta","merge_fasta","get_id_from_json_dict",
-           "filter_low_coverage"]
+__all__ = ["remove_dat_junk","repair_names","clean_names","remove_fasta","merge_fasta",
+           "filter_low_coverage", "process_gisaid_sequence_data"]
 
 from datafunk import *

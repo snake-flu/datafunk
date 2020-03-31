@@ -2,36 +2,6 @@ from Bio import SeqIO
 import json, re, argparse
 
 
-def parseArgs():
-    parser = argparse.ArgumentParser(description=""" \
-        Process raw sequence data in fasta or json format""")
-
-    # TO DO: Add path to reference sequence to optionally add it to the output?
-
-    parser._action_groups.pop()
-    required = parser.add_argument_group('required arguments')
-    optional = parser.add_argument_group('optional arguments')
-
-    required.add_argument('-i', '--input',
-                        help='Sequence data in FASTA/json format',
-                        required=True,
-                        metavar = 'GISAID.fasta/GISAID.json')
-    optional.add_argument('-o', '--output',
-                        help='FASTA format file to write.',
-                        required=False,
-                        metavar = 'OUTPUT.fasta')
-    optional.add_argument('-e', '--exclude',
-                        action='append',
-                        required=False,
-                        metavar = 'FILE',
-                        help='A file that contains (anywhere) EPI_ISL_###### IDs to exclude (can provide many files, e.g. -e FILE1 -e FILE2 ...)')
-    optional.add_argument('--stdout',
-                        help='Overides -o/--output if present and prints output to stdout',
-                        required=False,
-                        action = 'store_true')
-    return(parser.parse_args())
-
-
 def fix_seq_in_gisaid_json_dict(gisaid_json_dict):
     """
     strip whitespace and newline characters from the
@@ -190,21 +160,6 @@ def process_gisaid_sequence_data(input, output = False, omit_file_list = False):
                 input_json_output_file(input = input, output = output, omitted = omitted_IDs)
 
     pass
-
-
-if __name__ == '__main__':
-
-    args = parseArgs()
-
-    if args.stdout:
-        process_gisaid_sequence_data(input = args.input, output = 'stdout', omit_file_list = args.exclude)
-    else:
-        process_gisaid_sequence_data(input = args.input, output = args.output, omit_file_list = args.exclude)
-
-
-
-
-
 
 
 
