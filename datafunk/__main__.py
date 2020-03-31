@@ -253,27 +253,31 @@ def main(args=None):
     subparser_process_gisaid_sequence_data = subparsers.add_parser(
         "process_gisaid_sequence_data",
         aliases=['get_new_horrors'],
-        usage="datafunk process_gisaid_sequence_data -i <input_fasta> -t <threshold> [-o <output_fasta>]",
-        help="Process raw sequence data in fasta or json format",
+        usage="datafunk process_gisaid_sequence_data -i <input.json OR input.fasta> [-o <output.fasta>] [-e file1 -e file2 ...] [--stdout]",
+        description="Process raw sequence data in fasta or json format",
     )
 
-    subparser_process_gisaid_sequence_data.add_argument(
+    subparser_process_gisaid_sequence_data._action_groups.pop()
+    required = subparser_process_gisaid_sequence_data.add_argument_group('required arguments')
+    optional = subparser_process_gisaid_sequence_data.add_argument_group('optional arguments')
+
+    required.add_argument(
         '-i',
         '--input',
         required=True,
-        metavar='GISAID.fasta/GISAID.json',
+        metavar='GISAID.fasta OR GISAID.json',
         help='Sequence data in FASTA/json format'
     )
 
-    subparser_process_gisaid_sequence_data.add_argument(
+    optional.add_argument(
         '-o',
         '--output',
         required=False,
         metavar = 'OUTPUT.fasta',
-        help='FASTA format file to write.'
+        help='FASTA format file to write'
     )
 
-    subparser_process_gisaid_sequence_data.add_argument(
+    optional.add_argument(
         '-e',
         '--exclude',
         action='append',
@@ -284,7 +288,7 @@ def main(args=None):
     )
 
 
-    subparser_process_gisaid_sequence_data.add_argument(
+    optional.add_argument(
         '--stdout',
         required=False,
         action='store_true',
