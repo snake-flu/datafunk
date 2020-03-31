@@ -1,3 +1,4 @@
-__all__ = ["remove_dat_junk", "repair_names","clean_names","remove_fasta","merge_fasta","get_ID_from_json_dict.py"]
+__all__ = ["remove_dat_junk", "repair_names","clean_names","remove_fasta","merge_fasta",
+           "filter_low_coverage"]
 
 from datafunk.subcommands import *

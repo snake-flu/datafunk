@@ -198,6 +198,57 @@ def main(args=None):
 
     # ___________________________________________________________________________#
 
+    # _________________________________ filter_low_coverage ____________________________#
+    subparser_filter_low_coverage = subparsers.add_parser(
+        "filter_low_coverage",
+        aliases=['filter_dat_fasta'],
+        usage="datafunk filter_low_coverage -i <input_fasta> -t <threshold> [-o <output_fasta>]",
+        help="Removes sequences where the fraction of non-N bases falls below the threshold",
+    )
+
+    subparser_filter_low_coverage.add_argument(
+        "-i",
+        "--input_file",
+        dest="input_file",
+        action="store",
+        required=True,
+        type=str,
+        help="Input FASTA",
+    )
+
+    subparser_filter_low_coverage.add_argument(
+        "-t",
+        "--threshold",
+        dest="threshold",
+        action="store",
+        required=True,
+        type=int,
+        help="Integer representing the percentage threshold. Sequences with coverage (strictly) "
+             "less than this will be excluded from the filtered file.",
+    )
+
+    subparser_filter_low_coverage.add_argument(
+        "-o",
+        "--output_file",
+        dest="output_file",
+        action="store",
+        default=None,
+        type=str,
+        help="Output file name for resulting filtered FASTA (default adds .filtered to input file name)",
+    )
+
+    subparser_filter_low_coverage.add_argument(
+        "-v",
+        "--verbose",
+        dest="verbose",
+        action="store_true",
+        help="Run with high verbosity " "(debug level logging)",
+    )
+
+    subparser_filter_low_coverage.set_defaults(func=datafunk.subcommands.filter_low_coverage.run)
+
+    # ___________________________________________________________________________#
+
     args = parser.parse_args()
 
     if hasattr(args, "func"):
