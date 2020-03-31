@@ -254,6 +254,7 @@ def main(args=None):
         "process_gisaid_sequence_data",
         aliases=['get_new_horrors'],
         usage="datafunk process_gisaid_sequence_data -i <input.json OR input.fasta> [-o <output.fasta>] [-e file1 -e file2 ...] [--stdout]",
+        help="Process raw sequence data in fasta or json format",
         description="Process raw sequence data in fasta or json format",
     )
 
