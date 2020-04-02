@@ -53,7 +53,7 @@ def run(options):
 
     if trim:
         if options.output and not options.stdout:
-            f_out = open(args.output, 'w')
+            f_out = open(options.output, 'w')
             if options.prefix_ref:
                 f_out.write('>' + reference.id + '\n')
                 f_out.write(str(reference.seq[trimstart:trimend]) + '\n')
@@ -63,7 +63,7 @@ def run(options):
                 print(reference.seq[trimstart:trimend])
     else:
         if options.output and not options.stdout:
-            f_out = open(args.output, 'w')
+            f_out = open(options.output, 'w')
             if options.prefix_ref:
                 f_out.write('>' + reference.id + '\n')
                 f_out.write(str(reference.seq) + '\n')
