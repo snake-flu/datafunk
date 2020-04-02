@@ -94,3 +94,8 @@ def run(options):
             if options.stdout:
                 print('>' + query_seq_name)
                 print(seq)
+
+
+
+    if options.output and not options.stdout:
+        f_out.close()
