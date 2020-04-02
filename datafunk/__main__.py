@@ -307,9 +307,6 @@ def main(args=None):
         description="aligned sam -> fasta (with optional trim to user-defined (reference) co-ordinates)",
     )
 
-
-    # TO DO: Add path to reference sequence to optionally add it to the output?
-
     subparser_sam_2_fasta._action_groups.pop()
     required_sam_2_fasta = subparser_sam_2_fasta.add_argument_group('required arguments')
     optional_sam_2_fasta = subparser_sam_2_fasta.add_argument_group('optional arguments')
