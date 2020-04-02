@@ -333,7 +333,7 @@ def main(args=None):
         '-t', '--trim',
         help='trim the alignment to these coordinates (0-based, half-open)',
         required=False,
-        metavar='[[start]:[end]],'
+        metavar='[[start]:[end]]'
                         )
     optional_sam_2_fasta.add_argument(
         '--prefix_ref',
