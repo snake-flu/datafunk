@@ -13,6 +13,7 @@ setup(
         "biopython>=1.70",
         "pandas>=0.25.0",
         "pycountry>=pycountry-19.8.18",
+        "pysam>=0.15.4"
     ],
     classifiers=[
         "Development Status :: 4 - Beta",

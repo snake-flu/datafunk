@@ -259,10 +259,10 @@ def main(args=None):
     )
 
     subparser_process_gisaid_sequence_data._action_groups.pop()
-    required = subparser_process_gisaid_sequence_data.add_argument_group('required arguments')
-    optional = subparser_process_gisaid_sequence_data.add_argument_group('optional arguments')
+    required_process_gisaid_sequence_data = subparser_process_gisaid_sequence_data.add_argument_group('required arguments')
+    optional_process_gisaid_sequence_data = subparser_process_gisaid_sequence_data.add_argument_group('optional arguments')
 
-    required.add_argument(
+    required_process_gisaid_sequence_data.add_argument(
         '-i',
         '--input',
         required=True,
@@ -270,7 +270,7 @@ def main(args=None):
         help='Sequence data in FASTA/json format'
     )
 
-    optional.add_argument(
+    optional_process_gisaid_sequence_data.add_argument(
         '-o',
         '--output',
         required=False,
@@ -278,7 +278,7 @@ def main(args=None):
         help='FASTA format file to write'
     )
 
-    optional.add_argument(
+    optional_process_gisaid_sequence_data.add_argument(
         '-e',
         '--exclude',
         action='append',
@@ -289,7 +289,7 @@ def main(args=None):
     )
 
 
-    optional.add_argument(
+    optional_process_gisaid_sequence_data.add_argument(
         '--stdout',
         required=False,
         action='store_true',
@@ -297,6 +297,62 @@ def main(args=None):
     )
 
     subparser_process_gisaid_sequence_data.set_defaults(func=datafunk.subcommands.process_gisaid_sequence_data.run)
+
+    # _________________________________ sam_2_fasta _____________________________#
+
+    subparser_sam_2_fasta = subparsers.add_parser(
+        "sam_2_fasta",
+        usage="datafunk sam_2_fasta -s <input.sam> -r <reference.fasta> [-o <output.fasta>] [-t [INT]:[INT]] [--prefix_ref] [--stdout]",
+        help="Convert sam format alignment to fasta format multiple alignment, with optional trimming",
+        description="aligned sam -> fasta (with optional trim to user-defined (reference) co-ordinates)",
+    )
+
+
+    # TO DO: Add path to reference sequence to optionally add it to the output?
+
+    subparser_sam_2_fasta._action_groups.pop()
+    required_sam_2_fasta = subparser_sam_2_fasta.add_argument_group('required arguments')
+    optional_sam_2_fasta = subparser_sam_2_fasta.add_argument_group('optional arguments')
+
+    required_sam_2_fasta.add_argument(
+        '-s', '--sam',
+        help='samfile',
+        required=True,
+        metavar='in.sam'
+                        )
+    required_sam_2_fasta.add_argument(
+        '-r', '--reference',
+        help='reference',
+        required=True,
+        metavar='reference.fasta'
+                        )
+    optional_sam_2_fasta.add_argument(
+        '-o', '--output',
+        help='FASTA format file to write.',
+        required=False,
+        metavar='out.fasta'
+                        )
+    optional_sam_2_fasta.add_argument(
+        '-t', '--trim',
+        help='trim the alignment to these coordinates (0-based, half-open)',
+        required=False,
+        metavar='[[start]:[end]],'
+                        )
+    optional_sam_2_fasta.add_argument(
+        '--prefix_ref',
+        help='write the reference sequence at the beginning of the file',
+        required=False,
+        action='store_true'
+                        )
+    optional_sam_2_fasta.add_argument(
+        '--stdout',
+        help='Overides -o/--output if present and prints output to stdout',
+        required=False,
+        action='store_true'
+                        )
+
+    subparser_sam_2_fasta.set_defaults(func=datafunk.subcommands.sam_2_fasta.run)
+
 
     # ___________________________________________________________________________#
 
