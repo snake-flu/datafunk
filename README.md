@@ -50,15 +50,14 @@ and end with the entry point
 6. If the script has any new dependencies, update `install_requires` section of `setup.py` - this means that it can be pip installed from a conda environment file without a hitch.
 
 
+Function List
 
-Newly added functions in version 0.00000001 (Prototype)
+       - clean_names
+       - merge_fasta
+       - remove_fasta 
+       - filter_low_coverage
+       - process_gisaid_data
+       - sam_2_fasta
+       - split_by_phylotype
+       - phylo_consensus
 
-       - clean_names (clean_dat_name)
-       - merge_fasta (merge_dat_fasta)
-       - remove_fasta (remove_dat_fasta)
-
-Examples to use for comparison in test_files (will be deleted soon)
-readme_test for commands
-
-Slack me for bugs (there will be many)
-Will update for them in v0.000000002 (Prototype2)
