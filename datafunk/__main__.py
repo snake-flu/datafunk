@@ -89,6 +89,7 @@ def main(args=None):
         dest="output_file",
         action="store",
         type=str,
+        default='removed.fasta',
         help="Output file name for resulting filtered fasta file",
     )
 
@@ -136,6 +137,7 @@ def main(args=None):
         dest="output_file",
         action="store",
         type=str,
+        default='cleaned.csv',
         help="Output file name for resulting filtered metafile",
     )
 
@@ -151,7 +153,7 @@ def main(args=None):
 
     # ___________________________________________________________________________#
 
-        # _________________________________ merge_fasta ____________________________#
+    # _________________________________ merge_fasta ____________________________#
     subparser_merge_fasta = subparsers.add_parser(
         "merge_fasta",
         aliases=['merge_dat_fasta'],
@@ -183,6 +185,7 @@ def main(args=None):
         dest="output_file",
         action="store",
         type=str,
+        default='filtered.fasta',
         help="Output for merged fasta file",
     )
 
@@ -350,6 +353,104 @@ def main(args=None):
 
     subparser_sam_2_fasta.set_defaults(func=datafunk.subcommands.sam_2_fasta.run)
 
+
+    # ___________________________________________________________________________#
+
+    # _________________________________ split_by_phylotype ____________________________#
+    subparser_split_by_phylotype = subparsers.add_parser(
+        "split_by_phylotype",
+        aliases=['split_dat_phylotype'],
+        usage="datafunk split_by_phylotype -i <input_fasta> -m <input_metafile> -c <clade_threshold> -o <output_folder>",
+        help="Split sequences in Fasta file according to phylotypes that is still within UK",
+    )
+
+    subparser_split_by_phylotype.add_argument(
+        "-i",
+        "--input_fasta",
+        dest="input_fasta",
+        action="store",
+        type=str,
+        help="Fasta file for splitting into phylotypes",
+    )
+
+    subparser_split_by_phylotype.add_argument(
+        "-m",
+        "--input_metafile",
+        dest="input_metafile",
+        action="store",
+        type=str,
+        help="Input metafile (csv) with phylotype information",
+    )
+
+
+    subparser_split_by_phylotype.add_argument(
+        "-c",
+        "--clade_threshold",
+        dest="clade_threshold",
+        action="store",
+        type=int,
+        default=2,
+        help="Clade threshold for minimum number of sequence classified for downstream phylogenetic analysis (Default: 2)",
+    )
+
+    subparser_split_by_phylotype.add_argument(
+        "-o",
+        "--output_folder",
+        dest="output_folder",
+        action="store",
+        default="./",
+        type=str,
+        help="Output folder for the phylotype fasta files",
+    )
+
+    subparser_split_by_phylotype.add_argument(
+        "-v",
+        "--verbose",
+        dest="verbose",
+        action="store_true",
+        help="Run with high verbosity " "(debug level logging)",
+    )
+
+    subparser_split_by_phylotype.set_defaults(func=datafunk.subcommands.split_by_phylotype.run)
+
+    # ___________________________________________________________________________#
+
+    # _________________________________ phylo_consensus ____________________________#
+    subparser_phylo_consensus = subparsers.add_parser(
+        "phylo_consensus",
+        aliases=['phylo_consensus'],
+        usage="datafunk phylo_consensus -i <input_folder> -o <output_file>",
+        help="Create consensus sequences for phylotypes",
+    )
+
+    subparser_phylo_consensus.add_argument(
+        "-i",
+        "--input_folder",
+        dest="input_folder",
+        action="store",
+        type=str,
+        help="Fasta file folder for creating consensus sequences",
+    )
+
+    subparser_phylo_consensus.add_argument(
+        "-o",
+        "--output_file",
+        dest="output_file",
+        action="store",
+        type=str,
+        default="consensus.fasta",
+        help="Output file for conesensus sequence fasta file",
+    )
+
+    subparser_phylo_consensus.add_argument(
+        "-v",
+        "--verbose",
+        dest="verbose",
+        action="store_true",
+        help="Run with high verbosity " "(debug level logging)",
+    )
+
+    subparser_phylo_consensus.set_defaults(func=datafunk.subcommands.phylo_consensus.run)
 
     # ___________________________________________________________________________#
 
