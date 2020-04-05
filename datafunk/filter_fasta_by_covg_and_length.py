@@ -43,3 +43,5 @@ def filter_sequences(inpath, outpath, min_covg=None, min_length=None):
             print("#Short/truncated sequences:")
             for seq_name in lshort_seqs:
                 print(seq_name)
+
+    record_dict.close()
