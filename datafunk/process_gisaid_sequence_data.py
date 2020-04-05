@@ -27,7 +27,7 @@ def get_ID_from_json_dict(gisaid_json_dict):
     make a sequence identifier from the gisaid dump json-format data.
     Function input (gisaid_json_dict) is one record from the dump
     """
-    myStr = gisaid_json_dict['covv_virus_name'].replace(' ', '_').replace("hCoV-19/","") + '|' + \
+    myStr = gisaid_json_dict['covv_virus_name'].replace(' ', '_').replace("hCoV-19/","").replace("hCov-19/","") + '|' + \
             gisaid_json_dict['covv_accession_id'] + '|' + \
             gisaid_json_dict['covv_collection_date']
 
@@ -37,7 +37,7 @@ def fix_fasta_header(header):
     """
     parse fasta header and remove problems
     """
-    fixed_header = header.replace(' ', '_').replace("hCoV-19/","")
+    fixed_header = header.replace(' ', '_').replace("hCoV-19/","").replace("hCov-19/","")
 
     return(fixed_header)
 
