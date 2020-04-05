@@ -14,7 +14,7 @@ def sequence_too_short(sequence, length_threshold):
     return False
 
 def filter_sequences(inpath, outpath, min_covg=None, min_length=None):
-    print("\n*** Filtering out sequences with less than %i coverage ***\n" %min_covg)
+    print("\n*** Filtering sequences by length and coverage ***\n")
 
     record_dict = SeqIO.index(inpath, "fasta")
 
@@ -31,7 +31,7 @@ def filter_sequences(inpath, outpath, min_covg=None, min_length=None):
                 low_covg_seqs.append(seq_name)
                 continue
             if min_length and sequence_too_short(record_seq, min_length):
-                low_covg_seqs.append(seq_name)
+                short_seqs.append(seq_name)
                 continue
             SeqIO.write(record_dict[seq_name], out_handle, "fasta")
 
@@ -41,7 +41,7 @@ def filter_sequences(inpath, outpath, min_covg=None, min_length=None):
                 print(seq_name)
         if min_length:
             print("#Short/truncated sequences:")
-            for seq_name in lshort_seqs:
+            for seq_name in short_seqs:
                 print(seq_name)
 
     record_dict.close()

@@ -19,7 +19,7 @@ def run(options):
     if options.trim:
         trim = True
         if ':' in options.trim:
-            s = options.trim.strip().split(':')
+            s = options.trim.strip().replace("[","").replace("]","").split(':')
             if len(s) == 2:
                 if len(s[0]) == 0:
                     trimstart = 0
