@@ -80,8 +80,8 @@ def keep_entry(header, omitted=False, exclude_uk=False):
     if omitted and epi_id in omitted:
         return False
     if exclude_uk:
-        for country in ["England", "Scotland", "Ireland", "Wales"]:
-            if country in header:
+        for country in ['/England/', '/Scotland/', '/Wales/', '/Northern Ireland/']:
+            if country.lower() in header.lower():
                 return False
     return True
 
