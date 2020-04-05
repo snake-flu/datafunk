@@ -201,15 +201,15 @@ def main(args=None):
 
     # ___________________________________________________________________________#
 
-    # _________________________________ filter_low_coverage ____________________________#
-    subparser_filter_low_coverage = subparsers.add_parser(
-        "filter_low_coverage",
+    # _________________________________ filter_fasta_by_covg_and_length ____________________________#
+    subparser_filter_fasta_by_covg_and_length = subparsers.add_parser(
+        "filter_fasta_by_covg_and_length",
         aliases=['filter_dat_fasta'],
-        usage="datafunk filter_low_coverage -i <input_fasta> -t <threshold> [-o <output_fasta>]",
+        usage="datafunk filter_fasta_by_covg_and_length -i <input_fasta> -t <threshold> [-o <output_fasta>]",
         help="Removes sequences where the fraction of non-N bases falls below the threshold",
     )
 
-    subparser_filter_low_coverage.add_argument(
+    subparser_filter_fasta_by_covg_and_length.add_argument(
         "-i",
         "--input_file",
         dest="input_file",
@@ -219,18 +219,27 @@ def main(args=None):
         help="Input FASTA",
     )
 
-    subparser_filter_low_coverage.add_argument(
-        "-t",
-        "--threshold",
-        dest="threshold",
+    subparser_filter_fasta_by_covg_and_length.add_argument(
+        "--min_covg",
+        dest="min_covg",
         action="store",
-        required=True,
+        required=False,
         type=int,
-        help="Integer representing the percentage threshold. Sequences with coverage (strictly) "
-             "less than this will be excluded from the filtered file.",
+        help="Integer representing the minimum coverage percentage threshold. Sequences with coverage "
+             "(strictly) less than this will be excluded from the filtered file.",
     )
 
-    subparser_filter_low_coverage.add_argument(
+    subparser_filter_fasta_by_covg_and_length.add_argument(
+        "--min_length",
+        dest="min_length",
+        action="store",
+        required=False,
+        type=int,
+        help="Integer representing the minimum length threshold. Sequences with length (strictly) "
+             "less than this will be excluded from the filtered file. Default: ?",
+    )
+
+    subparser_filter_fasta_by_covg_and_length.add_argument(
         "-o",
         "--output_file",
         dest="output_file",
@@ -240,7 +249,7 @@ def main(args=None):
         help="Output file name for resulting filtered FASTA (default adds .filtered to input file name)",
     )
 
-    subparser_filter_low_coverage.add_argument(
+    subparser_filter_fasta_by_covg_and_length.add_argument(
         "-v",
         "--verbose",
         dest="verbose",
@@ -248,7 +257,7 @@ def main(args=None):
         help="Run with high verbosity " "(debug level logging)",
     )
 
-    subparser_filter_low_coverage.set_defaults(func=datafunk.subcommands.filter_low_coverage.run)
+    subparser_filter_fasta_by_covg_and_length.set_defaults(func=datafunk.subcommands.filter_fasta_by_covg_and_length.run)
 
     # ___________________________________________________________________________#
 
@@ -291,6 +300,12 @@ def main(args=None):
              'e.g. -e FILE1 -e FILE2 ...)'
     )
 
+    optional_process_gisaid_sequence_data.add_argument(
+        '--exclude_uk',
+        required=False,
+        action='store_true',
+        help='Removes all GISAID entries with containing England, Ireland, Scotland or Wales',
+    )
 
     optional_process_gisaid_sequence_data.add_argument(
         '--stdout',
