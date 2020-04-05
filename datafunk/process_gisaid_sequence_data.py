@@ -33,6 +33,14 @@ def get_ID_from_json_dict(gisaid_json_dict):
 
     return(myStr)
 
+def fix_fasta_header(header):
+    """
+    parse fasta header and remove problems
+    """
+    fixed_header = header.replace(' ', '_')
+
+    return(fixed_header)
+
 
 def parse_omissions_file(file):
     """
@@ -46,13 +54,15 @@ def parse_omissions_file(file):
 
     IDs = []
     regex = re.compile('EPI_ISL_\d{6}')
+    file_is_fasta = file.split('.')[-1][0:2] == 'fa'
 
     with open(file, 'r') as f:
         for line in f:
-            # if file is a FASTA file, only search the header lines:
-            if file.split('.')[-1][0:2] == 'fa':
+            if file_is_fasta:
                 if line[0] != '>':
                     continue
+            elif line.startswith("#"):
+                continue
             match = re.search(regex, line)
             if match:
                 ID = match.group()
@@ -60,78 +70,54 @@ def parse_omissions_file(file):
 
     return(IDs)
 
+def keep_entry(header, omitted=False, exclude_uk=False):
+    regex = re.compile('EPI_ISL_\d{6}')
+    match = re.search(regex, header)
+    if not match:
+        return False
+    epi_id = match.group()
 
-def process_gisaid_sequence_data(input, output = False, omit_file_list = False):
+    if omitted and epi_id in omitted:
+        return False
+    if exclude_uk:
+        for country in ["England", "Scotland", "Ireland", "Wales"]:
+            if country in header:
+                return False
+    return True
 
-    def input_fasta_output_file(input, output, omitted):
+
+def process_gisaid_sequence_data(input, output = False, omit_file_list = False, exclude_uk = False):
+
+    def input_fasta_output(input, output, omitted, exclude_uk):
+        if output:
+            out = open(output, 'w')
+        else:
+            out = sys.stdout
         out = open(output, 'w')
         with open(input, 'r') as f:
-            if omitted:
-                omitted_IDs = omitted
-                for record in SeqIO.parse(f, "fasta"):
-                    # To do: try except IndexError below, in case header line not formatted correctly
-                    ID = record.description.split('|')[1]
-                    if ID not in omitted_IDs:
-                        out.write('>' + record.description.replace(' ', '_') + '\n')
-                        out.write(str(record.seq) + '\n')
-            else:
-                for record in SeqIO.parse(f, "fasta"):
-                    out.write('>' + record.description.replace(' ', '_') + '\n')
+            for record in SeqIO.parse(f, "fasta"):
+                if keep_entry(record.description, omitted, exclude_uk):
+                    out.write('>' + fix_fasta_header(record.description) + '\n')
                     out.write(str(record.seq) + '\n')
-        out.close()
+
+        if output:
+            out.close()
         pass
 
-
-    def input_fasta_output_stdout(input, omitted):
+    def input_json_output(input, output, omitted, exclude_uk):
+        if output:
+            out = open(output, 'w')
+        else:
+            out = sys.stdout
         with open(input, 'r') as f:
-            if omitted:
-                omitted_IDs = omitted
-                for record in SeqIO.parse(f, "fasta"):
-                    # To do: try except IndexError below, in case header line not formatted correctly
-                    ID = record.description.split('|')[1]
-                    if ID not in omitted_IDs:
-                        print('>' + record.description.replace(' ', '_'))
-                        print(str(record.seq))
-            else:
-                for record in SeqIO.parse(f, "fasta"):
-                    print('>' + record.description.replace(' ', '_'))
-                    print(str(record.seq))
-        pass
-
-
-    def input_json_output_file(input, output, omitted):
-        out = open(output, 'w')
-        with open(input, 'r') as f:
-            if omitted:
                 for jsonObj in f:
                     jsonDict = fix_seq_in_gisaid_json_dict(json.loads(jsonObj))
-                    ID = jsonDict['covv_accession_id']
-                    if ID not in omitted_IDs:
-                        out.write('>' + get_ID_from_json_dict(jsonDict) + '\n')
+                    header = get_ID_from_json_dict(jsonDict)
+                    if keep_entry(header, omitted, exclude_uk):
+                        out.write('>' + header + '\n')
                         out.write(jsonDict['sequence'] + '\n')
-            else:
-                for jsonObj in f:
-                    jsonDict = fix_seq_in_gisaid_json_dict(json.loads(jsonObj))
-                    out.write('>' + get_ID_from_json_dict(jsonDict) + '\n')
-                    out.write(jsonDict['sequence'] + '\n')
-        out.close()
-        pass
-
-
-    def input_json_output_stdout(input, omitted):
-        with open(input, 'r') as f:
-            if omitted:
-                for jsonObj in f:
-                    jsonDict = fix_seq_in_gisaid_json_dict(json.loads(jsonObj))
-                    ID = jsonDict['covv_accession_id']
-                    if ID not in omitted_IDs:
-                        print('>' + get_ID_from_json_dict(jsonDict))
-                        print(jsonDict['sequence'])
-            else:
-                for jsonObj in f:
-                    jsonDict = fix_seq_in_gisaid_json_dict(json.loads(jsonObj))
-                    print('>' + get_ID_from_json_dict(jsonDict))
-                    print(jsonDict['sequence'])
+        if output:
+            out.close()
         pass
 
 
@@ -142,24 +128,14 @@ def process_gisaid_sequence_data(input, output = False, omit_file_list = False):
 
         omitted_IDs = set(temp)
     else:
-        omitted_IDs = None
+        omitted_IDs = False
 
-
-    if input.split('.')[-1][0:2].lower() == 'fa':
-        if output == 'stdout':
-            input_fasta_output_stdout(input = input, omitted = omitted_IDs)
-        else:
-            if output:
-                input_fasta_output_file(input = input, output = output, omitted = omitted_IDs)
-
-    if input.split('.')[-1].lower() == 'json':
-        if output == 'stdout':
-            input_json_output_stdout(input = input, omitted = omitted_IDs)
-        else:
-            if output:
-                input_json_output_file(input = input, output = output, omitted = omitted_IDs)
-
-    pass
+    input_is_fasta = input.split('.')[-1][0:2].lower() == 'fa'
+    input_is_json = input.split('.')[-1].lower() == 'json'
+    if input_is_fasta:
+        input_fasta_output(input = input, output = output, omitted = omitted_IDs, exclude_uk = exclude_uk)
+    elif input_is_json:
+        input_json_output(input = input, output = output, omitted = omitted_IDs, exclude_uk = exclude_uk)
 
 
 
