@@ -27,8 +27,13 @@ def get_ID_from_json_dict(gisaid_json_dict):
     make a sequence identifier from the gisaid dump json-format data.
     Function input (gisaid_json_dict) is one record from the dump
     """
+    country_strings = gisaid_json_dict['covv_location'].split(" / ")[1:4]
+    while len(country_strings) < 3:
+        country_strings.append("")
+
     myStr = gisaid_json_dict['covv_virus_name'] + '|' + \
-            gisaid_json_dict['covv_accession_id'] + '|' + \
+            gisaid_json_dict['covv_accession_id'] + '||' + \
+            '|'.join(country_strings) + '|' + \
             gisaid_json_dict['covv_collection_date']
 
     return(myStr)
