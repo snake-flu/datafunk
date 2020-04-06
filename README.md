@@ -58,6 +58,4 @@ Function List
        - filter_low_coverage
        - process_gisaid_data
        - sam_2_fasta
-       - split_by_phylotype
-       - phylo_consensus
-
+       - phylotype_consensus
