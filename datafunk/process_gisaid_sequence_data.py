@@ -27,13 +27,13 @@ def get_ID_from_json_dict(gisaid_json_dict):
     make a sequence identifier from the gisaid dump json-format data.
     Function input (gisaid_json_dict) is one record from the dump
     """
-    myStr = gisaid_json_dict['covv_virus_name'].replace(' ', '_').replace("hCoV-19/","").replace("hCov-19/","") + '|' + \
+    myStr = gisaid_json_dict['covv_virus_name'] + '|' + \
             gisaid_json_dict['covv_accession_id'] + '|' + \
             gisaid_json_dict['covv_collection_date']
 
     return(myStr)
 
-def fix_fasta_header(header):
+def fix_header(header):
     """
     parse fasta header and remove problems
     """
@@ -97,7 +97,7 @@ def process_gisaid_sequence_data(input, output = False, omit_file_list = False, 
         with open(input, 'r') as f:
             for record in SeqIO.parse(f, "fasta"):
                 if keep_entry(record.description, omitted, exclude_uk):
-                    out.write('>' + fix_fasta_header(record.description) + '\n')
+                    out.write('>' + fix_header(record.description) + '\n')
                     out.write(str(record.seq) + '\n')
 
         if output:
@@ -114,7 +114,7 @@ def process_gisaid_sequence_data(input, output = False, omit_file_list = False, 
                     jsonDict = fix_seq_in_gisaid_json_dict(json.loads(jsonObj))
                     header = get_ID_from_json_dict(jsonDict)
                     if keep_entry(header, omitted, exclude_uk):
-                        out.write('>' + header + '\n')
+                        out.write('>' + fix_header(header) + '\n')
                         out.write(jsonDict['sequence'] + '\n')
         if output:
             out.close()
