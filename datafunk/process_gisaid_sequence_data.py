@@ -38,6 +38,14 @@ def get_ID_from_json_dict(gisaid_json_dict):
 
     return(myStr)
 
+def update_fasta_header_string(header):
+    fields = header.split('|')
+    updated_fields = fields[:2]
+    updated_fields.extend(["","UK"])
+    updated_fields.extend(fields[2:])
+    updated_header = '|'.join(updated_fields)
+    return updated_header
+
 def fix_header(header):
     """
     parse fasta header and remove problems
@@ -102,7 +110,7 @@ def process_gisaid_sequence_data(input, output = False, omit_file_list = False, 
         with open(input, 'r') as f:
             for record in SeqIO.parse(f, "fasta"):
                 if keep_entry(record.description, omitted, exclude_uk):
-                    out.write('>' + fix_header(record.description) + '\n')
+                    out.write('>' + fix_header(update_fasta_header_string(record.description)) + '\n')
                     out.write(str(record.seq) + '\n')
 
         if output:
