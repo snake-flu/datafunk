@@ -354,7 +354,7 @@ def main(args=None):
 
     subparser_gisaid_json_2_metadata = subparsers.add_parser(
         "gisaid_json_2_metadata",
-        usage="json_2_csv.py [-h] -n gisaid.json -c <metadata.csv / False> -o metadata.csv -e omissions.txt",
+        usage="datafunk gisaid_json_2_metadata [-h] -n gisaid.json -c <metadata_old.csv / False> -o metadata_new.csv -e omissions.txt",
         help = "Add the info from a Gisaid json dump to an existing metadata table (or create a new one)",
         description="""Add the info from a Gisaid json dump to an existing metadata table (or create a new one)""")
 
@@ -370,11 +370,11 @@ def main(args=None):
                         help='Last metadata table (csv format), or \'False\' if you really want '
                              '(but you will lose date stamp information from previous dumps)',
                         required=True,
-                        metavar = '<metadata.csv / False>')
+                        metavar = '<metadata_old.csv / False>')
     required_gisaid_json_2_metadata.add_argument('-o', '--output',
                         help='New csv file to write',
                         required=True,
-                        metavar='metadata.csv')
+                        metavar='metadata_new.csv')
     required_gisaid_json_2_metadata.add_argument('-e', '--exclude',
                         action='append',
                         required=True,
