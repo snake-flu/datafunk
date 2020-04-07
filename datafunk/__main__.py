@@ -350,6 +350,40 @@ def main(args=None):
 
     subparser_sam_2_fasta.set_defaults(func=datafunk.subcommands.sam_2_fasta.run)
 
+    # _________________________________ gisaid_json_2_metadata _____________________________#
+
+    subparser_gisaid_json_2_metadata = subparsers.add_parser(
+        "gisaid_json_2_metadata",
+        usage="json_2_csv.py [-h] -n gisaid.json -c <metadata.csv / False> -o metadata.csv -e omissions.txt",
+        help = "Add the info from a Gisaid json dump to an existing metadata table (or create a new one)",
+        description="""Add the info from a Gisaid json dump to an existing metadata table (or create a new one)""")
+
+    subparser_gisaid_json_2_metadata._action_groups.pop()
+    required_gisaid_json_2_metadata = subparser_gisaid_json_2_metadata.add_argument_group('required arguments')
+    optional_gisaid_json_2_metadata = subparser_gisaid_json_2_metadata.add_argument_group('optional arguments')
+
+    required_gisaid_json_2_metadata.add_argument('-n', '--new',
+                        help='Most recent Gisaid json dump',
+                        required=True,
+                        metavar = 'gisaid.json')
+    required_gisaid_json_2_metadata.add_argument('-c', '--csv',
+                        help='Last metadata table (csv format), or \'False\' if you really want '
+                             '(but you will lose date stamp information from previous dumps)',
+                        required=True,
+                        metavar = '<metadata.csv / False>')
+    required_gisaid_json_2_metadata.add_argument('-o', '--output',
+                        help='New csv file to write',
+                        required=True,
+                        metavar='metadata.csv')
+    required_gisaid_json_2_metadata.add_argument('-e', '--exclude',
+                        action='append',
+                        required=True,
+                        metavar = 'omissions.txt',
+                        help='A file that contains (anywhere) EPI_ISL_###### IDs to exclude (can provide more than one file, '
+                             'e.g. -e FILE1 -e FILE2 ...)')
+
+
+    subparser_gisaid_json_2_metadata.set_defaults(func=datafunk.subcommands.gisaid_json_2_metadata.run)
 
     # ___________________________________________________________________________#
 
