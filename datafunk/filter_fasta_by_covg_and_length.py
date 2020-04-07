@@ -16,7 +16,6 @@ def sequence_too_short(sequence, length_threshold):
     while unaligned_seq[j-1] == "N":
         j -= 1
     unaligned_seq = unaligned_seq[i:j]
-    print(unaligned_seq)
     if len(unaligned_seq) < length_threshold:
         return True
     return False
