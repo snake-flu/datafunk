@@ -256,6 +256,10 @@ def update_edin_lineage_field(dict, lineage_dict):
     ID = dict['covv_accession_id']
     if ID in lineage_dict:
         dict['edin_lineage'] = lineage_dict[ID]['lineage']
+    else:
+        ID2 = dict['covv_virus_name'].split('/')[2]
+        if ID2 in lineage_dict:
+            dict['edin_lineage'] = lineage_dict[ID2]['lineage']
 
     return(dict)
 
