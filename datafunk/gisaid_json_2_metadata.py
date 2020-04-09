@@ -4,7 +4,7 @@ import sys
 from datetime import datetime
 import warnings
 import re
-
+import pycountry
 
 
 """
@@ -15,14 +15,15 @@ _fields_gisaid = ['covv_accession_id', 'covv_virus_name', 'covv_location', 'covv
                  'covv_passage', 'covv_patient_age', 'covv_seq_technology', \
                  'covv_specimen', 'covv_subm_date']
 
-_fields_edin = ['edin_omitted', 'edin_date_stamp', 'edin_FLAG']
+_fields_edin = ['edin_admin_0', 'edin_admin_1', 'edin_admin_2', \
+                'edin_lineage' \
+                'edin_omitted', 'edin_date_stamp', 'edin_FLAG']
 
 
 """
 You can edit this list:
 """
-fields = ['edin_admin_0', 'edin_admin_1', 'edin_admin_2', \
-          'edin_epi_week', 'edin_lineage', 'edin_annotation']
+fields = ['edin_epi_week', 'edin_annotation']
 
 
 def parse_omissions_file(file):
@@ -62,6 +63,55 @@ def fix_gisaid_json_dict(gisaid_json_dict):
         newDict[x] = str(y).replace(',', '')
 
     return(newDict)
+
+
+def get_admin_levels_from_json_dict(gisaid_json_dict):
+    """
+    get location strings from the gisaid location field
+    use pycountry /
+    """
+    location_strings = [x.strip() for x in gisaid_json_dict['covv_location'].split("/")]
+
+    while len(location_strings) < 4:
+        location_strings.append("")
+
+    continent = location_strings[0]
+    country = location_strings[1]
+    subdivision = location_strings[2]
+    subsubdivision = location_strings[3]
+
+    if any([x == country for x in ['England', 'Northern Ireland', 'Scotland', 'Wales']]):
+        country = 'United Kingdom'
+        subdivision = location_strings[1]
+        subsubdivision = location_strings[2]
+
+    if any([x == country for x in ['Alaska']]):
+        country = 'USA'
+        subdivision = location_strings[1]
+        subsubdivision = location_strings[2]
+
+    # some check here that there's a match to a real country
+    # using pycountries?
+    # First, these countries are known exceptions:
+    if all([country != x for x in ['Iran', 'South Korea', 'Russia']]):
+        try:
+            pycountry.countries.lookup(country)
+        except LookupError:
+            warnings.warn('Check country flagged for ' + gisaid_json_dict['covv_accession_id'])
+            
+            if len(gisaid_json_dict['edin_FLAG']) == 0:
+                gisaid_json_dict['edin_FLAG'] = 'check_country'
+            elif len(gisaid_json_dict['edin_FLAG']) > 0:
+                gisaid_json_dict['edin_FLAG'] = ' check_country'
+
+    if country == 'United Kingdom':
+        country = 'UK'
+
+    gisaid_json_dict['edin_admin_0'] = country
+    gisaid_json_dict['edin_admin_1'] = subdivision
+    gisaid_json_dict['edin_admin_2'] = subsubdivision
+
+    return(gisaid_json_dict)
 
 
 # def get_field_list(dict_of_dicts):
@@ -275,15 +325,19 @@ def gisaid_json_2_metadata(json, output, args_csv, args_omit_file_list):
     # update omitted field
     new_records_dict = {x: update_edin_omitted_field(all_records_dict[x], omitted_IDs) for x in new_records_dict.keys()}
 
-    # update date stam field
+    # update date stamp field
     new_records_dict = {x: update_edin_date_stamp_field(all_records_dict[x]) for x in new_records_dict.keys()}
+
+    # update admin level
+    new_records_dict = {x: get_admin_levels_from_json_dict(all_records_dict[x]) for x in new_records_dict.keys()}
+
 
     write_output(output = output,
                   new_records_list = new_records_list,
                   new_records_dict = new_records_dict,
                   old_records_list = old_records_list,
                   old_records_dict = old_records_dict,
-                  fields_list = _fields_gisaid + _fields_edin + fields)
+                  fields_list = _fields_edin + fields + _fields_gisaid)
 
     # logfile.close()
     pass
