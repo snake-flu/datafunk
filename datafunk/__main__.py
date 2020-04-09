@@ -427,7 +427,7 @@ def main(args=None):
 
     subparser_phylotype_consensus.set_defaults(func=datafunk.subcommands.phylotype_consensus.run)
 
-    # _________________________________ phylotype_consensus ____________________________#
+    # _________________________________ gisaid_json_2_metadata ____________________________#
 
     subparser_gisaid_json_2_metadata = subparsers.add_parser(
         """gisaid_json_2_metadata""",
@@ -452,6 +452,13 @@ def main(args=None):
                         help='New csv file to write',
                         required=True,
                         metavar='NEW_metadata.csv')
+    optional_gisaid_json_2_metadata.add_argument(
+        '-l',
+        '--lineages',
+        required=False,
+        metavar = 'lineages.csv',
+        help='csv file of ineages to include'
+    )
     required_gisaid_json_2_metadata.add_argument('-e', '--exclude',
                         action='append',
                         required=True,
