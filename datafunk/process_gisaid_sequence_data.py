@@ -1,6 +1,7 @@
 from Bio import SeqIO
 import json, re
-
+from datetime import datetime
+import sys
 
 def fix_seq_in_gisaid_json_dict(gisaid_json_dict):
     """
@@ -75,7 +76,7 @@ def parse_omissions_file(file):
 
     return(IDs)
 
-def keep_entry(header, omitted=False, exclude_uk=False):
+def keep_entry(header, omitted=False, exclude_uk=False, exclude_undated=False):
     regex = re.compile('EPI_ISL_\d{6}')
     match = re.search(regex, header)
     if not match:
@@ -88,12 +89,18 @@ def keep_entry(header, omitted=False, exclude_uk=False):
         for country in ['/England/', '/Scotland/', '/Wales/', '/Northern Ireland/']:
             if country.lower() in header.lower():
                 return False
+    if exclude_undated:
+        date = header.split('|')[-1]
+        regex = re.compile('\d{4}-\d{2}-\d{2}')
+        match = re.search(regex, date)
+        if not match:
+            return False
     return True
 
 
-def process_gisaid_sequence_data(input, output = False, omit_file_list = False, exclude_uk = False):
+def process_gisaid_sequence_data(input, output = False, omit_file_list = False, exclude_uk = False, exclude_undated = False):
 
-    def input_fasta_output(input, output, omitted, exclude_uk):
+    def input_fasta_output(input, output, omitted, exclude_uk, exclude_undated):
         if output:
             out = open(output, 'w')
         else:
@@ -101,7 +108,7 @@ def process_gisaid_sequence_data(input, output = False, omit_file_list = False, 
         out = open(output, 'w')
         with open(input, 'r') as f:
             for record in SeqIO.parse(f, "fasta"):
-                if keep_entry(record.description, omitted, exclude_uk):
+                if keep_entry(record.description, omitted, exclude_uk, exclude_undated):
                     out.write('>' + fix_header(record.description) + '\n')
                     out.write(str(record.seq) + '\n')
 
@@ -109,7 +116,7 @@ def process_gisaid_sequence_data(input, output = False, omit_file_list = False, 
             out.close()
         pass
 
-    def input_json_output(input, output, omitted, exclude_uk):
+    def input_json_output(input, output, omitted, exclude_uk, exclude_undated):
         if output:
             out = open(output, 'w')
         else:
@@ -118,7 +125,7 @@ def process_gisaid_sequence_data(input, output = False, omit_file_list = False, 
                 for jsonObj in f:
                     jsonDict = fix_seq_in_gisaid_json_dict(json.loads(jsonObj))
                     header = get_ID_from_json_dict(jsonDict)
-                    if keep_entry(header, omitted, exclude_uk):
+                    if keep_entry(header, omitted, exclude_uk, exclude_undated):
                         out.write('>' + fix_header(header) + '\n')
                         out.write(jsonDict['sequence'] + '\n')
         if output:
@@ -138,9 +145,9 @@ def process_gisaid_sequence_data(input, output = False, omit_file_list = False, 
     input_is_fasta = input.split('.')[-1][0:2].lower() == 'fa'
     input_is_json = input.split('.')[-1].lower() == 'json'
     if input_is_fasta:
-        input_fasta_output(input = input, output = output, omitted = omitted_IDs, exclude_uk = exclude_uk)
+        input_fasta_output(input = input, output = output, omitted = omitted_IDs, exclude_uk = exclude_uk, exclude_undated=exclude_undated)
     elif input_is_json:
-        input_json_output(input = input, output = output, omitted = omitted_IDs, exclude_uk = exclude_uk)
+        input_json_output(input = input, output = output, omitted = omitted_IDs, exclude_uk = exclude_uk, exclude_undated=exclude_undated)
 
 
 

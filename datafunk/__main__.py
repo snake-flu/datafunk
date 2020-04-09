@@ -287,7 +287,7 @@ def main(args=None):
         '--output',
         required=False,
         metavar = 'OUTPUT.fasta',
-        help='FASTA format file to write'
+        help='FASTA format file to write, print to stdout if unspecified'
     )
 
     optional_process_gisaid_sequence_data.add_argument(
@@ -308,10 +308,10 @@ def main(args=None):
     )
 
     optional_process_gisaid_sequence_data.add_argument(
-        '--stdout',
+        '--exclude_undated',
         required=False,
         action='store_true',
-        help='Overides -o/--output if present and prints output to stdout',
+        help='Removes all GISAID entries with an incomplete date',
     )
 
     subparser_process_gisaid_sequence_data.set_defaults(func=datafunk.subcommands.process_gisaid_sequence_data.run)
