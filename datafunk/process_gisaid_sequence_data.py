@@ -39,11 +39,24 @@ def get_ID_from_json_dict(gisaid_json_dict):
 
     return(myStr)
 
+def update_fasta_header_string(header):
+    fields = header.split('|')
+    updated_fields = fields[:2]
+    updated_fields.extend(["","UK"])
+    updated_fields.extend(fields[2:5])
+    updated_header = '|'.join(updated_fields)
+    return updated_header
+
 def fix_header(header):
     """
     parse fasta header and remove problems
     """
-    fixed_header = header.replace(' ', '_').replace("hCoV-19/","").replace("hCov-19/","")
+    fixed_header = header.replace(' ', '_')\
+        .replace("hCoV-19/","")\
+        .replace("hCov-19/","")\
+        .replace("PENDING", "")\
+        .replace("UPLOADED", "")\
+        .replace("None", "")
 
     return(fixed_header)
 
@@ -77,24 +90,28 @@ def parse_omissions_file(file):
     return(IDs)
 
 def keep_entry(header, omitted=False, exclude_uk=False, exclude_undated=False):
-    regex = re.compile('EPI_ISL_\d{6}')
-    match = re.search(regex, header)
-    if not match:
-        return False
-    epi_id = match.group()
+    if omitted:
+        regex = re.compile('EPI_ISL_\d{6}')
+        match = re.search(regex, header)
+        if not match:
+            return False
+        epi_id = match.group()
 
-    if omitted and epi_id in omitted:
-        return False
+        if epi_id in omitted:
+            return False
+          
     if exclude_uk:
         for country in ['/England/', '/Scotland/', '/Wales/', '/Northern Ireland/']:
             if country.lower() in header.lower():
                 return False
+              
     if exclude_undated:
         date = header.split('|')[-1]
         regex = re.compile('\d{4}-\d{2}-\d{2}')
         match = re.search(regex, date)
         if not match:
             return False
+          
     return True
 
 
@@ -108,8 +125,8 @@ def process_gisaid_sequence_data(input, output = False, omit_file_list = False, 
         out = open(output, 'w')
         with open(input, 'r') as f:
             for record in SeqIO.parse(f, "fasta"):
-                if keep_entry(record.description, omitted, exclude_uk, exclude_undated):
-                    out.write('>' + fix_header(record.description) + '\n')
+                if keep_entry(record.description, omitted, exclude_uk):
+                    out.write('>' + fix_header(update_fasta_header_string(record.description)) + '\n')
                     out.write(str(record.seq) + '\n')
 
         if output:
