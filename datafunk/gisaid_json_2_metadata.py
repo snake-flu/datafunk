@@ -16,7 +16,7 @@ _fields_gisaid = ['covv_accession_id', 'covv_virus_name', 'covv_location', 'covv
                  'covv_specimen', 'covv_subm_date']
 
 _fields_edin = ['edin_admin_0', 'edin_admin_1', 'edin_admin_2', \
-                'edin_lineage' \
+                'edin_lineage', \
                 'edin_omitted', 'edin_date_stamp', 'edin_FLAG']
 
 
@@ -98,11 +98,11 @@ def get_admin_levels_from_json_dict(gisaid_json_dict):
             pycountry.countries.lookup(country)
         except LookupError:
             warnings.warn('Check country flagged for ' + gisaid_json_dict['covv_accession_id'])
-            
+
             if len(gisaid_json_dict['edin_FLAG']) == 0:
                 gisaid_json_dict['edin_FLAG'] = 'check_country'
             elif len(gisaid_json_dict['edin_FLAG']) > 0:
-                gisaid_json_dict['edin_FLAG'] = ' check_country'
+                gisaid_json_dict['edin_FLAG'] = gisaid_json_dict['edin_FLAG'] + ':check_country'
 
     if country == 'United Kingdom':
         country = 'UK'
@@ -211,6 +211,58 @@ def get_json_order_and_record_dict(json_file, fields_list_required, fields_list_
 
     return(record_order, all_records)
 
+def get_lineage_info(lineage_file):
+    """
+
+    """
+    myDict= {}
+    First = True
+    with open(lineage_file, 'r') as f:
+        for line in f:
+            l = line.rstrip().split(',')
+            if First:
+                header = l
+                First = False
+            taxon = l[0]
+            ID = l[1]
+            lineage = l[2]
+
+            myDict[ID] = {'taxon': taxon, 'ID': ID, 'lineage': lineage}
+
+    return(myDict)
+
+
+def check_gisaid_date(dict):
+    """
+
+    """
+    date = dict['covv_collection_date']
+    regex = re.compile('\d{4}-\d{2}-\d{2}')
+    match = re.search(regex, date)
+    if not match:
+        if len(dict['edin_FLAG']) == 0:
+            dict['edin_FLAG'] = 'check_date'
+        elif len(dict['edin_FLAG']) > 0:
+            dict['edin_FLAG'] = dict['edin_FLAG'] + ':check_date'
+
+    return(dict)
+
+
+def update_edin_lineage_field(dict, lineage_dict):
+    """
+    update omission field to True if record
+    is in omissions file
+    """
+    ID = dict['covv_accession_id']
+    if ID in lineage_dict:
+        dict['edin_lineage'] = lineage_dict[ID]['lineage']
+    else:
+        ID2 = dict['covv_virus_name'].split('/')[2]
+        if ID2 in lineage_dict:
+            dict['edin_lineage'] = lineage_dict[ID2]['lineage']
+
+    return(dict)
+
 
 def update_edin_omitted_field(dict, omit_set):
     """
@@ -275,7 +327,7 @@ def write_output(output, \
     pass
 
 
-def gisaid_json_2_metadata(json, output, args_csv, args_omit_file_list):
+def gisaid_json_2_metadata(json, output, args_csv, args_omit_file_list, args_lineages):
 
     # logfile = open(output + '.log', 'w')
     if args_omit_file_list:
@@ -286,6 +338,9 @@ def gisaid_json_2_metadata(json, output, args_csv, args_omit_file_list):
         omitted_IDs = set(temp)
     else:
         omitted_IDs = False
+
+    if args_lineages:
+        lineages = get_lineage_info(args_lineages)
 
     if args_csv != 'False':
         # Check that all required fields were in the csv file
@@ -331,6 +386,12 @@ def gisaid_json_2_metadata(json, output, args_csv, args_omit_file_list):
     # update admin level
     new_records_dict = {x: get_admin_levels_from_json_dict(all_records_dict[x]) for x in new_records_dict.keys()}
 
+    # check gisaid collection date
+    new_records_dict = {x: check_gisaid_date(all_records_dict[x]) for x in new_records_dict.keys()}
+
+    # update lineages
+    if args_lineages:
+        new_records_dict = {x: update_edin_lineage_field(all_records_dict[x], lineages) for x in new_records_dict.keys()}
 
     write_output(output = output,
                   new_records_list = new_records_list,
