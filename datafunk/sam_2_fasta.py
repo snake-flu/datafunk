@@ -76,13 +76,16 @@ def get_sam_cigar_operations(cigar):
     return(operations)
 
 
-def get_one_string(sam_line, rlen):
+def get_one_string(sam_line, rlen, log_inserts = False):
     """
     Transform one line of the SAM alignment into sample sequence in unpadded
     reference coordinates (insertions relative to the reference are omitted).
     """
+
     # parsed sam line
     aln_info_dict = parse_sam_line(sam_line)
+
+    QNAME = aln_info_dict['QNAME']
 
     # CIGAR STRING
     CIGAR = aln_info_dict['CIGAR']
@@ -115,6 +118,13 @@ def get_one_string(sam_line, rlen):
     for o in operations:
         operation = o[0]
         size = o[1]
+
+        if log_inserts:
+            if operation == 'I':
+                if str(rstart) in insertions:
+                  insertions[str(rstart)] = insertions[str(rstart)] + [(QNAME, str(size))]
+                else:
+                  insertions[str(rstart)] = [(QNAME, str(size))]
 
         # based on this CIGAR operation, call the relavent lambda function
         # from the dict of lambda functions, returns sequence to be appended
@@ -173,18 +183,18 @@ def swap_in_gaps_Ns(seq):
     return(seq)
 
 
-def get_seq_from_block(sam_block, rlen):
+def get_seq_from_block(sam_block, rlen, log_inserts):
 
-    block_lines_sites_list = [get_one_string(sam_line, rlen) for sam_line in sam_block]
+    block_lines_sites_list = [get_one_string(sam_line, rlen, log_inserts = log_inserts) for sam_line in sam_block]
 
     if len(block_lines_sites_list) == 1:
         seq_flat_no_internal_gaps = swap_in_gaps_Ns(block_lines_sites_list[0])
         return(seq_flat_no_internal_gaps)
 
-    else:
+    elif len(block_lines_sites_list) > 1:
         # # as an alternative to check_and_get_flattened_site() we can flatten
         # # the site with no checks (about three times as fast):
-        # flattened_site_list = [max(x) for x in zip(*block_lines_sites_list)]
+        # flattened_site_list = [max(x) for x in zip(*[list(x) for x in block_lines_sites_list])]
 
         flattened_site_list = [check_and_get_flattened_site(x) for x in zip(*[list(x) for x in block_lines_sites_list])]
         seq_flat = ''.join(flattened_site_list)
@@ -192,3 +202,96 @@ def get_seq_from_block(sam_block, rlen):
         # replace central '*'s with 'N's, and external '*'s with '-'s
         seq_flat_no_internal_gaps = swap_in_gaps_Ns(seq_flat)
         return(seq_flat_no_internal_gaps)
+
+
+def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, \
+                trim = False, trimstart = None, trimend = None):
+    global insertions
+
+    RLEN = samfile.header['SQ'][0]['LN']
+
+    if output == 'stdout':
+        out = sys.stdout()
+    else:
+        out = open(output, 'w')
+
+
+    if prefix_ref:
+        if trim:
+            out.write('>' + reference.id + '\n')
+            out.write(str(reference.seq[trimstart:trimend]) + '\n')
+        else:
+            out.write('>' + reference.id + '\n')
+            out.write(str(reference.seq) + '\n')
+
+    if log_inserts:
+        insertions = {}
+    else:
+        insertions = None
+
+    for query_seq_name, one_querys_alignment_lines in itertools.groupby(samfile, lambda x: parse_sam_line(x)['QNAME']):
+        # one_querys_alignment_lines is an iterator corresponding to all the lines
+        # in the SAM file for one query sequence
+        seq = get_seq_from_block(sam_block = one_querys_alignment_lines, rlen = RLEN, log_inserts = log_inserts)
+
+        if trim:
+            out.write('>' + query_seq_name + '\n')
+            out.write(seq[trimstart:trimend] + '\n')
+
+        else:
+            out.write('>' + query_seq_name + '\n')
+            out.write(seq + '\n')
+
+
+    if output != 'stdout':
+        out.close()
+
+
+    def get_insertion_lines(entry):
+        d = {}
+        for y in entry:
+            qname = y[0]
+            length = str(y[1])
+            if length in d:
+                d[length] = d[length] + [qname]
+            else:
+                d[length] = [qname]
+        matches = [(x, d[x]) for x in d if len(d[x]) > 1]
+        return(matches)
+
+
+    if log_inserts:
+        l = []
+        for x in insertions:
+            refstart = x
+            lines = get_insertion_lines(insertions[x])
+            if len(lines) > 0:
+                l.append((refstart, lines))
+
+        if len(l) > 0:
+            out_insertions = open('insertions.txt', 'w')
+            out_insertions.write('ref_start\tsize\tsequences\n')
+            for x in l:
+                refstart = x[0]
+                for y in x[1]:
+                    length = y[0]
+                    names_list = y[1]
+                    out_insertions.write(str(refstart) + '\t' + str(length) + '\t' + ':'.join(names_list) + '\n')
+            out_insertions.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            #
