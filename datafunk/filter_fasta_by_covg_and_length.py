@@ -9,11 +9,13 @@ def sequence_has_low_coverage(sequence, coverage_threshold):
 
 def sequence_too_short(sequence, length_threshold):
     unaligned_seq = sequence.replace("-", "")
+    if len(unaligned_seq) == 0:
+        return True
     i = 0
-    while unaligned_seq[i] == "N":
+    while i < len(unaligned_seq) and unaligned_seq[i] == "N":
         i += 1
     j = len(unaligned_seq)
-    while unaligned_seq[j-1] == "N":
+    while j > 0 and unaligned_seq[j-1] == "N":
         j -= 1
     unaligned_seq = unaligned_seq[i:j]
     if len(unaligned_seq) < length_threshold:
