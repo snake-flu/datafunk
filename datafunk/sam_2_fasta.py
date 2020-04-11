@@ -79,12 +79,14 @@ def get_sam_cigar_operations(cigar):
 def get_one_string(sam_line, rlen, log_inserts = False):
     """
     Transform one line of the SAM alignment into sample sequence in unpadded
-    reference coordinates (insertions relative to the reference are omitted).
+    reference coordinates (insertions relative to the reference are omitted,
+    but are logged to a global dict if log_inserts = True).
     """
 
     # parsed sam line
     aln_info_dict = parse_sam_line(sam_line)
 
+    # query sequence name
     QNAME = aln_info_dict['QNAME']
 
     # CIGAR STRING
@@ -119,12 +121,14 @@ def get_one_string(sam_line, rlen, log_inserts = False):
         operation = o[0]
         size = o[1]
 
+        # logging insertions relative to the reference:
         if log_inserts:
             if operation == 'I':
                 if str(rstart) in insertions:
-                  insertions[str(rstart)] = insertions[str(rstart)] + [(QNAME, str(size))]
+                  insertions[str(rstart)] = insertions[str(rstart)] + [(QNAME, SEQ[qstart:qstart + size])]
                 else:
-                  insertions[str(rstart)] = [(QNAME, str(size))]
+                  insertions[str(rstart)] = [(QNAME, SEQ[qstart:qstart + size])]
+
 
         # based on this CIGAR operation, call the relavent lambda function
         # from the dict of lambda functions, returns sequence to be appended
@@ -224,10 +228,12 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, \
             out.write('>' + reference.id + '\n')
             out.write(str(reference.seq) + '\n')
 
+
     if log_inserts:
         insertions = {}
     else:
         insertions = None
+
 
     for query_seq_name, one_querys_alignment_lines in itertools.groupby(samfile, lambda x: parse_sam_line(x)['QNAME']):
         # one_querys_alignment_lines is an iterator corresponding to all the lines
@@ -248,35 +254,43 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, \
 
 
     def get_insertion_lines(entry):
+        """
+        entry is a list of tuples, format: [(query_name, insertion_sequence), (..., ...), ...]
+        matches is a list of tuples, format: [(insertion_seq, [qname1, qname2]), (...,[...]), ...]
+        matches only contains insertions that occur in >1 sequence
+        """
         d = {}
         for y in entry:
             qname = y[0]
-            length = str(y[1])
-            if length in d:
-                d[length] = d[length] + [qname]
+            insert = str(y[1])
+            if insert in d:
+                d[insert] = d[insert] + [qname]
             else:
-                d[length] = [qname]
+                d[insert] = [qname]
         matches = [(x, d[x]) for x in d if len(d[x]) > 1]
         return(matches)
 
-
+    # if we are logging insertions
     if log_inserts:
         l = []
         for x in insertions:
             refstart = x
             lines = get_insertion_lines(insertions[x])
+            # if there are non-singleton insertions to log
             if len(lines) > 0:
                 l.append((refstart, lines))
 
+        # if there are non-singleton insertions to write
         if len(l) > 0:
+            # write a file
             out_insertions = open('insertions.txt', 'w')
-            out_insertions.write('ref_start\tsize\tsequences\n')
+            out_insertions.write('ref_start\tinsertion\tsamples\n')
             for x in l:
                 refstart = x[0]
                 for y in x[1]:
-                    length = y[0]
+                    insert = y[0]
                     names_list = y[1]
-                    out_insertions.write(str(refstart) + '\t' + str(length) + '\t' + ':'.join(names_list) + '\n')
+                    out_insertions.write(str(refstart) + '\t' + str(insert) + '\t' + ':'.join(names_list) + '\n')
             out_insertions.close()
 
 
