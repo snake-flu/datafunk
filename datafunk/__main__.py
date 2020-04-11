@@ -343,7 +343,7 @@ def main(args=None):
                         )
     optional_sam_2_fasta.add_argument(
         '-o', '--output',
-        help='FASTA format file to write.',
+        help='FASTA format file to write. Prints to stdout if not specified',
         required=False,
         metavar='out.fasta'
                         )
@@ -356,6 +356,12 @@ def main(args=None):
     optional_sam_2_fasta.add_argument(
         '--prefix_ref',
         help='write the reference sequence at the beginning of the file',
+        required=False,
+        action='store_true'
+                        )
+    optional_sam_2_fasta.add_argument(
+        '--log_inserts',
+        help='log insertions relative to the reference',
         required=False,
         action='store_true'
                         )

@@ -15,6 +15,24 @@ def run(options):
     if RLEN != len(reference.seq):
         sys.exit('reference lengths differ!')
 
+
+    if options.stdout or not options.output:
+        output = 'stdout'
+    else:
+        output = options.output
+
+
+    if options.log_inserts:
+        log_inserts = True
+    else:
+        log_inserts = False
+
+
+    if options.prefix_ref:
+        prefix_ref = True
+    else:
+        prefix_ref = False
+
     trim = False
     if options.trim:
         trim = True
@@ -43,59 +61,25 @@ def run(options):
     if options.trim and not trim:
         warnings.warn('Trim argument not formatted properly. Ignoring trimming.')
     if options.trim and trim:
-        if trimstart > RLEN or trimend > RLEN:
+        if trimstart > RLEN - 1 or trimend > RLEN:
             trim = False
             warnings.warn('Trim values are larger than length of reference. Ignoring trimming.')
         if trimstart > trimend:
             trim = False
             warnings.warn('Trim argument not formatted properly. Ignoring trimming.')
 
-
     if trim:
-        if options.output and not options.stdout:
-            f_out = open(options.output, 'w')
-            if options.prefix_ref:
-                f_out.write('>' + reference.id + '\n')
-                f_out.write(str(reference.seq[trimstart:trimend]) + '\n')
-        if options.stdout:
-            if options.prefix_ref:
-                print('>' + reference.id)
-                print(reference.seq[trimstart:trimend])
+        sam_2_fasta(samfile = samfile, \
+                    reference = reference, \
+                    output = output, \
+                    prefix_ref = prefix_ref, \
+                    log_inserts = log_inserts, \
+                    trim = True, \
+                    trimstart = trimstart, \
+                    trimend = trimend)
     else:
-        if options.output and not options.stdout:
-            f_out = open(options.output, 'w')
-            if options.prefix_ref:
-                f_out.write('>' + reference.id + '\n')
-                f_out.write(str(reference.seq) + '\n')
-        if options.stdout:
-            if options.prefix_ref:
-                print('>' + reference.id)
-                print(reference.seq)
-
-
-    for query_seq_name, one_querys_alignment_lines in itertools.groupby(samfile, lambda x: parse_sam_line(x)['QNAME']):
-        # one_querys_alignment_lines is an iterator corresponding to all the lines
-        # in the SAM file for one query sequence
-        seq = get_seq_from_block(sam_block = one_querys_alignment_lines, rlen = RLEN)
-
-        if trim:
-            if options.output and not options.stdout:
-                f_out.write('>' + query_seq_name + '\n')
-                f_out.write(seq[trimstart:trimend] + '\n')
-
-            if options.stdout:
-                print('>' + query_seq_name)
-                print(seq[trimstart:trimend])
-        else:
-            if options.output and not options.stdout:
-                f_out.write('>' + query_seq_name + '\n')
-                f_out.write(seq + '\n')
-
-            if options.stdout:
-                print('>' + query_seq_name)
-                print(seq)
-
-
-
-    if options.output and not options.stdout:
-        f_out.close()
+        sam_2_fasta(samfile = samfile, \
+                    reference = reference, \
+                    output = output, \
+                    prefix_ref = prefix_ref, \
+                    log_inserts = log_inserts)
