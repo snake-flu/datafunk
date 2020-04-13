@@ -6,6 +6,8 @@ import warnings
 import re
 import pycountry
 
+from datafunk.travel_history import *
+from datafunk.travel_history import cities_list, countries_list, subdivisions_list, others, lookup
 
 """
 Don't edit these two lists please:
@@ -16,7 +18,7 @@ _fields_gisaid = ['covv_accession_id', 'covv_virus_name', 'covv_location', 'covv
                  'covv_specimen', 'covv_subm_date']
 
 _fields_edin = ['edin_admin_0', 'edin_admin_1', 'edin_admin_2', \
-                'edin_lineage', \
+                'edin_lineage', 'edin_travel', \
                 'edin_omitted', 'edin_date_stamp', 'edin_FLAG']
 
 
@@ -93,11 +95,12 @@ def get_admin_levels_from_json_dict(gisaid_json_dict):
     # some check here that there's a match to a real country
     # using pycountries?
     # First, these countries are known exceptions:
-    if all([country != x for x in ['Iran', 'South Korea', 'Russia']]):
+    if all([country != x for x in ['Iran', 'South Korea', 'Russia', 'Korea']]):
         try:
             pycountry.countries.lookup(country)
         except LookupError:
-            warnings.warn('Check country flagged for ' + gisaid_json_dict['covv_accession_id'])
+            warnings.warn('Check country flagged for ' + gisaid_json_dict['covv_accession_id'] + \
+                          '  ("' + country + '")')
 
             if len(gisaid_json_dict['edin_FLAG']) == 0:
                 gisaid_json_dict['edin_FLAG'] = 'check_country'
@@ -106,6 +109,9 @@ def get_admin_levels_from_json_dict(gisaid_json_dict):
 
     if country == 'United Kingdom':
         country = 'UK'
+
+    if country == 'Korea':
+        country = 'South Korea'
 
     gisaid_json_dict['edin_admin_0'] = country
     gisaid_json_dict['edin_admin_1'] = subdivision
@@ -210,6 +216,7 @@ def get_json_order_and_record_dict(json_file, fields_list_required, fields_list_
             all_records[ID] = d
 
     return(record_order, all_records)
+
 
 def get_lineage_info(lineage_file):
     """
@@ -388,6 +395,9 @@ def gisaid_json_2_metadata(json, output, args_csv, args_omit_file_list, args_lin
 
     # check gisaid collection date
     new_records_dict = {x: check_gisaid_date(all_records_dict[x]) for x in new_records_dict.keys()}
+
+    # get travel history
+    new_records_dict = {x: get_travel_history(all_records_dict[x]) for x in new_records_dict.keys()}
 
     # update lineages
     if args_lineages:
