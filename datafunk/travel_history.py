@@ -35,12 +35,7 @@ subdivisions_list = [x.__getattr__('name').lower() for x in pycountry.subdivisio
 others = ['hubei', 'wuhan']
 
 
-lookup = {'iran': 'Iran',
-          'south korea': 'South Korea',
-          'russia': 'Russia',
-          'korea': 'Korea',
-          'uk': 'UK',
-          'usa': 'USA',
+lookup = {'korea': 'South Korea',
           'us': 'USA',
           'u.k': 'UK',
           'u.s.a': 'USA',
