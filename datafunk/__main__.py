@@ -474,6 +474,64 @@ def main(args=None):
 
     subparser_gisaid_json_2_metadata.set_defaults(func=datafunk.subcommands.gisaid_json_2_metadata.run)
 
+    # _________________________________ set_uniform_header ____________________________#
+
+    subparser_set_uniform_header = subparsers.add_parser(
+        "set_uniform_header",
+        usage="datafunk set_uniform_header -i <input_fasta> -t <threshold> [-o <output_fasta>]",
+        help="Adds a header column to metadata table and converts fasta to have a uniform header",
+    )
+
+    subparser_set_uniform_header.add_argument(
+        "--input_fasta",
+        dest="input_fasta",
+        required=True,
+        type=str,
+        help="Input FASTA",
+    )
+    subparser_set_uniform_header.add_argument(
+        "--input_metadata",
+        dest="input_metadata",
+        required=True,
+        type=str,
+        help="Input CSV or TSV",
+    )
+    subparser_set_uniform_header.add_argument(
+        "--output_fasta",
+        dest="output_fasta",
+        required=True,
+        type=str,
+        help="Input FASTA",
+    )
+    subparser_set_uniform_header.add_argument(
+        "--output_metadata",
+        dest="output_metadata",
+        required=True,
+        type=str,
+        help="Input CSV or TSV",
+    )
+    subparser_set_uniform_header.add_argument(
+        "--gisaid",
+        dest="gisaid",
+        action="store_true",
+        required=False,
+        help="Input data is from GISAID",
+    )
+    subparser_set_uniform_header.add_argument(
+        "--cog_uk",
+        dest="cog_uk",
+        action="store_true",
+        required=False,
+        help="Input data is from COG-UK",
+    )
+    subparser_set_uniform_header.add_argument(
+        "--log",
+        dest="log_file",
+        required=False,
+        help="Log file to use (otherwise uses stdout)"
+    )
+
+    subparser_set_uniform_header.set_defaults(func=datafunk.subcommands.set_uniform_header.run)
     # ___________________________________________________________________________#
 
     args = parser.parse_args()
