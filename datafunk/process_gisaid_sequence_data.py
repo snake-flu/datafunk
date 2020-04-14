@@ -33,8 +33,7 @@ def get_ID_from_json_dict(gisaid_json_dict):
         country_strings.append("")
 
     myStr = gisaid_json_dict['covv_virus_name'] + '|' + \
-            gisaid_json_dict['covv_accession_id'] + '||' + \
-            '|'.join(country_strings) + '|' + \
+            country_strings[0] + '|' +\
             gisaid_json_dict['covv_collection_date']
 
     return(myStr)
