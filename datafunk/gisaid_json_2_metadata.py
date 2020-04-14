@@ -7,7 +7,7 @@ import re
 import pycountry
 
 from datafunk.travel_history import *
-from datafunk.travel_history import cities_list, countries_list, subdivisions_list, others, lookup
+from datafunk.travel_history import cities_dict, countries_list, subdivisions_dict, others
 
 """
 Don't edit these two lists please:
@@ -111,7 +111,7 @@ def get_admin_levels_from_json_dict(gisaid_json_dict):
         country = 'UK'
 
     if country == 'Korea':
-        country = 'South Korea'
+        country = 'South Korea'  
 
     gisaid_json_dict['edin_admin_0'] = country
     gisaid_json_dict['edin_admin_1'] = subdivision
