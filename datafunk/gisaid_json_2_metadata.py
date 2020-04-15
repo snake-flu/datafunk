@@ -95,7 +95,7 @@ def get_admin_levels_from_json_dict(gisaid_json_dict):
     # some check here that there's a match to a real country
     # using pycountries?
     # First, these countries are known exceptions:
-    if all([country != x for x in ['Iran', 'South Korea', 'Russia', 'Korea']]):
+    if all([country != x for x in ['Iran', 'South Korea', 'Russia', 'Korea', 'Democratic Republic of the Congo']]):
         try:
             pycountry.countries.lookup(country)
         except LookupError:
@@ -112,6 +112,9 @@ def get_admin_levels_from_json_dict(gisaid_json_dict):
 
     if country == 'Korea':
         country = 'South Korea'
+
+    if country == 'Democratic Republic of the Congo':
+        country = 'DRC'
 
     gisaid_json_dict['edin_admin_0'] = country
     gisaid_json_dict['edin_admin_1'] = subdivision
