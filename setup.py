@@ -14,7 +14,8 @@ setup(
         "pandas>=0.25.0",
         "pycountry>=pycountry-19.8.18",
         "pysam>=0.15.4",
-        "datapackage"
+        "datapackage",
+        "epiweeks"
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
