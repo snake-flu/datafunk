@@ -532,6 +532,44 @@ def main(args=None):
     )
 
     subparser_set_uniform_header.set_defaults(func=datafunk.subcommands.set_uniform_header.run)
+
+    # _________________________________ add_epi_week ____________________________#
+
+    subparser_add_epi_week = subparsers.add_parser(
+        "add_epi_week",
+        usage="datafunk add_epi_week -i <input_metadata> -o <output_metadata> --date_column <column> [--epi_column_name <column>]",
+        help="Adds a column for epi week to metadata table",
+    )
+
+    subparser_add_epi_week.add_argument(
+        "-i", "--input_metadata",
+        dest="input_metadata",
+        required=True,
+        type=str,
+        help="Input CSV or TSV",
+    )
+    subparser_add_epi_week.add_argument(
+        "-o", "--output_metadata",
+        dest="output_metadata",
+        required=True,
+        type=str,
+        help="Input CSV or TSV",
+    )
+    subparser_add_epi_week.add_argument(
+        "--date_column",
+        dest="date_column",
+        required=True,
+        help="Column name to convert to epi week",
+    )
+    subparser_add_epi_week.add_argument(
+        "--epi_column_name",
+        dest="epi_column_name",
+        required=False,
+        help="Column name for epi week column",
+    )
+
+    subparser_add_epi_week.set_defaults(func=datafunk.subcommands.add_epi_week.run)
+
     # ___________________________________________________________________________#
 
     args = parser.parse_args()
