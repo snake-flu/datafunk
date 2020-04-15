@@ -45,7 +45,7 @@ def get_travel_history(json_dict):
     for word in add_host_info_split:
         word = word.rstrip(",.:;!?-'\"").lstrip(",.:;!?-'\"")
 
-        # Note these are valid cities, which will be excluded as it stands:
+        # These are valid cities, which will be excluded because they match other words:
         if word.lower() in ['of', 'holiday', 'asia', 'northern', 'sur']:
             continue
 
