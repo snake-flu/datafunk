@@ -25,7 +25,9 @@ others = {'hubei': 'China',
           'irn': 'Iran',
           'ny': 'USA',
           'la': 'USA',
-          'iran': 'Iran'}
+          'iran': 'Iran',
+          'fareo': 'Faroe Islands',
+          'czech': 'Czech Republic'}
 
 
 def get_travel_history(json_dict):
@@ -44,7 +46,7 @@ def get_travel_history(json_dict):
         word = word.rstrip(",.:;!?-'\"").lstrip(",.:;!?-'\"")
 
         # Note these are valid cities, which will be excluded as it stands:
-        if word.lower() in ['of', 'holiday', 'asia', 'northern']:
+        if word.lower() in ['of', 'holiday', 'asia', 'northern', 'sur']:
             continue
 
         if word.lower() in countries_list:
