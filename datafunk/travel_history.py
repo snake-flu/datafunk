@@ -1,34 +1,15 @@
 import pycountry
-from datapackage import Package
+import pandas as pd
 
-"""
-TO DO: a better cities lookup dict (probably want major cities only)
-"""
+url = 'https://raw.githubusercontent.com/benjamincjackson/world_cities/master/cities50000.tsv'
+df = pd.read_csv(url, sep = '\t')
 
+cities_dict = {}
+for i in range(len(df)):
+    row = df.iloc[i,].squeeze()
+    cities_dict[row.at['city'].lower()] = row.at['country_code']
 
-package = Package('https://datahub.io/core/world-cities/datapackage.json')
-c = package.get_resource('world-cities_csv')
-cities_dict = {x[0].lower(): {'city': x[0],
-                              'country': x[1],
-                              'subdivision': x[2],
-                              'geoname': x[3]} for x in c.read()}
-
-cities_dict['ny'] = {'city': 'New York',
-                     'country': 'USA',
-                     'subdivision': 'New York',
-                     'geoname': 5128581}
-
-cities_dict['la'] = {'city': 'Los Angeles',
-                     'country': 'USA',
-                     'subdivision': 'California',
-                     'geoname': 5368361}
-
-cities_dict['milan'] = {'city': 'Milan',
-                     'country': 'Italy',
-                     'subdivision': 'Lomardy',
-                     'geoname': 3173435}
-
-countries_list = [x.__getattr__('name').lower() for x in pycountry.countries]
+countries_list = [x.name.lower() for x in pycountry.countries]
 
 subdivisions_dict = {x.name.lower(): x.country_code for x in pycountry.subdivisions}
 
@@ -68,6 +49,7 @@ def get_travel_history(json_dict):
 
         if word.lower() in countries_list:
             country.append(word)
+            continue
 
         if word.lower() in subdivisions_dict:
             subdivision.append(word)
@@ -76,14 +58,13 @@ def get_travel_history(json_dict):
                 country.append('Iran')
             else:
                 country.append(sd_country)
+            continue
 
         if word.lower() in cities_dict:
             city.append(word)
-            if word.lower() == 'venice' or word.lower() == 'rome':
-                country.append('Italy')
-            else:
-                city_country = cities_dict[word.lower()]['country']
-                country.append(city_country)
+            city_country = pycountry.countries.get(alpha_2=cities_dict[word.lower()]).name
+            country.append(city_country)
+            continue
 
         if word.lower() in others:
             country.append(others[word.lower()])
