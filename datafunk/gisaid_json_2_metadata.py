@@ -111,7 +111,7 @@ def get_admin_levels_from_json_dict(gisaid_json_dict):
         country = 'UK'
 
     if country == 'Korea':
-        country = 'South Korea'  
+        country = 'South Korea'
 
     gisaid_json_dict['edin_admin_0'] = country
     gisaid_json_dict['edin_admin_1'] = subdivision
@@ -153,12 +153,12 @@ def expand_dict(dict, fields_list_required, fields_list_optional):
         if x not in dict:
             dict[x] = ''
 
-    poplist = []
-    for x in dict:
-        if x not in fields_list_required + fields_list_optional:
-            poplist.append(x)
-    for x in poplist:
-        dict.pop(x)
+    # poplist = []
+    # for x in dict:
+    #     if x not in fields_list_required + fields_list_optional:
+    #         poplist.append(x)
+    # for x in poplist:
+    #     dict.pop(x)
 
     return(dict)
 
