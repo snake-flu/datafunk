@@ -530,6 +530,19 @@ def main(args=None):
         required=False,
         help="Log file to use (otherwise uses stdout)"
     )
+    subparser_set_uniform_header.add_argument(
+        "--column_name",
+        dest="column_name",
+        required=False,
+        default='sequence_name',
+        help="Name of column in metadata corresponding to fasta header"
+    )
+    subparser_set_uniform_header.add_argument(
+        "--index_column",
+        dest="index_column",
+        required=False,
+        help="Name of column in metadata to parse for string matching with fasta header"
+    )
 
     subparser_set_uniform_header.set_defaults(func=datafunk.subcommands.set_uniform_header.run)
 

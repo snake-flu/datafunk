@@ -7,4 +7,6 @@ def run(options):
                        options.output_metadata,
                        options.gisaid,
                        options.cog_uk,
-                       options.log_file)
+                       options.log_file,
+                       options.column_name,
+                       options.index_column)
