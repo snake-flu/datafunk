@@ -546,7 +546,7 @@ def main(args=None):
     subparser_set_uniform_header.add_argument(
         "--extended",
         dest="extended",
-        action="store_true"
+        action="store_true",
         required=False,
         help="Longer fasta name"
     )
