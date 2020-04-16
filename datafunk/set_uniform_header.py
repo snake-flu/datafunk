@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import re
 from Bio import SeqIO
+import sys
 
 def strip_nasties(name):
     return name.replace(" ","_")\
@@ -21,14 +22,17 @@ def load_dataframe(metadata_file):
     df = pd.read_csv(metadata_file, sep=sep)
     return df
 
-def add_header_column(df, columns):
+def add_header_column(df, columns, column_name='sequence_name', extended=False):
     headers = []
     for i,row in df.iterrows():
         fields = [row[c] if isinstance(row[c], str) else "" for c in columns ]
-        header = '|'.join(fields)
+        if extended:
+            header = '|'.join(fields)
+        else:
+            header = fields[0]
         header = strip_nasties(header)
         headers.append(header)
-    df['header'] = headers
+    df[column_name] = headers
     return df
 
 def parse_virus_name(header):
@@ -61,20 +65,26 @@ def parse_date(header):
     else:
         return ""
 
-def get_new_header(header):
+def get_new_header(header, extended=False):
     name = parse_virus_name(header)
-    country = parse_country(header)
-    if country == "":
-        country = parse_country_from_virus_name(name)
-    new_header = name + '|' + country + '|' + parse_date(header)
-    new_header = strip_nasties(new_header)
+    if extended:
+        country = parse_country(header)
+        if country == "":
+            country = parse_country_from_virus_name(name)
+        new_header = name + '|' + country + '|' + parse_date(header)
+        new_header = strip_nasties(new_header)
+    else:
+        new_header = strip_nasties(name)
     return new_header
 
-def get_new_header_second_attempt(header):
+def get_new_header_second_attempt(header, extended=False):
     name = parse_virus_name(header)
-    country = parse_country_from_virus_name(name)
-    new_header = name + '|' + country + '|' + parse_date(header)
-    new_header = strip_nasties(new_header)
+    if extended:
+        country = parse_country_from_virus_name(name)
+        new_header = name + '|' + country + '|' + parse_date(header)
+        new_header = strip_nasties(new_header)
+    else:
+        new_header = strip_nasties(name)
     return new_header
 
 def header_found_in_column(header, df, column):
@@ -86,12 +96,12 @@ def id_found_in_column(header, df, column):
         return False
     return header_found_in_column(sample_id, df, column)
 
-def update_df_if_id_found_in_column(header, df, column):
+def update_df_if_id_found_in_column(header, df, column, column_name):
     sample_id = header.split('|')[0].split('/')[1]
     if sample_id == "":
         return df
     if (df[column] == sample_id).any():
-        df.loc[df[column] == sample_id,"header"] = header
+        df.loc[df[column] == sample_id,column_name] = header
     return df
 
 def header_duplicated_in_column(header, df, column):
@@ -103,15 +113,17 @@ gisaid_columns = ['covv_virus_name', 'edin_admin_0', 'covv_collection_date']
 #COG-UK: secondary_accession adm1 collection_date
 coguk_columns = ['secondary_identifier', 'adm1', 'collection_date']
 
-def set_uniform_header(input_fasta, input_metadata, output_fasta, output_metadata, gisaid, cog_uk, log_file):
+def set_uniform_header(input_fasta, input_metadata, output_fasta, output_metadata, gisaid, cog_uk, log_file, column_name, index_column):
 
     metadata = load_dataframe(input_metadata)
     if gisaid:
-        metadata = add_header_column(metadata, gisaid_columns)
+        metadata = add_header_column(metadata, gisaid_columns, column_name)
     elif cog_uk:
-        metadata = add_header_column(metadata, coguk_columns)
+        metadata = add_header_column(metadata, coguk_columns, column_name)
+    elif index_column is not None:
+        metadata = add_header_column(metadata, [index_column], column_name)
     else:
-        sys.exit("Must use either --gisaid or --cog_uk flag")
+        sys.exit("Must use either --gisaid or --cog_uk flag or specify index column using --index_column")
 
     if log_file:
         log_handle = open(log_file, "w")
@@ -121,16 +133,16 @@ def set_uniform_header(input_fasta, input_metadata, output_fasta, output_metadat
     with open(input_fasta) as in_fasta, open(output_fasta, 'w') as out_fasta:
         for record in SeqIO.parse(in_fasta, "fasta"):
             header = get_new_header(record.description)
-            if not header_found_in_column(header, metadata, "header"):
+            if not header_found_in_column(header, metadata, column_name):
                 header = get_new_header_second_attempt(record.description)
-            if cog_uk and not header_found_in_column(header, metadata, "header") \
+            if cog_uk and not header_found_in_column(header, metadata, column_name) \
                     and id_found_in_column(header, metadata, "central_sample_id"):
-                metadata = update_df_if_id_found_in_column(header, metadata, "central_sample_id")
+                metadata = update_df_if_id_found_in_column(header, metadata, "central_sample_id", column_name)
 
-            if not header_found_in_column(header, metadata, "header"):
+            if not header_found_in_column(header, metadata, column_name):
                 log_handle.write("Could not find header %s parsed from record %s in metadata table\n" %(header, record.id))
             else:
-                if header_duplicated_in_column(header, metadata, "header"):
+                if header_duplicated_in_column(header, metadata, column_name):
                     log_handle.write("Header %s parsed from record %s has duplicate entries in metadata table\n" % (
                     header, record.id))
                 record.id = header
