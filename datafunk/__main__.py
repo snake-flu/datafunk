@@ -584,6 +584,7 @@ def main(args=None):
     subparser_add_epi_week.add_argument(
         "--epi_column_name",
         dest="epi_column_name",
+        default="edin_epi_week",
         required=False,
         help="Column name for epi week column",
     )

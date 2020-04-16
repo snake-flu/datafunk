@@ -19,7 +19,7 @@ _fields_gisaid = ['covv_accession_id', 'covv_virus_name', 'covv_location', 'covv
 
 _fields_edin = ['edin_admin_0', 'edin_admin_1', 'edin_admin_2', \
                 'edin_lineage', 'edin_travel', \
-                'edin_omitted', 'edin_date_stamp', 'edin_FLAG']
+                'edin_omitted', 'edin_date_stamp', 'edin_flag']
 
 
 """
@@ -103,10 +103,10 @@ def get_admin_levels_from_json_dict(gisaid_json_dict, warnings = True):
                 warnings.warn('Check country flagged for ' + gisaid_json_dict['covv_accession_id'] + \
                               '  ("' + country + '")')
 
-                if len(gisaid_json_dict['edin_FLAG']) == 0:
-                    gisaid_json_dict['edin_FLAG'] = 'check_country'
-                elif len(gisaid_json_dict['edin_FLAG']) > 0:
-                    gisaid_json_dict['edin_FLAG'] = gisaid_json_dict['edin_FLAG'] + ':check_country'
+                if len(gisaid_json_dict['edin_flag']) == 0:
+                    gisaid_json_dict['edin_flag'] = 'check_country'
+                elif len(gisaid_json_dict['edin_flag']) > 0:
+                    gisaid_json_dict['edin_flag'] = gisaid_json_dict['edin_flag'] + ':check_country'
 
     if country == 'United Kingdom':
         country = 'UK'
@@ -251,10 +251,10 @@ def check_gisaid_date(dict):
     regex = re.compile('\d{4}-\d{2}-\d{2}')
     match = re.search(regex, date)
     if not match:
-        if len(dict['edin_FLAG']) == 0:
-            dict['edin_FLAG'] = 'check_date'
-        elif len(dict['edin_FLAG']) > 0:
-            dict['edin_FLAG'] = dict['edin_FLAG'] + ':check_date'
+        if len(dict['edin_flag']) == 0:
+            dict['edin_flag'] = 'check_date'
+        elif len(dict['edin_flag']) > 0:
+            dict['edin_flag'] = dict['edin_flag'] + ':check_date'
 
     return(dict)
 
