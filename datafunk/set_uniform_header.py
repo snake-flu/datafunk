@@ -29,7 +29,7 @@ def add_header_column(df, columns, column_name='sequence_name', extended=False):
         if extended:
             header = '|'.join(fields)
         else:
-            header = fields[0]
+            header = parse_virus_name(fields[0])
         header = strip_nasties(header)
         headers.append(header)
     df[column_name] = headers
