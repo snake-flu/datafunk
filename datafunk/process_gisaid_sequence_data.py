@@ -3,6 +3,8 @@ import json, re
 from datetime import datetime
 import sys
 
+from datafunk.gisaid_json_2_metadata import get_admin_levels_from_json_dict
+
 def fix_seq_in_gisaid_json_dict(gisaid_json_dict):
     """
     strip whitespace and newline characters from the
@@ -28,16 +30,18 @@ def get_ID_from_json_dict(gisaid_json_dict):
     make a sequence identifier from the gisaid dump json-format data.
     Function input (gisaid_json_dict) is one record from the dump
     """
-    country_strings = gisaid_json_dict['covv_location'].split(" / ")[1:4]
-    while len(country_strings) < 3:
-        country_strings.append("")
+
+    gisaid_json_dict = get_admin_levels_from_json_dict(gisaid_json_dict, warnings = False)
 
     myStr = gisaid_json_dict['covv_virus_name'] + '|' + \
             gisaid_json_dict['covv_accession_id'] + '||' + \
-            '|'.join(country_strings) + '|' + \
+            gisaid_json_dict['edin_admin_0'] + '|' + \
+            gisaid_json_dict['edin_admin_1'] + '|' + \
+            gisaid_json_dict['edin_admin_2'] + '|' + \
             gisaid_json_dict['covv_collection_date']
 
     return(myStr)
+
 
 def update_fasta_header_string(header):
     fields = header.split('|')
@@ -46,6 +50,7 @@ def update_fasta_header_string(header):
     updated_fields.extend(fields[2:5])
     updated_header = '|'.join(updated_fields)
     return updated_header
+
 
 def fix_header(header):
     """
@@ -99,19 +104,19 @@ def keep_entry(header, omitted=False, exclude_uk=False, exclude_undated=False):
 
         if epi_id in omitted:
             return False
-          
+
     if exclude_uk:
         for country in ['/England/', '/Scotland/', '/Wales/', '/Northern Ireland/']:
             if country.lower() in header.lower():
                 return False
-              
+
     if exclude_undated:
         date = header.split('|')[-1]
         regex = re.compile('\d{4}-\d{2}-\d{2}')
         match = re.search(regex, date)
         if not match:
             return False
-          
+
     return True
 
 

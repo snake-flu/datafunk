@@ -67,7 +67,7 @@ def fix_gisaid_json_dict(gisaid_json_dict):
     return(newDict)
 
 
-def get_admin_levels_from_json_dict(gisaid_json_dict):
+def get_admin_levels_from_json_dict(gisaid_json_dict, warnings = True):
     """
     get location strings from the gisaid location field
     use pycountry /
@@ -95,17 +95,18 @@ def get_admin_levels_from_json_dict(gisaid_json_dict):
     # some check here that there's a match to a real country
     # using pycountries?
     # First, these countries are known exceptions:
-    if all([country != x for x in ['Iran', 'South Korea', 'Russia', 'Korea', 'Democratic Republic of the Congo']]):
-        try:
-            pycountry.countries.lookup(country)
-        except LookupError:
-            warnings.warn('Check country flagged for ' + gisaid_json_dict['covv_accession_id'] + \
-                          '  ("' + country + '")')
+    if warnings:
+        if all([country != x for x in ['Iran', 'South Korea', 'Russia', 'Korea', 'Democratic Republic of the Congo']]):
+            try:
+                pycountry.countries.lookup(country)
+            except LookupError:
+                warnings.warn('Check country flagged for ' + gisaid_json_dict['covv_accession_id'] + \
+                              '  ("' + country + '")')
 
-            if len(gisaid_json_dict['edin_FLAG']) == 0:
-                gisaid_json_dict['edin_FLAG'] = 'check_country'
-            elif len(gisaid_json_dict['edin_FLAG']) > 0:
-                gisaid_json_dict['edin_FLAG'] = gisaid_json_dict['edin_FLAG'] + ':check_country'
+                if len(gisaid_json_dict['edin_FLAG']) == 0:
+                    gisaid_json_dict['edin_FLAG'] = 'check_country'
+                elif len(gisaid_json_dict['edin_FLAG']) > 0:
+                    gisaid_json_dict['edin_FLAG'] = gisaid_json_dict['edin_FLAG'] + ':check_country'
 
     if country == 'United Kingdom':
         country = 'UK'
