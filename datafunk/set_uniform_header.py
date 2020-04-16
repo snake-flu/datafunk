@@ -113,7 +113,8 @@ gisaid_columns = ['covv_virus_name', 'edin_admin_0', 'covv_collection_date', 'co
 #COG-UK: secondary_accession adm1 collection_date
 coguk_columns = ['secondary_identifier', 'adm1', 'collection_date']
 
-def set_uniform_header(input_fasta, input_metadata, output_fasta, output_metadata, gisaid, cog_uk, log_file, column_name, index_column, extended=False):
+def set_uniform_header(input_fasta, input_metadata, output_fasta, output_metadata, gisaid, cog_uk, log_file,
+                       column_name, index_column, extended=False):
 
     metadata = load_dataframe(input_metadata)
     if gisaid:

@@ -9,4 +9,5 @@ def run(options):
                        options.cog_uk,
                        options.log_file,
                        options.column_name,
-                       options.index_column)
+                       options.index_column,
+                       options.extended)
