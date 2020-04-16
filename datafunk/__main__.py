@@ -569,6 +569,57 @@ def main(args=None):
     )
 
     subparser_add_epi_week.set_defaults(func=datafunk.subcommands.add_epi_week.run)
+    # ___________________________________________________________________________#
+
+    subparser_process_gisaid_data = subparsers.add_parser(
+        """process_gisaid_data""",
+        usage="""datafunk process_gisaid_data --input-json <export.json> --input-metadata <in.csv>
+                 --output-fasta <out.fa> --output-metadata <out.csv> --exclude-file <omissions.txt> --exclude-uk --exclude-undated""",
+        description="""Gisaid json (+ metadata) -> (new) gisaid.fasta + metadata""",
+        help="""Gisaid json (+ metadata) -> (new) gisaid.fasta + metadata""")
+
+    subparser_process_gisaid_data._action_groups.pop()
+    required_process_gisaid_data = subparser_process_gisaid_data.add_argument_group('required arguments')
+    optional_process_gisaid_data = subparser_process_gisaid_data.add_argument_group('optional arguments')
+
+    required_process_gisaid_data.add_argument('--input-json',
+                        dest='json',
+                        help='Gisaid json data',
+                        required=True,
+                        metavar = 'gisaid.json')
+    required_process_gisaid_data.add_argument('--input-metadata',
+                        help='previous metadata (can be \'False\')',
+                        required=True,
+                        dest='input_metadata',
+                        metavar='metadata.in.csv')
+    optional_process_gisaid_data.add_argument('--output-fasta',
+                        help='fasta format file to write.',
+                        dest='output_sequences',
+                        required=False,
+                        metavar = 'output.fasta')
+    optional_process_gisaid_data.add_argument('--output-metadata',
+                        help='metadata file to write.',
+                        dest='output_metadata',
+                        required=False,
+                        metavar = 'metadata.out.csv')
+    optional_process_gisaid_data.add_argument('--exclude-file',
+                        action='append',
+                        required=False,
+                        dest='exclude',
+                        metavar = 'FILE',
+                        help='A file that contains (anywhere) EPI_ISL_###### IDs to exclude (can provide many files, e.g. -e FILE1 -e FILE2 ...)')
+    optional_process_gisaid_data.add_argument('--exclude-uk',
+                        action='store_true',
+                        dest='exclude_uk',
+                        required=False,
+                        help='Removes all GISAID entries from England, Ireland, Scotland or Wales')
+    optional_process_gisaid_data.add_argument('--exclude-undated',
+                        action='store_true',
+                        dest='exclude_undated',
+                        required=False,
+                        help='Removes all GISAID entries with an incomplete date')
+
+    subparser_process_gisaid_data.set_defaults(func=datafunk.subcommands.process_gisaid_data.run)
 
     # ___________________________________________________________________________#
 
