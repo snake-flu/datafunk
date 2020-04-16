@@ -108,20 +108,20 @@ def header_duplicated_in_column(header, df, column):
     return df[df[column] == header][column].duplicated().any()
 
 #GISAID: covv_virus_name, edin_admin_0 or covv_location.split(' / ')[1], covv_collection_date
-gisaid_columns = ['covv_virus_name', 'edin_admin_0', 'covv_collection_date']
+gisaid_columns = ['covv_virus_name', 'edin_admin_0', 'covv_collection_date', 'covv_accession_id']
 
 #COG-UK: secondary_accession adm1 collection_date
 coguk_columns = ['secondary_identifier', 'adm1', 'collection_date']
 
-def set_uniform_header(input_fasta, input_metadata, output_fasta, output_metadata, gisaid, cog_uk, log_file, column_name, index_column):
+def set_uniform_header(input_fasta, input_metadata, output_fasta, output_metadata, gisaid, cog_uk, log_file, column_name, index_column, extended=False):
 
     metadata = load_dataframe(input_metadata)
     if gisaid:
-        metadata = add_header_column(metadata, gisaid_columns, column_name)
+        metadata = add_header_column(metadata, gisaid_columns, column_name, extended)
     elif cog_uk:
-        metadata = add_header_column(metadata, coguk_columns, column_name)
+        metadata = add_header_column(metadata, coguk_columns, column_name, extended)
     elif index_column is not None:
-        metadata = add_header_column(metadata, [index_column], column_name)
+        metadata = add_header_column(metadata, [index_column], column_name, extended)
     else:
         sys.exit("Must use either --gisaid or --cog_uk flag or specify index column using --index_column")
 
@@ -132,9 +132,9 @@ def set_uniform_header(input_fasta, input_metadata, output_fasta, output_metadat
 
     with open(input_fasta) as in_fasta, open(output_fasta, 'w') as out_fasta:
         for record in SeqIO.parse(in_fasta, "fasta"):
-            header = get_new_header(record.description)
+            header = get_new_header(record.description, extended)
             if not header_found_in_column(header, metadata, column_name):
-                header = get_new_header_second_attempt(record.description)
+                header = get_new_header_second_attempt(record.description, extended)
             if cog_uk and not header_found_in_column(header, metadata, column_name) \
                     and id_found_in_column(header, metadata, "central_sample_id"):
                 metadata = update_df_if_id_found_in_column(header, metadata, "central_sample_id", column_name)
