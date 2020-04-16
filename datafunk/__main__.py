@@ -543,6 +543,13 @@ def main(args=None):
         required=False,
         help="Name of column in metadata to parse for string matching with fasta header"
     )
+    subparser_set_uniform_header.add_argument(
+        "--extended",
+        dest="extended",
+        action="store_true"
+        required=False,
+        help="Longer fasta name"
+    )
 
     subparser_set_uniform_header.set_defaults(func=datafunk.subcommands.set_uniform_header.run)
 
