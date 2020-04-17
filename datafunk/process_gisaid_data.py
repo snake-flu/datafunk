@@ -4,6 +4,7 @@ write metadata and output sequences at the same time
 
 from Bio import SeqIO
 from datetime import datetime
+from epiweeks import Week, Year
 import sys
 import json
 import argparse
@@ -13,7 +14,7 @@ import pycountry
 
 from datafunk.travel_history import *
 from datafunk.travel_history import cities_dict, countries_list, subdivisions_dict, others
-
+from datafunk.add_epi_week import date_string_to_epi_week
 
 """Don't edit these two lists please:
 """
@@ -23,7 +24,7 @@ _fields_gisaid = ['covv_accession_id', 'covv_virus_name', 'covv_location', 'covv
                  'covv_specimen', 'covv_subm_date']
 
 _fields_edin = ['edin_header', 'edin_admin_0', 'edin_admin_1', 'edin_admin_2',
-                'edin_travel', 'edin_date_stamp', 'edin_omitted',
+                'edin_travel', 'edin_date_stamp', 'edin_omitted', 'edin_epi_week',
                 'edin_flag']
 
 """You can edit this list:
@@ -228,13 +229,36 @@ def check_UK_sequence(gisaid_json_dict, exclude_uk = False):
     return(gisaid_json_dict)
 
 
-def update_edin_date_stamp_field(dict):
+def update_edin_date_stamp_field(gisaid_json_dict):
     """
     date stamp the new records to write
     """
     mydate = str(datetime.date(datetime.now()))
-    dict['edin_date_stamp'] = mydate
-    return(dict)
+    gisaid_json_dict['edin_date_stamp'] = mydate
+    return(gisaid_json_dict)
+
+
+def update_edin_epi_week_field(gisaid_json_dict):
+    """
+    record epi week by parsing sample collection date
+    NB this will break in 2021!
+    """
+    if 'omitted_date' in gisaid_json_dict['edin_flag']:
+        return(gisaid_json_dict)
+
+    collection_date = gisaid_json_dict['covv_collection_date']
+
+    last_2019 = Week(2019, 52)
+    weeks = list(Year(2020).iterweeks())
+    weeks.append(last_2019)
+
+    # Rachel's function returns None if nothing found
+    epi_week = date_string_to_epi_week(collection_date, weeks)
+
+    if epi_week:
+        gisaid_json_dict['edin_epi_week'] = epi_week
+
+    return(gisaid_json_dict)
 
 
 def get_one_metadata_line(dict, fields_list, sep = ','):
@@ -462,6 +486,9 @@ def process_gisaid_data(input_json,
 
     # check gisaid collection date formatted correctly
     new_records_dict = {x: check_gisaid_date(all_records_dict[x]) for x in new_records_dict.keys()}
+
+    # if gisaid collection date formatted correctly, we can add epi week
+    new_records_dict = {x: update_edin_epi_week_field(all_records_dict[x]) for x in new_records_dict.keys()}
 
     # check if sequence is in omissions file
     new_records_dict = {x: check_edin_omitted_file(all_records_dict[x], omitted_IDs) for x in new_records_dict.keys()}
