@@ -4,6 +4,7 @@ write metadata and output sequences at the same time
 
 from Bio import SeqIO
 from datetime import datetime
+from epiweeks import Week, Year
 import sys
 import json
 import argparse
@@ -237,23 +238,6 @@ def update_edin_date_stamp_field(gisaid_json_dict):
     return(gisaid_json_dict)
 
 
-def date_string_to_epi_week(date_string, weeks):
-    date_bits = date_string.split("-")
-    if len(date_bits) != 3:
-        return None
-    date = datetime.date(int(date_bits[0]), int(date_bits[1]), int(date_bits[2]))
-
-    for week in weeks:
-        if date in week:
-            week_string = str(week)
-            if "2019" in week_string:
-                week_number = "0"
-            else:
-                week_number = week_string.lstrip("2020")
-            return week_number
-    return None
-
-
 def update_edin_epi_week_field(gisaid_json_dict):
     """
     record epi week by parsing sample collection date
@@ -262,15 +246,17 @@ def update_edin_epi_week_field(gisaid_json_dict):
     if 'omitted_date' in gisaid_json_dict['edin_flag']:
         return(gisaid_json_dict)
 
-    collection_date = dict['covv_collection_date']
+    collection_date = gisaid_json_dict['covv_collection_date']
 
     last_2019 = Week(2019, 52)
     weeks = list(Year(2020).iterweeks())
     weeks.append(last_2019)
 
+    # Rachel's function returns None if nothing found
     epi_week = date_string_to_epi_week(collection_date, weeks)
 
-    gisaid_json_dict['edin_epi_week'] = epi_week
+    if epi_week:
+        gisaid_json_dict['edin_epi_week'] = epi_week
 
     return(gisaid_json_dict)
 
