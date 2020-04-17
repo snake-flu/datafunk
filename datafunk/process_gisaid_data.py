@@ -248,34 +248,6 @@ def get_one_metadata_line(dict, fields_list, sep = ','):
     return(l)
 
 
-def write_metadata_output(output, \
-                  new_records_list, \
-                  new_records_dict, \
-                  old_records_list, \
-                  old_records_dict, \
-                  fields_list):
-
-    """
-    write a csv-format outfile to file
-    """
-    out = open(output, 'w')
-
-    out.write(','.join(fields_list) + '\n')
-
-    for record in old_records_list:
-        do = old_records_dict[record]
-        lo = get_one_metadata_line(dict=do, fields_list=fields_list)
-        out.write(lo)
-
-    for record in new_records_list:
-        dn = new_records_dict[record]
-        ln = get_one_metadata_line(dict=dn, fields_list=fields_list)
-        out.write(ln)
-
-    out.close()
-    pass
-
-
 def fix_seq_in_gisaid_json_dict(gisaid_json_dict):
     """
     strip whitespace and newline characters from the
@@ -359,11 +331,52 @@ def parse_omissions_file(file):
     return(IDs)
 
 
-def write_fasta_output(output, new_records_list, new_records_dict):
+def write_metadata_output(output,
+                  new_records_list,
+                  new_records_dict,
+                  old_records_list,
+                  old_records_dict,
+                  fields_list):
+
+    """
+    write a csv-format outfile to file
+    """
+    out = open(output, 'w')
+
+    out.write(','.join(fields_list) + '\n')
+
+    for record in old_records_list:
+        do = old_records_dict[record]
+        lo = get_one_metadata_line(dict=do, fields_list=fields_list)
+        out.write(lo)
+
+    for record in new_records_list:
+        dn = new_records_dict[record]
+        ln = get_one_metadata_line(dict=dn, fields_list=fields_list)
+        out.write(ln)
+
+    out.close()
+    pass
+
+
+def write_fasta_output(output,
+                  new_records_list,
+                  new_records_dict,
+                  old_records_list,
+                  old_records_dict):
     if output:
         out = open(output, 'w')
     else:
         out = sys.stdout
+
+    for record in old_records_list:
+        if old_records_dict[record]['edin_omitted'] == 'True':
+            continue
+        else:
+            header = old_records_dict[record]['edin_header']
+            seq = old_records_dict[record]['sequence']
+            out.write('>' + header + '\n')
+            out.write(seq + '\n')
 
     for record in new_records_list:
         if new_records_dict[record]['edin_omitted'] == 'True':
@@ -469,7 +482,10 @@ def process_gisaid_data(input_json,
 
     write_fasta_output(output = output_fasta,
                        new_records_list = new_records_list,
-                       new_records_dict = new_records_dict)
+                       new_records_dict = new_records_dict,
+                       old_records_list = old_records_list,
+                       old_records_dict = old_records_dict)
+
 
 
     # logfile.close()
