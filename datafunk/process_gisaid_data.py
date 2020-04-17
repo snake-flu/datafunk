@@ -24,7 +24,7 @@ _fields_gisaid = ['covv_accession_id', 'covv_virus_name', 'covv_location', 'covv
 
 _fields_edin = ['edin_header', 'edin_admin_0', 'edin_admin_1', 'edin_admin_2',
                 'edin_travel', 'edin_date_stamp', 'edin_omitted',
-                'edin_FLAG']
+                'edin_flag']
 
 """You can edit this list:
 """
@@ -81,10 +81,10 @@ def get_admin_levels_from_json_dict(gisaid_json_dict, warnings = True):
                 warnings.warn('Check country flagged for ' + gisaid_json_dict['covv_accession_id'] + \
                               '  ("' + country + '")')
 
-                if len(gisaid_json_dict['edin_FLAG']) == 0:
-                    gisaid_json_dict['edin_FLAG'] = 'check_country'
-                elif len(gisaid_json_dict['edin_FLAG']) > 0:
-                    gisaid_json_dict['edin_FLAG'] = gisaid_json_dict['edin_FLAG'] + ':check_country'
+                if len(gisaid_json_dict['edin_flag']) == 0:
+                    gisaid_json_dict['edin_flag'] = 'check_country'
+                elif len(gisaid_json_dict['edin_flag']) > 0:
+                    gisaid_json_dict['edin_flag'] = gisaid_json_dict['edin_flag'] + ':check_country'
 
     if country == 'United Kingdom':
         country = 'UK'
@@ -185,10 +185,10 @@ def check_gisaid_date(dict):
     if not match:
         dict['edin_omitted'] = 'True'
 
-        if len(dict['edin_FLAG']) == 0:
-            dict['edin_FLAG'] = 'omitted_date'
-        elif len(dict['edin_FLAG']) > 0:
-            dict['edin_FLAG'] = dict['edin_FLAG'] + ':omitted_date'
+        if len(dict['edin_flag']) == 0:
+            dict['edin_flag'] = 'omitted_date'
+        elif len(dict['edin_flag']) > 0:
+            dict['edin_flag'] = dict['edin_flag'] + ':omitted_date'
 
     return(dict)
 
@@ -202,10 +202,10 @@ def check_edin_omitted_file(dict, omit_set):
         if dict['covv_accession_id'] in omit_set:
             dict['edin_omitted'] = 'True'
 
-            if len(dict['edin_FLAG']) == 0:
-                dict['edin_FLAG'] = 'omitted_file'
-            elif len(dict['edin_FLAG']) > 0:
-                dict['edin_FLAG'] = dict['edin_FLAG'] + ':omitted_file'
+            if len(dict['edin_flag']) == 0:
+                dict['edin_flag'] = 'omitted_file'
+            elif len(dict['edin_flag']) > 0:
+                dict['edin_flag'] = dict['edin_flag'] + ':omitted_file'
 
     return(dict)
 
@@ -220,10 +220,10 @@ def check_UK_sequence(gisaid_json_dict, exclude_uk = False):
             if country.lower() in header.lower():
                 gisaid_json_dict['edin_omitted'] = 'True'
 
-                if len(gisaid_json_dict['edin_FLAG']) == 0:
-                    gisaid_json_dict['edin_FLAG'] = 'omitted_UK'
-                elif len(gisaid_json_dict['edin_FLAG']) > 0:
-                    gisaid_json_dict['edin_FLAG'] = gisaid_json_dict['edin_FLAG'] + ':omitted_UK'
+                if len(gisaid_json_dict['edin_flag']) == 0:
+                    gisaid_json_dict['edin_flag'] = 'omitted_UK'
+                elif len(gisaid_json_dict['edin_flag']) > 0:
+                    gisaid_json_dict['edin_flag'] = gisaid_json_dict['edin_flag'] + ':omitted_UK'
 
     return(gisaid_json_dict)
 
