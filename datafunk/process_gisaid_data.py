@@ -184,7 +184,7 @@ def check_gisaid_date(dict):
     regex = re.compile('\d{4}-\d{2}-\d{2}')
     match = re.search(regex, date)
     if not match:
-        dict['edin_omitted'] = 'True'
+        # dict['edin_omitted'] = 'True'
 
         if len(dict['edin_flag']) == 0:
             dict['edin_flag'] = 'omitted_date'
@@ -201,7 +201,7 @@ def check_edin_omitted_file(dict, omit_set):
     """
     if omit_set:
         if dict['covv_accession_id'] in omit_set:
-            dict['edin_omitted'] = 'True'
+            # dict['edin_omitted'] = 'True'
 
             if len(dict['edin_flag']) == 0:
                 dict['edin_flag'] = 'omitted_file'
@@ -211,22 +211,32 @@ def check_edin_omitted_file(dict, omit_set):
     return(dict)
 
 
-def check_UK_sequence(gisaid_json_dict, exclude_uk = False):
+def update_UK_sequence(gisaid_json_dict):
+    """
+    Flag UK sequences
+    """
+    header = gisaid_json_dict['edin_header']
+    for country in ['England/', 'Scotland/', 'Wales/', 'Northern_Ireland/']:
+        if country.lower() in header.lower():
+
+            if len(gisaid_json_dict['edin_flag']) == 0:
+                gisaid_json_dict['edin_flag'] = 'uk_sequence'
+            elif len(gisaid_json_dict['edin_flag']) > 0:
+                gisaid_json_dict['edin_flag'] = gisaid_json_dict['edin_flag'] + ':uk_sequence'
+
+    return(gisaid_json_dict)
+
+
+def check_UK_sequence(gisaid_json_dict):
     """
     Exclude UK sequences
     """
-    if exclude_uk:
-        header = gisaid_json_dict['edin_header']
-        for country in ['England/', 'Scotland/', 'Wales/', 'Northern Ireland/']:
-            if country.lower() in header.lower():
-                gisaid_json_dict['edin_omitted'] = 'True'
+    header = gisaid_json_dict['edin_header']
+    for country in ['England/', 'Scotland/', 'Wales/', 'Northern_Ireland/']:
+        if country.lower() in header.lower():
+            return(True)
 
-                if len(gisaid_json_dict['edin_flag']) == 0:
-                    gisaid_json_dict['edin_flag'] = 'omitted_UK'
-                elif len(gisaid_json_dict['edin_flag']) > 0:
-                    gisaid_json_dict['edin_flag'] = gisaid_json_dict['edin_flag'] + ':omitted_UK'
-
-    return(gisaid_json_dict)
+    return(False)
 
 
 def update_edin_date_stamp_field(gisaid_json_dict):
@@ -384,36 +394,82 @@ def write_metadata_output(output,
 
 
 def write_fasta_output(output,
-                  new_records_list,
-                  new_records_dict,
-                  old_records_list,
-                  old_records_dict):
+                      new_records_list,
+                      new_records_dict,
+                      old_records_list,
+                      old_records_dict,
+                      exclude_uk = False,
+                      exclude_undated = False):
     if output:
         out = open(output, 'w')
     else:
         out = sys.stdout
 
     for record in old_records_list:
-        if old_records_dict[record]['edin_omitted'] == 'True':
+        if exclude_uk:
+            if check_UK_sequence(old_records_dict[record]):
+                continue
+        if exclude_undated:
+            if 'omitted_date' in old_records_dict[record]['edin_flag']:
+                continue
+        if 'omitted_file' in old_records_dict[record]['edin_flag']:
             continue
+
         else:
             header = old_records_dict[record]['edin_header']
             seq = old_records_dict[record]['sequence']
             out.write('>' + header + '\n')
             out.write(seq + '\n')
 
+
     for record in new_records_list:
-        if new_records_dict[record]['edin_omitted'] == 'True':
+        if exclude_uk:
+            if check_UK_sequence(new_records_dict[record]):
+                continue
+        if exclude_undated:
+            if 'omitted_date' in new_records_dict[record]['edin_flag']:
+                continue
+        if 'omitted_file' in new_records_dict[record]['edin_flag']:
             continue
+
         else:
             header = new_records_dict[record]['edin_header']
             seq = new_records_dict[record]['sequence']
             out.write('>' + header + '\n')
             out.write(seq + '\n')
 
+
     if output:
         out.close()
     pass
+
+
+def compare_records(metadata_gisaid_dict, json_gisaid_dict):
+    """
+    check for equality between gisaid fields in the new dump
+    vs. the last iteration of the metadata
+    """
+    equality = True
+    for field in _fields_gisaid:
+        a = metadata_gisaid_dict[field]
+        b = json_gisaid_dict[field]
+        if a != b:
+            equality = False
+    return(equality)
+
+
+def repopulate_sequence_from_new_dump(csv_record_dict, all_records_dict):
+    """
+    add sequences back into old references from the new dump
+    """
+    # this is the id of the old record
+    epi_id = csv_record_dict['covv_accession_id']
+    # this is the sequence for this id in the new dump
+    seq = all_records_dict[epi_id]['sequence']
+    # add and populate the sequence field
+    csv_record_dict['sequence'] = seq
+    # return it
+    return(csv_record_dict)
 
 
 """Program
@@ -455,7 +511,9 @@ def process_gisaid_data(input_json,
                                                     fields_list_optional = fields)
 
         old_records_list = old_records[0]
-        old_records_dict = old_records[1]
+        temp_old_records_dict = old_records[1]
+
+
 
     else:
         old_records_list = []
@@ -469,6 +527,37 @@ def process_gisaid_data(input_json,
     all_records_list = all_records[0]
     all_records_dict = all_records[1]
 
+
+    # for each old record:
+    # if the info in the csv doesn't match the info in the new json dump,
+    # throw this record out of the list of old records - which means that
+    # it will get re-processed
+    changecount = 0
+    for record in old_records_list:
+        # this record might have been removed.
+        # so check if it is in all_records_dict before proceeding
+        if record not in all_records_dict:
+            old_records_list.remove(record)
+        else:
+            old_record = temp_old_records_dict[record]
+            new_record = all_records_dict[record]
+            is_it_the_same = compare_records(old_record, new_record)
+            if is_it_the_same == False:
+                # this could go into a log:
+                # print('\t'.join([old_record[x] for x in _fields_gisaid]))
+                # print('\t'.join([new_record[x] for x in _fields_gisaid]))
+                # print()
+                old_records_list.remove(record)
+                changecount+=1
+    # this could go into a log:
+    # print(changecount)
+
+
+    if input_metadata != 'False':
+        # repopulate the old records with sequence from the new dump:
+        old_records_dict = {x: repopulate_sequence_from_new_dump(temp_old_records_dict[x], all_records_dict) for x in old_records_list}
+
+    # get new records out of the new dump:
     new_records_list = [x for x in all_records_list if x not in set(old_records_list)]
     new_records_dict = {x: all_records_dict[x] for x in all_records_list if x not in set(old_records_list)}
 
@@ -493,9 +582,8 @@ def process_gisaid_data(input_json,
     # check if sequence is in omissions file
     new_records_dict = {x: check_edin_omitted_file(all_records_dict[x], omitted_IDs) for x in new_records_dict.keys()}
 
-    if exclude_uk:
-        # check if sequence is from the UK
-        new_records_dict = {x: check_UK_sequence(all_records_dict[x], exclude_uk = True) for x in new_records_dict.keys()}
+    # check if sequence is from the UK (not really necessary)
+    new_records_dict = {x: update_UK_sequence(all_records_dict[x]) for x in new_records_dict.keys()}
 
 
     if output_metadata:
@@ -511,7 +599,9 @@ def process_gisaid_data(input_json,
                        new_records_list = new_records_list,
                        new_records_dict = new_records_dict,
                        old_records_list = old_records_list,
-                       old_records_dict = old_records_dict)
+                       old_records_dict = old_records_dict,
+                       exclude_uk = exclude_uk,
+                       exclude_undated = exclude_undated)
 
 
 
