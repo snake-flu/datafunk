@@ -75,6 +75,7 @@ def run(options):
                     prefix_ref = prefix_ref, \
                     log_inserts = log_inserts, \
                     trim = True, \
+                    pad = options.pad, \
                     trimstart = trimstart, \
                     trimend = trimend)
     else:

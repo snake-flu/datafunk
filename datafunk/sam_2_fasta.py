@@ -209,7 +209,7 @@ def get_seq_from_block(sam_block, rlen, log_inserts):
 
 
 def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, \
-                trim = False, trimstart = None, trimend = None):
+                trim = False, pad = False, trimstart = None, trimend = None):
     global insertions
 
     RLEN = samfile.header['SQ'][0]['LN']
@@ -221,9 +221,18 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, \
 
 
     if prefix_ref:
-        if trim:
+        if trim and not pad:
             out.write('>' + reference.id + '\n')
             out.write(str(reference.seq[trimstart:trimend]) + '\n')
+
+        elif trim and pad:
+            out.write('>' + reference.id + '\n')
+            out.write(
+                'N' * trimstart +
+                str(reference.seq[trimstart:trimend]) +
+                'N' * (RLEN - trimend) +
+                '\n'
+                       )
         else:
             out.write('>' + reference.id + '\n')
             out.write(str(reference.seq) + '\n')
@@ -240,10 +249,18 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, \
         # in the SAM file for one query sequence
         seq = get_seq_from_block(sam_block = one_querys_alignment_lines, rlen = RLEN, log_inserts = log_inserts)
 
-        if trim:
+        if trim and not pad:
             out.write('>' + query_seq_name + '\n')
             out.write(seq[trimstart:trimend] + '\n')
 
+        elif trim and pad:
+            out.write('>' + query_seq_name + '\n')
+            out.write(
+                'N' * trimstart +
+                seq[trimstart:trimend] +
+                'N' * (RLEN - trimend) +
+                '\n'
+                       )
         else:
             out.write('>' + query_seq_name + '\n')
             out.write(seq + '\n')

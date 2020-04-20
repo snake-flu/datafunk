@@ -354,6 +354,12 @@ def main(args=None):
         metavar='[[start]:[end]]'
                         )
     optional_sam_2_fasta.add_argument(
+        '--pad',
+        help='if --trim, pad trimmed ends with Ns, to retain reference length',
+        required=False,
+        action='store_true'
+                        )
+    optional_sam_2_fasta.add_argument(
         '--prefix_ref',
         help='write the reference sequence at the beginning of the file',
         required=False,
