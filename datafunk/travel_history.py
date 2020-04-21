@@ -95,6 +95,6 @@ def get_travel_history(json_dict):
 
     locales = [x[0] + '/' + x[1] if len(x[1]) > 0 else x[0] for x in locales]
 
-    json_dict['edin_travel'] = ';'.join(locales)
+    json_dict['edin_travel'] = ';'.join(locales).replace(',', '')
 
     return(json_dict)
