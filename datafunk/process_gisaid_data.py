@@ -556,6 +556,7 @@ def process_gisaid_data(input_json,
     if input_metadata != 'False':
         # repopulate the old records with sequence from the new dump:
         old_records_dict = {x: repopulate_sequence_from_new_dump(temp_old_records_dict[x], all_records_dict) for x in old_records_list}
+        old_records_dict = {x: get_travel_history(old_records_dict[x]) for x in old_records_list}
 
     # get new records out of the new dump:
     new_records_list = [x for x in all_records_list if x not in set(old_records_list)]
