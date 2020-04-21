@@ -59,7 +59,7 @@ def get_travel_history(json_dict):
                 subdivision.append(word)
                 sd_country = pycountry.countries.get(alpha_2=subdivisions_dict[word.lower()]).name
                 if sd_country == 'Iran, Islamic Republic of':
-                    country.append('Iran')
+                    country.append(('Iran', word))
                 else:
                     country.append((sd_country.replace(' ', '_'), word))
 
