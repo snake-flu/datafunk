@@ -366,8 +366,16 @@ def main(args=None):
         action='store_true'
                         )
     optional_sam_2_fasta.add_argument(
-        '--log_inserts',
-        help='log insertions relative to the reference',
+        '--log-inserts',
+        dest='log_inserts',
+        help='log non-singleton insertions relative to the reference',
+        required=False,
+        action='store_true'
+                        )
+    optional_sam_2_fasta.add_argument(
+        '--log-all-inserts',
+        help='log all (including singleton) insertions relative to the reference',
+        dest='log_all_inserts',
         required=False,
         action='store_true'
                         )

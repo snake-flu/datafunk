@@ -28,6 +28,12 @@ def run(options):
         log_inserts = False
 
 
+    if options.log_all_inserts:
+        log_all_inserts = True
+    else:
+        log_all_inserts = False
+
+
     if options.prefix_ref:
         prefix_ref = True
     else:
@@ -74,6 +80,7 @@ def run(options):
                     output = output, \
                     prefix_ref = prefix_ref, \
                     log_inserts = log_inserts, \
+                    log_all_inserts = log_all_inserts, \
                     trim = True, \
                     pad = options.pad, \
                     trimstart = trimstart, \
@@ -83,4 +90,5 @@ def run(options):
                     reference = reference, \
                     output = output, \
                     prefix_ref = prefix_ref, \
-                    log_inserts = log_inserts)
+                    log_inserts = log_inserts,
+                    log_all_inserts = log_all_inserts)

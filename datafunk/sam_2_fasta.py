@@ -1,6 +1,6 @@
 from Bio import SeqIO
 import pysam
-import re, itertools
+import re, itertools, operator
 import sys, warnings
 
 """
@@ -208,7 +208,7 @@ def get_seq_from_block(sam_block, rlen, log_inserts):
         return(seq_flat_no_internal_gaps)
 
 
-def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, \
+def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, log_all_inserts, \
                 trim = False, pad = False, trimstart = None, trimend = None):
     global insertions
 
@@ -238,16 +238,18 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, \
             out.write(str(reference.seq) + '\n')
 
 
-    if log_inserts:
+    if log_inserts or log_all_inserts:
+        log = True
         insertions = {}
     else:
+        log = False
         insertions = None
 
 
     for query_seq_name, one_querys_alignment_lines in itertools.groupby(samfile, lambda x: parse_sam_line(x)['QNAME']):
         # one_querys_alignment_lines is an iterator corresponding to all the lines
         # in the SAM file for one query sequence
-        seq = get_seq_from_block(sam_block = one_querys_alignment_lines, rlen = RLEN, log_inserts = log_inserts)
+        seq = get_seq_from_block(sam_block = one_querys_alignment_lines, rlen = RLEN, log_inserts = log)
 
         if trim and not pad:
             out.write('>' + query_seq_name + '\n')
@@ -274,7 +276,7 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, \
         """
         entry is a list of tuples, format: [(query_name, insertion_sequence), (..., ...), ...]
         matches is a list of tuples, format: [(insertion_seq, [qname1, qname2]), (...,[...]), ...]
-        matches only contains insertions that occur in >1 sequence
+        matches contains all insertions
         """
         d = {}
         for y in entry:
@@ -284,31 +286,44 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, \
                 d[insert] = d[insert] + [qname]
             else:
                 d[insert] = [qname]
-        matches = [(x, d[x]) for x in d if len(d[x]) > 1]
+        matches = [(x, d[x]) for x in d]
         return(matches)
 
     # if we are logging insertions
-    if log_inserts:
+    if log_inserts and not log_all_inserts:
         l = []
         for x in insertions:
-            refstart = x
+            refstart = int(x)
             lines = get_insertion_lines(insertions[x])
             # if there are non-singleton insertions to log
             if len(lines) > 0:
+                for line in lines:
+                    if len(line[1]) > 1:
+                        l.append((refstart, lines))
+
+    elif log_all_inserts:
+        l = []
+        for x in insertions:
+            refstart = int(x)
+            lines = get_insertion_lines(insertions[x])
+            # if there are any singleton insertions to log
+            if len(lines) > 0:
                 l.append((refstart, lines))
 
-        # if there are non-singleton insertions to write
-        if len(l) > 0:
-            # write a file
-            out_insertions = open('insertions.txt', 'w')
-            out_insertions.write('ref_start\tinsertion\tsamples\n')
-            for x in l:
-                refstart = x[0]
-                for y in x[1]:
-                    insert = y[0]
-                    names_list = y[1]
-                    out_insertions.write(str(refstart) + '\t' + str(insert) + '\t' + ':'.join(names_list) + '\n')
-            out_insertions.close()
+
+    if 'l' in locals() and len(l) > 0:
+        # order l:
+        l.sort(key = operator.itemgetter(0))
+        # write a file
+        out_insertions = open('insertions.txt', 'w')
+        out_insertions.write('ref_start\tinsertion\tsamples\n')
+        for x in l:
+            refstart = x[0]
+            for y in x[1]:
+                insert = y[0]
+                names_list = y[1]
+                out_insertions.write(str(refstart) + '\t' + str(insert) + '\t' + ':'.join(names_list) + '\n')
+        out_insertions.close()
 
 
 

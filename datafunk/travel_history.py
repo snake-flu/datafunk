@@ -67,7 +67,10 @@ def get_travel_history(json_dict):
             if word.lower() not in ['hubei', 'wuhan', 'prague']:
                 city.append(word)
                 city_country = pycountry.countries.get(alpha_2=cities_dict[word.lower()]).name
-                country.append((city_country.replace(' ', '_'), word))
+                if city_country == 'Iran, Islamic Republic of':
+                    country.append(('Iran', word))
+                else:
+                    country.append((city_country.replace(' ', '_'), word))
 
         if word.lower() in others:
             country.append(others[word.lower()])
