@@ -12,7 +12,7 @@ def align_by_phylotype(input_fasta,input_cluster,input_metadata,output_folder):
     seq_dic = {}
     consensus_dic = {}
 
-    with open(input_metadata,"r",encoding='utf-8-sig') as f:
+    with open(input_metadata,"r") as f:
         reader = csv.DictReader(f)
         metadata = [r for r in reader]
 
