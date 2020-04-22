@@ -521,8 +521,8 @@ def process_gisaid_data(input_json,
 
 
     else:
-        old_records_list = []
-        old_records_dict = {}
+        temp_old_records_list = []
+        temp_old_records_dict = {}
 
 
     all_records = get_json_order_and_record_dict(input_json, \
