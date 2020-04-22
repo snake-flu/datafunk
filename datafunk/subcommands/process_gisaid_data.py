@@ -7,4 +7,6 @@ def run(options):
                         output_fasta=options.output_sequences,
                         output_metadata = options.output_metadata,
                         exclude_uk=options.exclude_uk,
-                        exclude_undated=options.exclude_undated)
+                        exclude_undated=options.exclude_undated,
+                        exclude_subsampled = not(options.include_subsampled),
+                        exclude_omitted_file = not(options.include_omitted_file))
