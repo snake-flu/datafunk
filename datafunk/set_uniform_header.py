@@ -148,7 +148,8 @@ def set_uniform_header(input_fasta, input_metadata, output_fasta, output_metadat
                     header, record.id))
                 record.id = header
                 record.description = ""
-                SeqIO.write(record, out_fasta, "fasta-2line")
+                if record.id != '':
+                    SeqIO.write(record, out_fasta, "fasta-2line")
 
     metadata.to_csv(output_metadata, index=False)
 
