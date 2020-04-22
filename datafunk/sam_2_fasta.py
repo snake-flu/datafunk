@@ -163,7 +163,7 @@ def check_and_get_flattened_site(site):
     return(base)
 
 
-def swap_in_gaps_Ns(seq):
+def swap_in_gaps_Ns(seq, pad = pad):
     """
     replace internal runs of '*'s with 'N's
     and external runs of '*'s with '-'s
@@ -176,23 +176,29 @@ def swap_in_gaps_Ns(seq):
     m_left = re.search(r_left, seq)
     if m_left:
         g_left = m_left.group()
-        seq = seq.replace(g_left, g_left[:-1].replace('*','-') + g_left[-1])
+        if pad:
+            seq = seq.replace(g_left, g_left[:-1].replace('*','N') + g_left[-1])
+        else:
+            seq = seq.replace(g_left, g_left[:-1].replace('*','-') + g_left[-1])
 
     r_right = re.compile('[A-Z]\*+$')
     m_right = re.search(r_right, seq)
     if m_right:
         g_right = m_right.group()
-        seq = seq.replace(g_right,  g_right[0] + g_right[1:].replace('*','-'))
+        if pad:
+            seq = seq.replace(g_right,  g_right[0] + g_right[1:].replace('*','N'))
+        else:
+            seq = seq.replace(g_right,  g_right[0] + g_right[1:].replace('*','-'))
 
     return(seq)
 
 
-def get_seq_from_block(sam_block, rlen, log_inserts):
+def get_seq_from_block(sam_block, rlen, log_inserts, pad = pad):
 
     block_lines_sites_list = [get_one_string(sam_line, rlen, log_inserts = log_inserts) for sam_line in sam_block]
 
     if len(block_lines_sites_list) == 1:
-        seq_flat_no_internal_gaps = swap_in_gaps_Ns(block_lines_sites_list[0])
+        seq_flat_no_internal_gaps = swap_in_gaps_Ns(block_lines_sites_list[0], pad = pad)
         return(seq_flat_no_internal_gaps)
 
     elif len(block_lines_sites_list) > 1:
@@ -204,7 +210,7 @@ def get_seq_from_block(sam_block, rlen, log_inserts):
         seq_flat = ''.join(flattened_site_list)
 
         # replace central '*'s with 'N's, and external '*'s with '-'s
-        seq_flat_no_internal_gaps = swap_in_gaps_Ns(seq_flat)
+        seq_flat_no_internal_gaps = swap_in_gaps_Ns(seq_flat, pad = pad)
         return(seq_flat_no_internal_gaps)
 
 
@@ -249,7 +255,7 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, log_all_ins
     for query_seq_name, one_querys_alignment_lines in itertools.groupby(samfile, lambda x: parse_sam_line(x)['QNAME']):
         # one_querys_alignment_lines is an iterator corresponding to all the lines
         # in the SAM file for one query sequence
-        seq = get_seq_from_block(sam_block = one_querys_alignment_lines, rlen = RLEN, log_inserts = log)
+        seq = get_seq_from_block(sam_block = one_querys_alignment_lines, rlen = RLEN, log_inserts = log, pad = pad)
 
         if trim and not pad:
             out.write('>' + query_seq_name + '\n')
