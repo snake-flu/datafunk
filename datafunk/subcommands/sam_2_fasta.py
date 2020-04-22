@@ -16,10 +16,10 @@ def run(options):
         sys.exit('reference lengths differ!')
 
 
-    if options.stdout or not options.output:
+    if options.stdout or not options.output-fasta:
         output = 'stdout'
     else:
-        output = options.output
+        output = options.output-fasta
 
 
     if options.log_inserts:
@@ -34,7 +34,7 @@ def run(options):
         log_all_inserts = False
 
 
-    if options.prefix_ref:
+    if options.prefix-ref:
         prefix_ref = True
     else:
         prefix_ref = False

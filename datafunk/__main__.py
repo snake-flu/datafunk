@@ -16,32 +16,6 @@ def main(args=None):
         title="Available subcommands", help="", metavar=""
     )
 
-    #_____________________________ remove_dat_junk ______________________________#
-    subparser_remove_dat_junk = subparsers.add_parser(
-        "remove_dat_junk",
-        usage="datafunk remove_dat_junk -i <input>",
-        help="Example command",
-    )
-
-    subparser_remove_dat_junk.add_argument(
-        "-i",
-        "--input_file",
-        dest="input_file",
-        action="store",
-        type=str,
-        help="Input file: something about the input file format",
-    )
-
-    subparser_remove_dat_junk.add_argument(
-        "-v",
-        "--verbose",
-        dest="verbose",
-        action="store_true",
-        help="Run with high verbosity " "(debug level logging)",
-    )
-
-    subparser_remove_dat_junk.set_defaults(func=datafunk.subcommands.remove_dat_junk.run)
-
     # _________________________________ repair_names ____________________________#
     subparser_repair_names = subparsers.add_parser("repair_names",
         aliases=['rename_dat_punk'],
@@ -55,8 +29,6 @@ def main(args=None):
 
     subparser_repair_names.set_defaults(func=datafunk.subcommands.repair_names.run)
 
-    # ___________________________________________________________________________#
-
     # _________________________________ remove_fasta ____________________________#
     subparser_remove_fasta = subparsers.add_parser(
         "remove_fasta",
@@ -67,8 +39,8 @@ def main(args=None):
 
     subparser_remove_fasta.add_argument(
         "-i",
-        "--input_file",
-        dest="input_file",
+        "--input-fasta",
+        dest="input_fasta",
         action="store",
         type=str,
         help="Input file: something about the input file format",
@@ -76,7 +48,7 @@ def main(args=None):
 
     subparser_remove_fasta.add_argument(
         "-f",
-        "--filter_file",
+        "--filter-file",
         dest="filter_file",
         action="store",
         type=str,
@@ -85,7 +57,7 @@ def main(args=None):
 
     subparser_remove_fasta.add_argument(
         "-o",
-        "--output_file",
+        "--output-fasta",
         dest="output_file",
         action="store",
         type=str,
@@ -103,23 +75,21 @@ def main(args=None):
 
     subparser_remove_fasta.set_defaults(func=datafunk.subcommands.remove_fasta.run)
 
-    # ___________________________________________________________________________#
-
     # _________________________________ clean_names ____________________________#
     subparser_clean_names = subparsers.add_parser(
         "clean_names",
         aliases=['clean_dat_name'],
-        usage="datafunk clean_names -i <input_metafile> -t <trait> -o <output_file>",
+        usage="datafunk clean_names -i <input_metadata> -t <trait> -o <output_file>",
         help="Standardizing country names based on trait given",
     )
 
     subparser_clean_names.add_argument(
         "-i",
-        "--input_metafile",
-        dest="input_metafile",
+        "--input-metadata",
+        dest="input_metadata",
         action="store",
         type=str,
-        help="Input file: metafile (csv) for location curation",
+        help="Input file: metadata (csv) for location curation",
     )
 
     subparser_clean_names.add_argument(
@@ -133,12 +103,12 @@ def main(args=None):
 
     subparser_clean_names.add_argument(
         "-o",
-        "--output_file",
-        dest="output_file",
+        "--output-metadata",
+        dest="output_metadata",
         action="store",
         type=str,
         default='cleaned.csv',
-        help="Output file name for resulting filtered metafile",
+        help="Output file name for resulting filtered metadata",
     )
 
     subparser_clean_names.add_argument(
@@ -151,13 +121,11 @@ def main(args=None):
 
     subparser_clean_names.set_defaults(func=datafunk.subcommands.clean_names.run)
 
-    # ___________________________________________________________________________#
-
     # _________________________________ merge_fasta ____________________________#
     subparser_merge_fasta = subparsers.add_parser(
         "merge_fasta",
         aliases=['merge_dat_fasta'],
-        usage="datafunk merge_fasta -f <folder> -i <input_metafile> -o <output_file>",
+        usage="datafunk merge_fasta -f <folder> -i <input_metadata> -o <output_file>",
         help="Merge fasta file into one single file with removal of duplicates",
     )
 
@@ -172,17 +140,17 @@ def main(args=None):
 
     subparser_merge_fasta.add_argument(
         "-i",
-        "--input_metafile",
-        dest="input_metafile",
+        "--input-metadata",
+        dest="input_metadata",
         action="store",
         type=str,
-        help="Input metafile (csv) for validating sequence information",
+        help="Input metadata (csv) for validating sequence information",
     )
 
     subparser_merge_fasta.add_argument(
         "-o",
-        "--output_file",
-        dest="output_file",
+        "--output-fasta",
+        dest="output_fasta",
         action="store",
         type=str,
         default='filtered.fasta',
@@ -199,8 +167,6 @@ def main(args=None):
 
     subparser_merge_fasta.set_defaults(func=datafunk.subcommands.merge_fasta.run)
 
-    # ___________________________________________________________________________#
-
     # _________________________________ filter_fasta_by_covg_and_length ____________________________#
     subparser_filter_fasta_by_covg_and_length = subparsers.add_parser(
         "filter_fasta_by_covg_and_length",
@@ -211,8 +177,8 @@ def main(args=None):
 
     subparser_filter_fasta_by_covg_and_length.add_argument(
         "-i",
-        "--input_file",
-        dest="input_file",
+        "--input-fasta",
+        dest="input_fasta",
         action="store",
         required=True,
         type=str,
@@ -220,7 +186,7 @@ def main(args=None):
     )
 
     subparser_filter_fasta_by_covg_and_length.add_argument(
-        "--min_covg",
+        "--min-covg",
         dest="min_covg",
         action="store",
         required=False,
@@ -230,7 +196,7 @@ def main(args=None):
     )
 
     subparser_filter_fasta_by_covg_and_length.add_argument(
-        "--min_length",
+        "--min-length",
         dest="min_length",
         action="store",
         required=False,
@@ -241,8 +207,8 @@ def main(args=None):
 
     subparser_filter_fasta_by_covg_and_length.add_argument(
         "-o",
-        "--output_file",
-        dest="output_file",
+        "--output-fasta",
+        dest="output_fasta",
         action="store",
         default=None,
         type=str,
@@ -258,8 +224,6 @@ def main(args=None):
     )
 
     subparser_filter_fasta_by_covg_and_length.set_defaults(func=datafunk.subcommands.filter_fasta_by_covg_and_length.run)
-
-    # ___________________________________________________________________________#
 
     # _________________________________ process_gisaid_sequence_data ____________________________#
     subparser_process_gisaid_sequence_data = subparsers.add_parser(
@@ -284,7 +248,7 @@ def main(args=None):
 
     optional_process_gisaid_sequence_data.add_argument(
         '-o',
-        '--output',
+        '--output-fasta',
         required=False,
         metavar = 'OUTPUT.fasta',
         help='FASTA format file to write, print to stdout if unspecified'
@@ -301,14 +265,14 @@ def main(args=None):
     )
 
     optional_process_gisaid_sequence_data.add_argument(
-        '--exclude_uk',
+        '--exclude-uk',
         required=False,
         action='store_true',
         help='Removes all GISAID entries with containing England, Ireland, Scotland or Wales',
     )
 
     optional_process_gisaid_sequence_data.add_argument(
-        '--exclude_undated',
+        '--exclude-undated',
         required=False,
         action='store_true',
         help='Removes all GISAID entries with an incomplete date',
@@ -317,10 +281,9 @@ def main(args=None):
     subparser_process_gisaid_sequence_data.set_defaults(func=datafunk.subcommands.process_gisaid_sequence_data.run)
 
     # _________________________________ sam_2_fasta _____________________________#
-
     subparser_sam_2_fasta = subparsers.add_parser(
         "sam_2_fasta",
-        usage="datafunk sam_2_fasta -s <input.sam> -r <reference.fasta> [-o <output.fasta>] [-t [INT]:[INT]] [--prefix_ref] [--stdout]",
+        usage="datafunk sam_2_fasta -s <input.sam> -r <reference.fasta> [-o <output.fasta>] [-t [INT]:[INT]] [--prefix-ref] [--stdout]",
         help="Convert sam format alignment to fasta format multiple alignment, with optional trimming",
         description="aligned sam -> fasta (with optional trim to user-defined (reference) co-ordinates)",
     )
@@ -342,7 +305,7 @@ def main(args=None):
         metavar='reference.fasta'
                         )
     optional_sam_2_fasta.add_argument(
-        '-o', '--output',
+        '-o', '--output-fasta',
         help='FASTA format file to write. Prints to stdout if not specified',
         required=False,
         metavar='out.fasta'
@@ -360,7 +323,7 @@ def main(args=None):
         action='store_true'
                         )
     optional_sam_2_fasta.add_argument(
-        '--prefix_ref',
+        '--prefix-ref',
         help='write the reference sequence at the beginning of the file',
         required=False,
         action='store_true'
@@ -381,27 +344,24 @@ def main(args=None):
                         )
     optional_sam_2_fasta.add_argument(
         '--stdout',
-        help='Overides -o/--output if present and prints output to stdout',
+        help='Overides -o/--output-fasta if present and prints output to stdout',
         required=False,
         action='store_true'
                         )
 
     subparser_sam_2_fasta.set_defaults(func=datafunk.subcommands.sam_2_fasta.run)
 
-
-    # ___________________________________________________________________________#
-
     # _________________________________ phylotype_consensus ____________________________#
     subparser_phylotype_consensus = subparsers.add_parser(
         "phylotype_consensus",
         aliases=['phylotype_consensus'],
-        usage="datafunk phylotype_consensus -i <input_fasta> -m <input_metafile> -c <clade_file> -o <output_folder>",
+        usage="datafunk phylotype_consensus -i <input_fasta> -m <input_metadata> -c <clade_file> -o <output_folder>",
         help="Split sequences according to lineage and create an consensus",
     )
 
     subparser_phylotype_consensus.add_argument(
         "-i",
-        "--input_fasta",
+        "--input-fasta",
         dest="input_fasta",
         action="store",
         type=str,
@@ -410,17 +370,17 @@ def main(args=None):
 
     subparser_phylotype_consensus.add_argument(
         "-m",
-        "--input_metafile",
-        dest="input_metafile",
+        "--input-metadata",
+        dest="input_metadata",
         action="store",
         type=str,
-        help="Input metafile (csv) with phylotype information",
+        help="Input metadata (csv) with phylotype information",
     )
 
 
     subparser_phylotype_consensus.add_argument(
         "-c",
-        "--clade_file",
+        "--clade-file",
         dest="clade_file",
         action="store",
         type=str,
@@ -429,7 +389,7 @@ def main(args=None):
 
     subparser_phylotype_consensus.add_argument(
         "-o",
-        "--output_folder",
+        "--output-folder",
         dest="output_folder",
         action="store",
         default="./",
@@ -448,7 +408,6 @@ def main(args=None):
     subparser_phylotype_consensus.set_defaults(func=datafunk.subcommands.phylotype_consensus.run)
 
     # _________________________________ gisaid_json_2_metadata ____________________________#
-
     subparser_gisaid_json_2_metadata = subparsers.add_parser(
         """gisaid_json_2_metadata""",
         usage="""datafunk gisaid_json_2_metadata [-h] -n gisaid.json -c <OLD_metadata.csv / False> -o NEW_metadata.csv -e omissions.txt""",
@@ -468,7 +427,7 @@ def main(args=None):
                              '(but you will lose date stamp information from previous dumps)',
                         required=True,
                         metavar = '<OLD_metadata.csv / False>')
-    required_gisaid_json_2_metadata.add_argument('-o', '--output',
+    required_gisaid_json_2_metadata.add_argument('-o', '--output-metadata',
                         help='New csv file to write',
                         required=True,
                         metavar='NEW_metadata.csv')
@@ -489,7 +448,6 @@ def main(args=None):
     subparser_gisaid_json_2_metadata.set_defaults(func=datafunk.subcommands.gisaid_json_2_metadata.run)
 
     # _________________________________ set_uniform_header ____________________________#
-
     subparser_set_uniform_header = subparsers.add_parser(
         "set_uniform_header",
         usage="datafunk set_uniform_header -i <input_fasta> -t <threshold> [-o <output_fasta>]",
@@ -497,28 +455,28 @@ def main(args=None):
     )
 
     subparser_set_uniform_header.add_argument(
-        "--input_fasta",
+        "--input-fasta",
         dest="input_fasta",
         required=True,
         type=str,
         help="Input FASTA",
     )
     subparser_set_uniform_header.add_argument(
-        "--input_metadata",
+        "--input-metadata",
         dest="input_metadata",
         required=True,
         type=str,
         help="Input CSV or TSV",
     )
     subparser_set_uniform_header.add_argument(
-        "--output_fasta",
+        "--output-fasta",
         dest="output_fasta",
         required=True,
         type=str,
         help="Input FASTA",
     )
     subparser_set_uniform_header.add_argument(
-        "--output_metadata",
+        "--output-metadata",
         dest="output_metadata",
         required=True,
         type=str,
@@ -532,7 +490,7 @@ def main(args=None):
         help="Input data is from GISAID",
     )
     subparser_set_uniform_header.add_argument(
-        "--cog_uk",
+        "--cog-uk",
         dest="cog_uk",
         action="store_true",
         required=False,
@@ -545,14 +503,14 @@ def main(args=None):
         help="Log file to use (otherwise uses stdout)"
     )
     subparser_set_uniform_header.add_argument(
-        "--column_name",
+        "--column-name",
         dest="column_name",
         required=False,
         default='sequence_name',
         help="Name of column in metadata corresponding to fasta header"
     )
     subparser_set_uniform_header.add_argument(
-        "--index_column",
+        "--index-column",
         dest="index_column",
         required=False,
         help="Name of column in metadata to parse for string matching with fasta header"
@@ -568,35 +526,34 @@ def main(args=None):
     subparser_set_uniform_header.set_defaults(func=datafunk.subcommands.set_uniform_header.run)
 
     # _________________________________ add_epi_week ____________________________#
-
     subparser_add_epi_week = subparsers.add_parser(
         "add_epi_week",
-        usage="datafunk add_epi_week -i <input_metadata> -o <output_metadata> --date_column <column> [--epi_column_name <column>]",
+        usage="datafunk add_epi_week -i <input_metadata> -o <output_metadata> --date_column <column> [--epi-column-name <column>]",
         help="Adds a column for epi week to metadata table",
     )
 
     subparser_add_epi_week.add_argument(
-        "-i", "--input_metadata",
+        "-i", "--input-metadata",
         dest="input_metadata",
         required=True,
         type=str,
         help="Input CSV or TSV",
     )
     subparser_add_epi_week.add_argument(
-        "-o", "--output_metadata",
+        "-o", "--output-metadata",
         dest="output_metadata",
         required=True,
         type=str,
         help="Input CSV or TSV",
     )
     subparser_add_epi_week.add_argument(
-        "--date_column",
+        "--date-column",
         dest="date_column",
         required=True,
         help="Column name to convert to epi week",
     )
     subparser_add_epi_week.add_argument(
-        "--epi_column_name",
+        "--epi-column-name",
         dest="epi_column_name",
         default="edin_epi_week",
         required=False,
@@ -604,8 +561,8 @@ def main(args=None):
     )
 
     subparser_add_epi_week.set_defaults(func=datafunk.subcommands.add_epi_week.run)
-    # ___________________________________________________________________________#
 
+    # _______________________________ process_gisaid_data ____________________________________________#
     subparser_process_gisaid_data = subparsers.add_parser(
         """process_gisaid_data""",
         usage="""datafunk process_gisaid_data --input-json <export.json> --input-metadata <in.csv>
