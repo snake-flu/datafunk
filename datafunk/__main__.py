@@ -306,6 +306,7 @@ def main(args=None):
                         )
     optional_sam_2_fasta.add_argument(
         '-o', '--output-fasta',
+        dest='output',
         help='FASTA format file to write. Prints to stdout if not specified',
         required=False,
         metavar='out.fasta'

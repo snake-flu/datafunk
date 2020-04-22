@@ -16,10 +16,10 @@ def run(options):
         sys.exit('reference lengths differ!')
 
 
-    if options.stdout or not options.output-fasta:
+    if options.stdout or not options.output:
         output = 'stdout'
     else:
-        output = options.output-fasta
+        output = options.output
 
 
     if options.log_inserts:
