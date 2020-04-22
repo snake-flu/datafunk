@@ -193,7 +193,7 @@ def swap_in_gaps_Ns(seq, pad):
     return(seq)
 
 
-def get_seq_from_block(sam_block, rlen, log_inserts, pad = pad):
+def get_seq_from_block(sam_block, rlen, log_inserts, pad):
 
     block_lines_sites_list = [get_one_string(sam_line, rlen, log_inserts = log_inserts) for sam_line in sam_block]
 
