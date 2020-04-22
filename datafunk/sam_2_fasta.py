@@ -163,7 +163,7 @@ def check_and_get_flattened_site(site):
     return(base)
 
 
-def swap_in_gaps_Ns(seq, pad = pad):
+def swap_in_gaps_Ns(seq, pad):
     """
     replace internal runs of '*'s with 'N's
     and external runs of '*'s with '-'s
