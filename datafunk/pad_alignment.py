@@ -1,5 +1,5 @@
 from Bio import SeqIO
-import argparse
+import argparse, sys
 
 def pad_alignment(alignment, leftpad, rightpad, output):
     if output:
@@ -10,7 +10,7 @@ def pad_alignment(alignment, leftpad, rightpad, output):
     with open(alignment, 'r') as f:
         for record in SeqIO.parse(f, "fasta"):
             id = record.id
-            seq = 'N' * leftpad + str(record.seq) + 'N' * rightpad
+            seq = 'N' * int(leftpad) + str(record.seq) + 'N' * int(rightpad)
             out.write('>' + id + '\n')
             out.write(seq + '\n')
 
