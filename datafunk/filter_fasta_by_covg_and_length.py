@@ -42,7 +42,10 @@ def filter_sequences(inpath, outpath, min_covg=None, min_length=None):
             if min_length and sequence_too_short(record_seq, min_length):
                 short_seqs.append(seq_name)
                 continue
-            SeqIO.write(record_dict[seq_name], out_handle, "fasta")
+            record = record_dict[seq_name]
+            out_handle.write('>' + record.id + '\n')
+            out_handle.write(str(record.seq) + '\n')
+            # SeqIO.write(record_dict[seq_name], out_handle, "fasta")
 
         if min_covg:
             print("#Low coverage sequences:")
