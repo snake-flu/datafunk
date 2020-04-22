@@ -604,12 +604,22 @@ def main(args=None):
                         action='store_true',
                         dest='exclude_uk',
                         required=False,
-                        help='Removes all GISAID entries from England, Ireland, Scotland or Wales')
+                        help='Excludes GISAID entries from England, Ireland, Scotland or Wales from being written to fasta (default is to include them)')
     optional_process_gisaid_data.add_argument('--exclude-undated',
                         action='store_true',
                         dest='exclude_undated',
                         required=False,
-                        help='Removes all GISAID entries with an incomplete date')
+                        help='Excludes GISAID entries with an incomplete date from being written to fasta (default is to include them)')
+    optional_process_gisaid_data.add_argument('--include-subsampled',
+                        action='store_true',
+                        dest='include_subsampled',
+                        required=False,
+                        help='Write GISAID entries previously flagged as duplicated to fasta (default is to exclude them)')
+    optional_process_gisaid_data.add_argument('--include-omitted-file',
+                        action='store_true',
+                        dest='include_omitted_file',
+                        required=False,
+                        help='Write GISAID entries excluded in --exclude-file FILE to fasta (default is to exclude them)')
 
     subparser_process_gisaid_data.set_defaults(func=datafunk.subcommands.process_gisaid_data.run)
 

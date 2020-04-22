@@ -96,9 +96,9 @@ def get_admin_levels_from_json_dict(gisaid_json_dict, warnings = True):
     if country == 'Democratic Republic of the Congo':
         country = 'DRC'
 
-    gisaid_json_dict['edin_admin_0'] = country
-    gisaid_json_dict['edin_admin_1'] = subdivision
-    gisaid_json_dict['edin_admin_2'] = subsubdivision
+    gisaid_json_dict['edin_admin_0'] = country.replace(' ', '_')
+    gisaid_json_dict['edin_admin_1'] = subdivision.replace(' ', '_')
+    gisaid_json_dict['edin_admin_2'] = subsubdivision.replace(' ', '_')
 
     return(gisaid_json_dict)
 
@@ -227,18 +227,6 @@ def update_UK_sequence(gisaid_json_dict):
     return(gisaid_json_dict)
 
 
-def check_UK_sequence(gisaid_json_dict):
-    """
-    Exclude UK sequences
-    """
-    header = gisaid_json_dict['edin_header']
-    for country in ['England/', 'Scotland/', 'Wales/', 'Northern_Ireland/']:
-        if country.lower() in header.lower():
-            return(True)
-
-    return(False)
-
-
 def update_edin_date_stamp_field(gisaid_json_dict):
     """
     date stamp the new records to write
@@ -322,8 +310,6 @@ def add_header_to_json_dict(gisaid_json_dict):
     Function input (gisaid_json_dict) is one record from the dump
     """
 
-    gisaid_json_dict = get_admin_levels_from_json_dict(gisaid_json_dict, warnings = False)
-
     myTempHeader = gisaid_json_dict['covv_virus_name'] + '|' + \
                     gisaid_json_dict['covv_accession_id'] + '||' + \
                     gisaid_json_dict['edin_admin_0'] + '|' + \
@@ -397,22 +383,14 @@ def write_fasta_output(output,
                       new_records_list,
                       new_records_dict,
                       old_records_list,
-                      old_records_dict,
-                      exclude_uk = False,
-                      exclude_undated = False):
+                      old_records_dict):
     if output:
         out = open(output, 'w')
     else:
         out = sys.stdout
 
     for record in old_records_list:
-        if exclude_uk:
-            if check_UK_sequence(old_records_dict[record]):
-                continue
-        if exclude_undated:
-            if 'omitted_date' in old_records_dict[record]['edin_flag']:
-                continue
-        if 'omitted_file' in old_records_dict[record]['edin_flag']:
+        if old_records_dict[record]['edin_omitted'] == 'True':
             continue
 
         else:
@@ -423,13 +401,7 @@ def write_fasta_output(output,
 
 
     for record in new_records_list:
-        if exclude_uk:
-            if check_UK_sequence(new_records_dict[record]):
-                continue
-        if exclude_undated:
-            if 'omitted_date' in new_records_dict[record]['edin_flag']:
-                continue
-        if 'omitted_file' in new_records_dict[record]['edin_flag']:
+        if new_records_dict[record]['edin_omitted'] == 'True':
             continue
 
         else:
@@ -472,6 +444,38 @@ def repopulate_sequence_from_new_dump(csv_record_dict, all_records_dict):
     return(csv_record_dict)
 
 
+def wipe_edin_omit_field(json_gisaid_dict):
+    json_gisaid_dict['edin_omitted'] = ''
+    return(json_gisaid_dict)
+
+
+def update_edin_omit_field(json_gisaid_dict,
+                           exclude_uk = False, exclude_undated = False,
+                           exclude_subsampled = True, exclude_omitted_file = True):
+
+    if exclude_uk:
+        if 'uk_sequence' in json_gisaid_dict['edin_flag']:
+            json_gisaid_dict['edin_omitted'] = 'True'
+            return(json_gisaid_dict)
+
+    if exclude_undated:
+        if 'omitted_date' in json_gisaid_dict['edin_flag']:
+            json_gisaid_dict['edin_omitted'] = 'True'
+            return(json_gisaid_dict)
+
+    if exclude_subsampled:
+        if 'subsample_omit' in json_gisaid_dict['edin_flag']:
+            json_gisaid_dict['edin_omitted'] = 'True'
+            return(json_gisaid_dict)
+
+    if exclude_omitted_file:
+        if 'omitted_file' in json_gisaid_dict['edin_flag']:
+            json_gisaid_dict['edin_omitted'] = 'True'
+            return(json_gisaid_dict)
+
+    return(json_gisaid_dict)
+
+
 """Program
 """
 def process_gisaid_data(input_json,
@@ -479,8 +483,10 @@ def process_gisaid_data(input_json,
                         input_metadata,
                         output_fasta,
                         output_metadata,
-                        exclude_uk=False,
-                        exclude_undated=False):
+                        exclude_uk,
+                        exclude_undated,
+                        exclude_subsampled,
+                        exclude_omitted_file):
 
     # logfile = open(output + '.log', 'w')
     if input_omit_file_list:
@@ -499,20 +505,19 @@ def process_gisaid_data(input_json,
         if not all([x in csv_header for x in _fields_gisaid + _fields_edin]):
             sys.exit('There were missing mandatory fields in ' + input_metadata)
 
-        # add optional fields from the old csv file to the output
-        for x in csv_header:
-            if x not in _fields_gisaid + _fields_edin:
-                if x not in fields:
-                    fields.append(x)
+        # # add optional fields from the old csv file to the output
+        # for x in csv_header:
+        #     if x not in _fields_gisaid + _fields_edin:
+        #         if x not in fields:
+        #             fields.append(x)
 
 
         old_records = get_csv_order_and_record_dict(input_metadata,
                                                     fields_list_required = _fields_gisaid + _fields_edin,
                                                     fields_list_optional = fields)
 
-        old_records_list = old_records[0]
+        temp_old_records_list = old_records[0]
         temp_old_records_dict = old_records[1]
-
 
 
     else:
@@ -527,17 +532,19 @@ def process_gisaid_data(input_json,
     all_records_list = all_records[0]
     all_records_dict = all_records[1]
 
-
     # for each old record:
     # if the info in the csv doesn't match the info in the new json dump,
     # throw this record out of the list of old records - which means that
     # it will get re-processed
-    changecount = 0
-    for record in old_records_list:
+
+    to_remove = []
+    for record in temp_old_records_list:
         # this record might have been removed.
         # so check if it is in all_records_dict before proceeding
         if record not in all_records_dict:
-            old_records_list.remove(record)
+            to_remove.append(record)
+        elif temp_old_records_list.count(record) > 1:
+            to_remove.append(record)
         else:
             old_record = temp_old_records_dict[record]
             new_record = all_records_dict[record]
@@ -547,45 +554,76 @@ def process_gisaid_data(input_json,
                 # print('\t'.join([old_record[x] for x in _fields_gisaid]))
                 # print('\t'.join([new_record[x] for x in _fields_gisaid]))
                 # print()
-                old_records_list.remove(record)
-                changecount+=1
+                to_remove.append(record)
     # this could go into a log:
-    # print(changecount)
+    # print('removed because different: '+ str(changecount_diff))
+    # print('removed because deleted: '+ str(changecount_del))
+    # print('removed old = '+str(len(to_remove)))
+
+    old_records_list = [x for x in temp_old_records_list if x not in to_remove]
 
 
     if input_metadata != 'False':
         # repopulate the old records with sequence from the new dump:
-        old_records_dict = {x: repopulate_sequence_from_new_dump(temp_old_records_dict[x], all_records_dict) for x in old_records_list}
-        old_records_dict = {x: get_travel_history(old_records_dict[x]) for x in old_records_list}
+        old_records_dict = {x: repopulate_sequence_from_new_dump(temp_old_records_dict[x], all_records_dict) for x in set(old_records_list)}
+
+        # FIRST THING TO DO: WIPE EDIN_OMITTED
+        old_records_dict = {x: wipe_edin_omit_field(old_records_dict[x]) for x in old_records_dict.keys()}
+
+        # TEMPORARY THINGS TO DO TO BRING OLD METADATA INLINE WITH NEW METADATA:
+        old_records_dict = {x: get_admin_levels_from_json_dict(old_records_dict[x]) for x in old_records_dict.keys()}
+        old_records_dict = {x: get_travel_history(old_records_dict[x]) for x in old_records_dict.keys()}
+
+        # update omit field for this round of writing records only:
+        old_records_dict = {x: update_edin_omit_field(old_records_dict[x],
+                                           exclude_uk = exclude_uk,
+                                           exclude_undated = exclude_undated,
+                                           exclude_subsampled = exclude_subsampled,
+                                           exclude_omitted_file = exclude_omitted_file)
+                                for x in old_records_dict.keys()}
+
+
 
     # get new records out of the new dump:
     new_records_list = [x for x in all_records_list if x not in set(old_records_list)]
-    new_records_dict = {x: all_records_dict[x] for x in all_records_list if x not in set(old_records_list)}
+    new_records_dict = {x: all_records_dict[x] for x in new_records_list}
+
+
+    # FIRST THING TO DO: WIPE EDIN_OMITTED
+    new_records_dict = {x: wipe_edin_omit_field(new_records_dict[x]) for x in new_records_dict.keys()}
 
     # update date stamp field
-    new_records_dict = {x: update_edin_date_stamp_field(all_records_dict[x]) for x in new_records_dict.keys()}
+    new_records_dict = {x: update_edin_date_stamp_field(new_records_dict[x]) for x in new_records_dict.keys()}
 
     # update admin level
-    new_records_dict = {x: get_admin_levels_from_json_dict(all_records_dict[x]) for x in new_records_dict.keys()}
+    new_records_dict = {x: get_admin_levels_from_json_dict(new_records_dict[x]) for x in new_records_dict.keys()}
 
     # include a header field in each dictionary (just for writing the fasta file):
-    new_records_dict = {x: add_header_to_json_dict(all_records_dict[x]) for x in new_records_dict.keys()}
+    new_records_dict = {x: add_header_to_json_dict(new_records_dict[x]) for x in new_records_dict.keys()}
 
     # get travel history
-    new_records_dict = {x: get_travel_history(all_records_dict[x]) for x in new_records_dict.keys()}
-
-    # check gisaid collection date formatted correctly
-    new_records_dict = {x: check_gisaid_date(all_records_dict[x]) for x in new_records_dict.keys()}
+    new_records_dict = {x: get_travel_history(new_records_dict[x]) for x in new_records_dict.keys()}
 
     # if gisaid collection date formatted correctly, we can add epi week
-    new_records_dict = {x: update_edin_epi_week_field(all_records_dict[x]) for x in new_records_dict.keys()}
+    new_records_dict = {x: update_edin_epi_week_field(new_records_dict[x]) for x in new_records_dict.keys()}
+
+    # check gisaid collection date formatted correctly
+    new_records_dict = {x: check_gisaid_date(new_records_dict[x]) for x in new_records_dict.keys()}
 
     # check if sequence is in omissions file
-    new_records_dict = {x: check_edin_omitted_file(all_records_dict[x], omitted_IDs) for x in new_records_dict.keys()}
+    new_records_dict = {x: check_edin_omitted_file(new_records_dict[x], omitted_IDs) for x in new_records_dict.keys()}
 
-    # check if sequence is from the UK (not really necessary)
-    new_records_dict = {x: update_UK_sequence(all_records_dict[x]) for x in new_records_dict.keys()}
+    # record if sequence is from the UK
+    new_records_dict = {x: update_UK_sequence(new_records_dict[x]) for x in new_records_dict.keys()}
 
+    # update omit field for this round of writing records only:
+    new_records_dict = {x:
+        update_edin_omit_field(new_records_dict[x],
+                                   exclude_uk = exclude_uk,
+                                   exclude_undated = exclude_undated,
+                                   exclude_subsampled = exclude_subsampled,
+                                   exclude_omitted_file = exclude_omitted_file)
+                        for x in new_records_dict.keys()}
 
     if output_metadata:
         write_metadata_output(output = output_metadata,
@@ -600,9 +638,7 @@ def process_gisaid_data(input_json,
                        new_records_list = new_records_list,
                        new_records_dict = new_records_dict,
                        old_records_list = old_records_list,
-                       old_records_dict = old_records_dict,
-                       exclude_uk = exclude_uk,
-                       exclude_undated = exclude_undated)
+                       old_records_dict = old_records_dict)
 
 
 
