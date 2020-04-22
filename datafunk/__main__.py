@@ -325,6 +325,7 @@ def main(args=None):
                         )
     optional_sam_2_fasta.add_argument(
         '--prefix-ref',
+        dest='prefix_ref',
         help='write the reference sequence at the beginning of the file',
         required=False,
         action='store_true'
