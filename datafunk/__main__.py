@@ -658,6 +658,46 @@ def main(args=None):
 
     # ___________________________________________________________________________#
 
+    subparser_pad_alignment = subparsers.add_parser(
+        """pad_alignment""",
+        usage="""datafunk pad_alignment""",
+        description="""pad alignment with leading and trailing Ns""",
+        help="""pad alignment with leading and trailing Ns""")
+
+    subparser_pad_alignment._action_groups.pop()
+    required_pad_alignment = subparser_pad_alignment.add_argument_group('required arguments')
+    optional_pad_alignment = subparser_pad_alignment.add_argument_group('optional arguments')
+
+
+    required_pad_alignment.add_argument('-i', '--input-fasta',
+                        help='Fasta file to pad',
+                        required=True,
+                        dest='fasta_in',
+                        metavar='input.fasta')
+    required_pad_alignment.add_argument('-l', '--left-pad',
+                        help='Number of leading Ns to pad with',
+                        dest='left_pad',
+                        required=False,
+                        metavar = 'int')
+    required_pad_alignment.add_argument('-r', '--right-pad',
+                        help='Number of trailing Ns to pad with',
+                        dest='right_pad',
+                        required=False,
+                        metavar = 'int')
+    optional_pad_alignment.add_argument('-o','--output-fasta',
+                        help='Padded fasta file to write. Prints to stdout if not specified',
+                        dest='fasta_out',
+                        required=False,
+                        metavar = 'output.fasta')
+    optional_pad_alignment.add_argument('--stdout',
+                        help='Overrides --output-fasta and writes to stdout',
+                        action = 'store_true',
+                        required=False)
+
+    subparser_pad_alignment.set_defaults(func=datafunk.subcommands.pad_alignment.run)
+
+    # ___________________________________________________________________________#
+
     args = parser.parse_args()
 
     if hasattr(args, "func"):
