@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="datafunk",
-    version="0.0.5",
+    version="0.0.6",
     packages=find_packages(),
     url="https://github.com/cov-ert/datafunk",
     license="MIT",
