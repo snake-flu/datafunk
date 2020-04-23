@@ -4,6 +4,7 @@ setup(
     name="datafunk",
     version="0.0.6",
     packages=find_packages(),
+    include_package_data=True,
     url="https://github.com/cov-ert/datafunk",
     license="MIT",
     entry_points={"console_scripts": ["datafunk = datafunk.__main__:main"]},

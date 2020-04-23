@@ -1,8 +1,8 @@
 import pycountry
 import pandas as pd
+import os
 
-url = 'https://raw.githubusercontent.com/benjamincjackson/world_cities/master/cities50000.tsv'
-df = pd.read_csv(url, sep = '\t')
+df = pd.read_csv(os.path.dirname(os.path.realpath(__file__)) + '/resources/cities50000.tsv', sep = '\t')
 
 cities_dict = {}
 for i in range(len(df)):
