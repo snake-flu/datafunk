@@ -119,6 +119,16 @@ def expand_dict(dict, fields_list_required, fields_list_optional):
 
     return(dict)
 
+def add_edin_flag_if_dict_key_true(dictionary, key):
+    if key in dictionary:
+        if dictionary[key] == "True" or dictionary[key] == "true" or dictionary[key] == True:
+            if len(dictionary['edin_flag']) == 0:
+                dictionary['edin_flag'] = key
+            elif len(dictionary['edin_flag']) > 0:
+                dictionary['edin_flag'] = dictionary['edin_flag'] + ':' + key
+        del dictionary[key]
+    return dictionary
+
 
 def get_csv_order_and_record_dict(csv_file, fields_list_required, fields_list_optional):
     """
@@ -147,6 +157,7 @@ def get_csv_order_and_record_dict(csv_file, fields_list_required, fields_list_op
 
             ID = d['covv_accession_id']
             record_order.append(ID)
+            d = add_edin_flag_if_dict_key_true(d, "subsample_omit")
             old_records[ID] = d
 
     return(record_order, old_records)
