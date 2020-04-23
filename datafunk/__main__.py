@@ -668,7 +668,7 @@ def main(args=None):
     # ___________________________ exclude_uk_seqs _____________________________________#
 
     subparser_exclude_uk_seqs = subparsers.add_parser(
-        """exclude UK sequences from fasta""",
+        """exclude_uk_seqs""",
         usage="""datafunk exclude_uk_seqs""",
         description="""exclude UK sequences from fasta""",
         help="""exclude UK sequences from fasta""")
