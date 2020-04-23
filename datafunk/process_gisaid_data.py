@@ -124,7 +124,7 @@ def add_edin_flag_if_dict_key_true(dictionary, key):
         if dictionary[key] == "True" or dictionary[key] == "true" or dictionary[key] == True:
             if len(dictionary['edin_flag']) == 0:
                 dictionary['edin_flag'] = key
-            elif len(dictionary['edin_flag']) > 0:
+            elif len(dictionary['edin_flag']) > 0 and key not in dictionary['edin_flag']:
                 dictionary['edin_flag'] = dictionary['edin_flag'] + ':' + key
         del dictionary[key]
     return dictionary
