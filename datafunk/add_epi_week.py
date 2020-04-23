@@ -4,20 +4,23 @@ import datetime
 
 
 def date_string_to_epi_week(date_string, weeks):
-    date_bits = date_string.split("-")
-    if len(date_bits) != 3:
-        return None
-    date = datetime.date(int(date_bits[0]), int(date_bits[1]), int(date_bits[2]))
+    # check the date:
+    regex = re.compile('\d{4}-\d{2}-\d{2}')
+    match = re.search(regex, date_string)
+    if not match:
+        return(None)
 
-    for week in weeks:
-        if date in week:
-            week_string = str(week)
-            if "2019" in week_string:
-                week_number = "0"
-            else:
-                week_number = week_string.lstrip("2020")
-            return week_number
-    return None
+    date = datetime.strptime(date_string, '%Y-%m-%d').date()
+
+    week = Week.fromdate(date)
+
+    if week in weeks:
+        if '2019' in str(week):
+            return('0')
+        else:
+            return(str(week.weektuple()[1]))
+    else:
+        return(None)
 
 def load_dataframe(metadata_file):
     sep = ','

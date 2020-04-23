@@ -3,6 +3,7 @@ write metadata and output sequences at the same time
 """
 
 from Bio import SeqIO
+import datetime
 from datetime import datetime
 from epiweeks import Week, Year
 import sys
@@ -14,7 +15,6 @@ import pycountry
 
 from datafunk.travel_history import *
 from datafunk.travel_history import cities_dict, countries_list, subdivisions_dict, others
-from datafunk.add_epi_week import date_string_to_epi_week
 
 """Don't edit these two lists please:
 """
@@ -208,6 +208,20 @@ def check_edin_omitted_file(dict, omit_set):
             elif len(dict['edin_flag']) > 0:
                 dict['edin_flag'] = dict['edin_flag'] + ':omitted_file'
 
+        elif any([x in dict['covv_virus_name'] for x in ['/bat/', '/pangolin/']]):
+
+            if len(dict['edin_flag']) == 0:
+                dict['edin_flag'] = 'omitted_file'
+            elif len(dict['edin_flag']) > 0:
+                dict['edin_flag'] = dict['edin_flag'] + ':omitted_file'
+
+        elif any([x in dict['edin_header'] for x in omit_set]):
+
+            if len(dict['edin_flag']) == 0:
+                dict['edin_flag'] = 'omitted_file'
+            elif len(dict['edin_flag']) > 0:
+                dict['edin_flag'] = dict['edin_flag'] + ':omitted_file'
+
     return(dict)
 
 
@@ -236,6 +250,26 @@ def update_edin_date_stamp_field(gisaid_json_dict):
     return(gisaid_json_dict)
 
 
+def date_string_to_epi_week(date_string, weeks):
+    # check the date:
+    regex = re.compile('\d{4}-\d{2}-\d{2}')
+    match = re.search(regex, date_string)
+    if not match:
+        return(None)
+
+    date = datetime.strptime(date_string, '%Y-%m-%d').date()
+
+    week = Week.fromdate(date)
+
+    if week in weeks:
+        if '2019' in str(week):
+            return('0')
+        else:
+            return(str(week.weektuple()[1]))
+    else:
+        return(None)
+
+
 def update_edin_epi_week_field(gisaid_json_dict):
     """
     record epi week by parsing sample collection date
@@ -250,7 +284,7 @@ def update_edin_epi_week_field(gisaid_json_dict):
     weeks = list(Year(2020).iterweeks())
     weeks.append(last_2019)
 
-    # Rachel's function returns None if nothing found
+    # returns None if nothing found
     epi_week = date_string_to_epi_week(collection_date, weeks)
 
     if epi_week:
@@ -343,10 +377,15 @@ def parse_omissions_file(file):
                     continue
             elif line.startswith("#"):
                 continue
+            elif len(line.strip()) == 0:
+                continue
+
             match = re.search(regex, line)
             if match:
                 ID = match.group()
                 IDs.append(ID)
+            else:
+                IDs.append(line.rstrip())
 
     return(IDs)
 
