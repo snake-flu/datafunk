@@ -625,7 +625,7 @@ def main(args=None):
 
     subparser_process_gisaid_data.set_defaults(func=datafunk.subcommands.process_gisaid_data.run)
 
-    # ___________________________________________________________________________#
+    # ___________________________________pad_alignment________________________________________#
 
     subparser_pad_alignment = subparsers.add_parser(
         """pad_alignment""",
@@ -665,7 +665,34 @@ def main(args=None):
 
     subparser_pad_alignment.set_defaults(func=datafunk.subcommands.pad_alignment.run)
 
+    # ___________________________ exclude_uk_seqs _____________________________________#
+
+    subparser_exclude_uk_seqs = subparsers.add_parser(
+        """exclude UK sequences from fasta""",
+        usage="""datafunk exclude_uk_seqs""",
+        description="""exclude UK sequences from fasta""",
+        help="""exclude UK sequences from fasta""")
+
+    subparser_exclude_uk_seqs._action_groups.pop()
+    required_exclude_uk_seqs = subparser_exclude_uk_seqs.add_argument_group('required arguments')
+
+
+    required_exclude_uk_seqs.add_argument('-i', '--input-fasta',
+                        help='Fasta file to read',
+                        required=True,
+                        dest='fasta_in',
+                        metavar='input.fasta')
+    required_exclude_uk_seqs.add_argument('-o','--output-fasta',
+                        help='Fasta file to write.',
+                        dest='fasta_out',
+                        required=False,
+                        metavar = 'output.fasta')
+
+
+    subparser_exclude_uk_seqs.set_defaults(func=datafunk.subcommands.exclude_uk_seqs.run)
+
     # ___________________________________________________________________________#
+
 
     args = parser.parse_args()
 
