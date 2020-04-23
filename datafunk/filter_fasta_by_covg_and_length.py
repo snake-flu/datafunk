@@ -23,8 +23,6 @@ def sequence_too_short(sequence, length_threshold):
     return False
 
 def filter_sequences(inpath, outpath, min_covg=None, min_length=None):
-    print("\n*** Filtering sequences by length and coverage ***\n")
-
     record_dict = SeqIO.index(inpath, "fasta")
 
     if outpath is None:
