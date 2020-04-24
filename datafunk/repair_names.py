@@ -10,7 +10,7 @@ def make_record_dict(fasta):
 def fix_names(fasta, tree, out):
     print("\n*** Fixing the taxa names ***\n")
 
-    record_dict = make_record_dict(str(args.fasta))
+    record_dict = make_record_dict(str(fasta))
 
     fw = open(str(out),"w")
     
