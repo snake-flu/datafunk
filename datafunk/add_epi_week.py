@@ -1,6 +1,7 @@
 import pandas as pd
 from epiweeks import Week,Year
 import datetime
+import re
 
 
 def date_string_to_epi_week(date_string, weeks):
