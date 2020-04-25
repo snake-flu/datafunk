@@ -2,7 +2,7 @@ from Bio import SeqIO
 import sys, os
 
 
-WH04_align = SeqIO.read(os.path.dirname(os.path.realpath(__file__)) + '/resources/WH04.aligned.fa', 'fasta')
+WH04_align = SeqIO.read(os.path.dirname(os.path.realpath(__file__)) + '/resources/WH04_aligned.fa', 'fasta')
 
 
 def get_pairwise_difference(seq1, seq2):
