@@ -720,8 +720,32 @@ def main(args=None):
 
     subparser_get_CDS.set_defaults(func=datafunk.subcommands.get_CDS.run)
 
-    # ___________________________________________________________________________#
+    # ___________________________ distance_to_root _____________________________________#
 
+    subparser_distance_to_root = subparsers.add_parser(
+        """distance_to_root""",
+        usage="""datafunk distance_to_root""",
+        description="""calculates the genetic distance to WH04""",
+        help="""calculates the genetic distance to WH04""")
+
+    subparser_distance_to_root._action_groups.pop()
+    required_distance_to_root = subparser_distance_to_root.add_argument_group('required arguments')
+
+    required_distance_to_root.add_argument('--input-fasta',
+                        help='Fasta file to read',
+                        required=True,
+                        dest='fasta_in',
+                        metavar='input.fasta')
+    required_distance_to_root.add_argument('--input-metadata',
+                        help='Metadata to read',
+                        required=True,
+                        dest='metadata_in',
+                        metavar='input.csv')
+
+
+    subparser_distance_to_root.set_defaults(func=datafunk.subcommands.distance_to_root.run)
+
+    # ___________________________________________________________________________#
 
     args = parser.parse_args()
 
