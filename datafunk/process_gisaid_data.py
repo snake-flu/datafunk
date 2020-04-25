@@ -25,7 +25,7 @@ _fields_gisaid = ['covv_accession_id', 'covv_virus_name', 'covv_location', 'covv
 
 _fields_edin = ['edin_header', 'edin_admin_0', 'edin_admin_1', 'edin_admin_2',
                 'edin_travel', 'edin_date_stamp', 'edin_omitted', 'edin_epi_week',
-                'edin_flag']
+                'edin_flag', 'is_uk']
 
 """You can edit this list:
 """
@@ -249,6 +249,8 @@ def update_UK_sequence(gisaid_json_dict):
             elif len(gisaid_json_dict['edin_flag']) > 0:
                 gisaid_json_dict['edin_flag'] = gisaid_json_dict['edin_flag'] + ':uk_sequence'
 
+            gisaid_json_dict['is_uk'] = 'True'
+
     return(gisaid_json_dict)
 
 
@@ -273,7 +275,7 @@ def date_string_to_epi_week(date_string, weeks):
     week = Week.fromdate(date)
 
     if week in weeks:
-        if '2019' in str(week):
+        if str(week)[0:4] == '2019':
             return('0')
         else:
             return(str(week.weektuple()[1]))
@@ -620,9 +622,9 @@ def process_gisaid_data(input_json,
         # FIRST THING TO DO: WIPE EDIN_OMITTED
         old_records_dict = {x: wipe_edin_omit_field(old_records_dict[x]) for x in old_records_dict.keys()}
 
-        # TEMPORARY THINGS TO DO TO BRING OLD METADATA INLINE WITH NEW METADATA:
-        old_records_dict = {x: get_admin_levels_from_json_dict(old_records_dict[x]) for x in old_records_dict.keys()}
-        old_records_dict = {x: get_travel_history(old_records_dict[x]) for x in old_records_dict.keys()}
+        # # TEMPORARY THINGS TO DO TO BRING OLD METADATA INLINE WITH NEW METADATA:
+        # old_records_dict = {x: get_admin_levels_from_json_dict(old_records_dict[x]) for x in old_records_dict.keys()}
+        # old_records_dict = {x: get_travel_history(old_records_dict[x]) for x in old_records_dict.keys()}
 
         # update omit field for this round of writing records only:
         old_records_dict = {x: update_edin_omit_field(old_records_dict[x],

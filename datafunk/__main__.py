@@ -683,13 +683,42 @@ def main(args=None):
                         dest='fasta_in',
                         metavar='input.fasta')
     required_exclude_uk_seqs.add_argument('-o','--output-fasta',
-                        help='Fasta file to write.',
+                        help='Fasta file to write',
                         dest='fasta_out',
                         required=False,
                         metavar = 'output.fasta')
 
-
     subparser_exclude_uk_seqs.set_defaults(func=datafunk.subcommands.exclude_uk_seqs.run)
+
+    # ___________________________ get_CDS _____________________________________#
+
+    subparser_get_CDS = subparsers.add_parser(
+        """get_CDS""",
+        usage="""datafunk get_CDS""",
+        description="""get CDS""",
+        help="""get CDS""")
+
+    subparser_get_CDS._action_groups.pop()
+    required_get_CDS = subparser_get_CDS.add_argument_group('required arguments')
+    optional_get_CDS = subparser_get_CDS.add_argument_group('optional arguments')
+
+
+    required_get_CDS.add_argument('-i', '--input-fasta',
+                        help='Fasta file to read',
+                        required=True,
+                        dest='fasta_in',
+                        metavar='input.fasta')
+    optional_get_CDS.add_argument('-o', '--output-fasta',
+                        help='Fasta file to write. Prints to stdout if not specified',
+                        required=False,
+                        dest='fasta_out',
+                        metavar='input.fasta')
+    optional_get_CDS.add_argument('--translate',
+                        help='output amino acid sequence (default is nucleotides)',
+                        required=False,
+                        action='store_true')
+
+    subparser_get_CDS.set_defaults(func=datafunk.subcommands.get_CDS.run)
 
     # ___________________________________________________________________________#
 
