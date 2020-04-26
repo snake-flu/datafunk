@@ -5,7 +5,7 @@ from Bio import SeqIO
 import sys
 
 def strip_nasties(name):
-    name =  name.replace(" ","_")\
+    return name.replace(" ","_")\
         .replace("hCoV-19/","")\
         .replace("hCov-19/","")\
         .replace("PENDING", "")\
@@ -15,8 +15,6 @@ def strip_nasties(name):
         .replace("UK-SCT", "Scotland")\
         .replace("UK-WLS", "Wales")
 
-    name = re.sub('^Wuhan-Hu-1','China/Wuhan-Hu-1',name)
-    return(name)
 
 def load_dataframe(metadata_file):
     sep = ','
@@ -144,6 +142,7 @@ def set_uniform_header(input_fasta, input_metadata, output_fasta, output_metadat
                 metadata = update_df_if_id_found_in_column(header, metadata, "central_sample_id", column_name)
 
             if not header_found_in_column(header, metadata, column_name):
+                print(header)
                 log_handle.write("Could not find header %s parsed from record %s in metadata table\n" %(header, record.id))
             else:
                 if header_duplicated_in_column(header, metadata, column_name):
