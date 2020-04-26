@@ -37,7 +37,7 @@ def add_header_column(df, columns, column_name='sequence_name', extended=False):
     return df
 
 def parse_virus_name(header):
-    header = header.replace('/Wuhan-Hu-1/','/China/Wuhan-Hu-1')
+    header = header.replace('/Wuhan-Hu-1/','/China/Wuhan-Hu-1/')
     regex = r"[A-Za-z _]+/[\w_-]+/\d+"
     regex = re.compile(regex)
     match = re.search(regex, header)
@@ -143,7 +143,6 @@ def set_uniform_header(input_fasta, input_metadata, output_fasta, output_metadat
                 metadata = update_df_if_id_found_in_column(header, metadata, "central_sample_id", column_name)
 
             if not header_found_in_column(header, metadata, column_name):
-                print(header)
                 log_handle.write("Could not find header %s parsed from record %s in metadata table\n" %(header, record.id))
             else:
                 if header_duplicated_in_column(header, metadata, column_name):
