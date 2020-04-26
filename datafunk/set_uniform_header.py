@@ -13,7 +13,8 @@ def strip_nasties(name):
         .replace("None", "")\
         .replace("UK-ENG", "England")\
         .replace("UK-SCT", "Scotland")\
-        .replace("UK-WLS", "Wales")
+        .replace("UK-WLS", "Wales")\
+        .lreplace("Wuhan-Hu-1", "China/Wuhan-Hu-1")
 
 def load_dataframe(metadata_file):
     sep = ','

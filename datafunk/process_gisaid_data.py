@@ -344,7 +344,8 @@ def fix_header(header):
         .replace("hCov-19/","")\
         .replace("PENDING", "")\
         .replace("UPLOADED", "")\
-        .replace("None", "")
+        .replace("None", "")\
+        .lreplace("Wuhan-Hu-1", "China/Wuhan-Hu-1")
 
     return(fixed_header)
 
