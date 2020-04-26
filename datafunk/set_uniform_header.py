@@ -15,6 +15,7 @@ def strip_nasties(name):
         .replace("UK-SCT", "Scotland")\
         .replace("UK-WLS", "Wales")
 
+
 def load_dataframe(metadata_file):
     sep = ','
     if metadata_file.endswith('tsv'):
@@ -36,6 +37,7 @@ def add_header_column(df, columns, column_name='sequence_name', extended=False):
     return df
 
 def parse_virus_name(header):
+    header = header.replace('/Wuhan-Hu-1/','/China/Wuhan-Hu-1/')
     regex = r"[A-Za-z _]+/[\w_-]+/\d+"
     regex = re.compile(regex)
     match = re.search(regex, header)
