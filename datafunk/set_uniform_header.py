@@ -5,7 +5,7 @@ from Bio import SeqIO
 import sys
 
 def strip_nasties(name):
-    return name.replace(" ","_")\
+    name =  name.replace(" ","_")\
         .replace("hCoV-19/","")\
         .replace("hCov-19/","")\
         .replace("PENDING", "")\
@@ -13,8 +13,10 @@ def strip_nasties(name):
         .replace("None", "")\
         .replace("UK-ENG", "England")\
         .replace("UK-SCT", "Scotland")\
-        .replace("UK-WLS", "Wales")\
-        .lreplace("Wuhan-Hu-1", "China/Wuhan-Hu-1")
+        .replace("UK-WLS", "Wales")
+
+    name = re.sub('^Wuhan-Hu-1','China/Wuhan-Hu-1',name)
+    return(name)
 
 def load_dataframe(metadata_file):
     sep = ','
