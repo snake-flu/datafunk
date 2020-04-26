@@ -5,7 +5,7 @@ from Bio import SeqIO
 import sys
 
 def strip_nasties(name):
-    name = name.replace(" ","_")\
+    return name.replace(" ","_")\
         .replace("hCoV-19/","")\
         .replace("hCov-19/","")\
         .replace("PENDING", "")\
@@ -14,10 +14,6 @@ def strip_nasties(name):
         .replace("UK-ENG", "England")\
         .replace("UK-SCT", "Scotland")\
         .replace("UK-WLS", "Wales")
-
-    name = re.sub('^Wuhan-Hu-1','China/Wuhan-Hu-1',name)
-
-    return name
 
 
 def load_dataframe(metadata_file):
@@ -41,6 +37,7 @@ def add_header_column(df, columns, column_name='sequence_name', extended=False):
     return df
 
 def parse_virus_name(header):
+    header = header.replace('/Wuhan-Hu-1/','/China/Wuhan-Hu-1')
     regex = r"[A-Za-z _]+/[\w_-]+/\d+"
     regex = re.compile(regex)
     match = re.search(regex, header)
