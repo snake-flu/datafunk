@@ -226,12 +226,21 @@ def check_edin_omitted_file(dict, omit_set):
             elif len(dict['edin_flag']) > 0:
                 dict['edin_flag'] = dict['edin_flag'] + ':omitted_file'
 
+        elif dict['covv_host'].lower() != 'human':
+
+            if len(dict['edin_flag']) == 0:
+                dict['edin_flag'] = 'omitted_file'
+            elif len(dict['edin_flag']) > 0:
+                dict['edin_flag'] = dict['edin_flag'] + ':omitted_file'
+
         elif any([x in dict['edin_header'] for x in omit_set]):
 
             if len(dict['edin_flag']) == 0:
                 dict['edin_flag'] = 'omitted_file'
             elif len(dict['edin_flag']) > 0:
                 dict['edin_flag'] = dict['edin_flag'] + ':omitted_file'
+
+
 
     return(dict)
 
@@ -348,7 +357,7 @@ def fix_header(header):
         .replace("UPLOADED", "")\
         .replace("None", "")
 
-    fixed_header = re.sub('^Wuhan-Hu-1','China/Wuhan-Hu-1',fixed_header)  
+    fixed_header = re.sub('^Wuhan-Hu-1','China/Wuhan-Hu-1',fixed_header)
 
     return(fixed_header)
 
