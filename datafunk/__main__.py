@@ -683,16 +683,74 @@ def main(args=None):
                         dest='fasta_in',
                         metavar='input.fasta')
     required_exclude_uk_seqs.add_argument('-o','--output-fasta',
-                        help='Fasta file to write.',
+                        help='Fasta file to write',
                         dest='fasta_out',
                         required=False,
                         metavar = 'output.fasta')
 
-
     subparser_exclude_uk_seqs.set_defaults(func=datafunk.subcommands.exclude_uk_seqs.run)
 
-    # ___________________________________________________________________________#
+    # ___________________________ get_CDS _____________________________________#
 
+    subparser_get_CDS = subparsers.add_parser(
+        """get_CDS""",
+        usage="""datafunk get_CDS""",
+        description="""get CDS""",
+        help="""get CDS""")
+
+    subparser_get_CDS._action_groups.pop()
+    required_get_CDS = subparser_get_CDS.add_argument_group('required arguments')
+    optional_get_CDS = subparser_get_CDS.add_argument_group('optional arguments')
+
+
+    required_get_CDS.add_argument('-i', '--input-fasta',
+                        help='Fasta file to read',
+                        required=True,
+                        dest='fasta_in',
+                        metavar='input.fasta')
+    optional_get_CDS.add_argument('-o', '--output-fasta',
+                        help='Fasta file to write. Prints to stdout if not specified',
+                        required=False,
+                        dest='fasta_out',
+                        metavar='input.fasta')
+    optional_get_CDS.add_argument('--translate',
+                        help='output amino acid sequence (default is nucleotides)',
+                        required=False,
+                        action='store_true')
+
+    subparser_get_CDS.set_defaults(func=datafunk.subcommands.get_CDS.run)
+
+    # ___________________________ distance_to_root _____________________________________#
+
+    subparser_distance_to_root = subparsers.add_parser(
+        """distance_to_root""",
+        usage="""datafunk distance_to_root""",
+        description="""calculates the genetic distance to WH04""",
+        help="""calculates the genetic distance to WH04""")
+
+    subparser_distance_to_root._action_groups.pop()
+    required_distance_to_root = subparser_distance_to_root.add_argument_group('required arguments')
+    optional_distance_to_root = subparser_distance_to_root.add_argument_group('optional arguments')
+
+    required_distance_to_root.add_argument('--input-fasta',
+                        help='Fasta file to read',
+                        required=True,
+                        dest='fasta_in',
+                        metavar='input.fasta')
+    required_distance_to_root.add_argument('--input-metadata',
+                        help='Metadata to read',
+                        required=True,
+                        dest='metadata_in',
+                        metavar='input.csv')
+    optional_distance_to_root.add_argument('--plot',
+                        help='plot distance by epi-week',
+                        required=False,
+                        action='store_true')
+
+
+    subparser_distance_to_root.set_defaults(func=datafunk.subcommands.distance_to_root.run)
+
+    # ___________________________________________________________________________#
 
     args = parser.parse_args()
 

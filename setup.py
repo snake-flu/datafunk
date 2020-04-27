@@ -4,6 +4,7 @@ setup(
     name="datafunk",
     version="0.0.7",
     packages=find_packages(),
+    package_data={'datafunk':['datafunk/resources/*']},
     include_package_data=True,
     url="https://github.com/cov-ert/datafunk",
     license="MIT",

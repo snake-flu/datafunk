@@ -17,7 +17,7 @@ def date_string_to_epi_week(date_string, weeks):
     week = Week.fromdate(date)
 
     if week in weeks:
-        if '2019' in str(week):
+        if str(week)[0:4] == '2019':
             return('0')
         else:
             return(str(week.weektuple()[1]))
