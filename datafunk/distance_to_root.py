@@ -1,8 +1,14 @@
 from Bio import SeqIO
+import numpy as np
 import sys, os
+import matplotlib.pyplot as plt
 
 
 WH04_align = SeqIO.read(os.path.dirname(os.path.realpath(__file__)) + '/resources/WH04_aligned.fa', 'fasta')
+
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 
 def get_pairwise_difference(seq1, seq2):
@@ -55,7 +61,7 @@ def read_metadata(file, sep = ','):
                 continue
             seq_name = d['sequence_name']
             if seq_name in metadata:
-                warnings.warn('duplicate entry in ' + file + ', ignoring ' + seq_name)
+                eprint('duplicate entry in ' + file + ', ignoring ' + seq_name)
                 del metadata[seq_name]
                 continue
             metadata[seq_name] = d
@@ -63,16 +69,40 @@ def read_metadata(file, sep = ','):
     return(metadata)
 
 
-def distance_to_root(fasta_file, metadata_file):
+def get_epi_week_distance_stats(metadata):
+    epi_weeks = {}
+    for key in metadata:
+        entry = metadata[key]
+        try:
+            epi_week = str(int(float(entry['edin_epi_week'])))
+            distance = entry['distance']
+        except:
+            continue
+
+        if epi_week not in epi_weeks:
+            epi_weeks[epi_week] = {'distance': [distance]}
+        else:
+            epi_weeks[epi_week]['distance'] = epi_weeks[epi_week]['distance'] + [distance]
+
+    for key in epi_weeks:
+        mean = np.mean(epi_weeks[key]['distance'])
+        std = np.std(epi_weeks[key]['distance'])
+
+        epi_weeks[key]['mean'] = mean
+        epi_weeks[key]['std'] = std
+
+    return(epi_weeks)
+
+
+def distance_to_root(fasta_file, metadata_file, plot = False):
     metadata = read_metadata(metadata_file)
     fasta = SeqIO.parse(fasta_file, 'fasta')
 
-    out = open('distances.txt', 'w')
-    out.write('sequence_name\tepi_week\tdistance_WH04\n')
     for record in fasta:
         id = record.id
         if id not in metadata:
-            warnings.warn(id + ' not found in ' + metadata_file)
+            eprint(id + ' not found in ' + metadata_file)
+            continue
 
         metadata_line = metadata[id]
 
@@ -81,13 +111,51 @@ def distance_to_root(fasta_file, metadata_file):
         distance_info = get_pairwise_difference(WH04_align.seq, seq)
         distance = distance_per_genome(distance_info)
 
-        try:
-            epi_week = int(metadata_line['edin_epi_week'])
-        except:
-            epi_week = None
+        metadata[id]['distance'] = distance
 
-        if epi_week:
-            out.write(id + '\t' + str(epi_week) + '\t' + str(round(distance,6)) + '\n')
+
+    stats = get_epi_week_distance_stats(metadata)
+
+    fasta = SeqIO.parse(fasta_file, 'fasta')
+    out = open('distances.txt', 'w')
+    out.write('sequence_name\tepi_week\tepi_week_mean_distance\tepi_week_stdev_distance\tsample_distance\tdistance_stdevs\n')
+    for record in fasta:
+        id = record.id
+        if id not in metadata:
+            continue
+
+        metadata_line = metadata[id]
+        try:
+            epi_week = str(int(float(metadata_line['edin_epi_week'])))
+            dist = metadata[id]['distance']
+        except:
+            continue
+
+        epi_week_mean_dist = stats[epi_week]['mean']
+        epi_week_std_dist = stats[epi_week]['std']
+
+        distance_std_units = (dist - epi_week_mean_dist) / epi_week_std_dist
+
+        out.write(record.id + '\t' + epi_week + '\t' + str(round(epi_week_mean_dist, 4)) + '\t' + str(round(epi_week_std_dist, 4)) + '\t' + str(round(dist, 4)) + '\t' + str(round(distance_std_units, 4)) + '\n')
+
+    out.close()
+
+
+    if plot:
+        names = [str(x) for x in sorted([int(x) for x in stats.keys()])]
+        means_plot = [stats[x]['mean'] for x in names]
+        stds_plot = [stats[x]['std'] for x in names]
+
+        plt.errorbar(x = names,
+                     y = means_plot,
+                     yerr = [2 * x for x in stds_plot],
+                     fmt = 'o')
+        x1,x2,y1,y2 = plt.axis()
+        plt.axis((x1,x2,0,y2))
+        plt.ylabel('distance (+/- 2 * s.d.)')
+        plt.xlabel('epi week')
+
+        plt.savefig('distances.png')
 
     pass
 

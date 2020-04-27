@@ -730,6 +730,7 @@ def main(args=None):
 
     subparser_distance_to_root._action_groups.pop()
     required_distance_to_root = subparser_distance_to_root.add_argument_group('required arguments')
+    optional_distance_to_root = subparser_distance_to_root.add_argument_group('optional arguments')
 
     required_distance_to_root.add_argument('--input-fasta',
                         help='Fasta file to read',
@@ -741,6 +742,10 @@ def main(args=None):
                         required=True,
                         dest='metadata_in',
                         metavar='input.csv')
+    optional_distance_to_root.add_argument('--plot',
+                        help='plot distance by epi-week',
+                        required=False,
+                        action='store_true')
 
 
     subparser_distance_to_root.set_defaults(func=datafunk.subcommands.distance_to_root.run)
