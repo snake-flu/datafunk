@@ -142,12 +142,13 @@ def get_csv_order_and_record_dict(csv_file, fields_list_required, fields_list_op
     first = True
     old_records = {}
     record_order = []
-    extra_fields = []
     with open(csv_file, 'r') as f:
         for line in f:
             l = line.strip().split(',')
             if first:
                 keys = l
+                extra_fields = list(set(keys) - set(fields_list_required + fields_list_optional))
+
                 first = False
                 continue
 
@@ -155,10 +156,6 @@ def get_csv_order_and_record_dict(csv_file, fields_list_required, fields_list_op
                 sys.exit('Badly formatted csv file: ' + csv_file.csv + ', exiting program')
 
             d = {x: y for x,y in zip(keys, l)}
-
-            d = expand_dict(dict = d, fields_list_required = fields_list_required, fields_list_optional = fields_list_optional)
-
-            extra_fields = extra_fields + list(set(list(d.keys())) - set(fields_list_required + fields_list_optional + extra_fields))
 
             ID = d['covv_accession_id']
             record_order.append(ID)
@@ -178,18 +175,20 @@ def get_json_order_and_record_dict(json_file, fields_list_required, fields_list_
     """
     all_records = {}
     record_order = []
+    extra_fields = []
     with open(json_file, 'r') as f:
         for jsonObj in f:
 
             d = fix_gisaid_json_dict(json.loads(jsonObj))
             d = fix_seq_in_gisaid_json_dict(d)
-            d = expand_dict(dict = d, fields_list_required = fields_list_required, fields_list_optional = fields_list_optional)
+
+            extra_fields = extra_fields + list(set(list(d.keys())) - set(fields_list_required + fields_list_optional))
 
             ID = d['covv_accession_id']
             record_order.append(ID)
             all_records[ID] = d
 
-    return(record_order, all_records)
+    return(record_order, all_records, extra_fields)
 
 
 def check_gisaid_date(dict):
@@ -594,6 +593,10 @@ def process_gisaid_data(input_json,
 
     all_records_list = all_records[0]
     all_records_dict = all_records[1]
+    extra_fields = all_records[2]
+
+    for x in extra_fields:
+        fields.append(x)
 
     # for each old record:
     # if the info in the csv doesn't match the info in the new json dump,
@@ -627,8 +630,13 @@ def process_gisaid_data(input_json,
 
 
     if input_metadata != 'False':
+
+
         # repopulate the old records with sequence from the new dump:
         old_records_dict = {x: repopulate_sequence_from_new_dump(temp_old_records_dict[x], all_records_dict) for x in set(old_records_list)}
+
+        # expand dict to include any extra columns
+        old_records_dict = {x: expand_dict(old_records_dict[x], fields_list_required = _fields_edin + _fields_gisaid, fields_list_optional = fields) for x in old_records_dict.keys()}
 
         # FIRST THING TO DO: WIPE EDIN_OMITTED
         old_records_dict = {x: wipe_edin_omit_field(old_records_dict[x]) for x in old_records_dict.keys()}
@@ -651,6 +659,8 @@ def process_gisaid_data(input_json,
     new_records_list = [x for x in all_records_list if x not in set(old_records_list)]
     new_records_dict = {x: all_records_dict[x] for x in new_records_list}
 
+    # expand dict to include any extra columns
+    new_records_dict = {x: expand_dict(new_records_dict[x], fields_list_required = _fields_edin + _fields_gisaid, fields_list_optional = fields) for x in old_records_dict.keys()}
 
     # FIRST THING TO DO: WIPE EDIN_OMITTED
     new_records_dict = {x: wipe_edin_omit_field(new_records_dict[x]) for x in new_records_dict.keys()}
