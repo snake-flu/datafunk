@@ -628,7 +628,7 @@ def main(args=None):
     # ___________________________________pad_alignment________________________________________#
 
     subparser_pad_alignment = subparsers.add_parser(
-        """pad_alignment""",
+        """pad_alignment -i <input.fasta> -o <output.fasta> --left-pad <int> --right-pad <int> [--stdout]""",
         usage="""datafunk pad_alignment""",
         description="""pad alignment with leading and trailing Ns""",
         help="""pad alignment with leading and trailing Ns""")
@@ -669,7 +669,7 @@ def main(args=None):
 
     subparser_exclude_uk_seqs = subparsers.add_parser(
         """exclude_uk_seqs""",
-        usage="""datafunk exclude_uk_seqs""",
+        usage="""datafunk exclude_uk_seqs -i <input.fasta> -o <output.fasta>""",
         description="""exclude UK sequences from fasta""",
         help="""exclude UK sequences from fasta""")
 
@@ -694,9 +694,9 @@ def main(args=None):
 
     subparser_get_CDS = subparsers.add_parser(
         """get_CDS""",
-        usage="""datafunk get_CDS""",
-        description="""get CDS""",
-        help="""get CDS""")
+        usage="""datafunk get_CDS -i <input.fasta> -o <output.fasta> [--translate]""",
+        description="""Extracts CDS from alignments in Wuhan-Hu-1 coordinates""",
+        help="""Extracts CDS from alignments in Wuhan-Hu-1 coordinates""")
 
     subparser_get_CDS._action_groups.pop()
     required_get_CDS = subparser_get_CDS.add_argument_group('required arguments')
@@ -712,7 +712,7 @@ def main(args=None):
                         help='Fasta file to write. Prints to stdout if not specified',
                         required=False,
                         dest='fasta_out',
-                        metavar='input.fasta')
+                        metavar='output.fasta')
     optional_get_CDS.add_argument('--translate',
                         help='output amino acid sequence (default is nucleotides)',
                         required=False,
@@ -724,7 +724,7 @@ def main(args=None):
 
     subparser_distance_to_root = subparsers.add_parser(
         """distance_to_root""",
-        usage="""datafunk distance_to_root""",
+        usage="""datafunk distance_to_root -i <file> -o <file> [--plot]""",
         description="""calculates the genetic distance to WH04""",
         help="""calculates the genetic distance to WH04""")
 
@@ -733,12 +733,12 @@ def main(args=None):
     optional_distance_to_root = subparser_distance_to_root.add_argument_group('optional arguments')
 
     required_distance_to_root.add_argument('--input-fasta',
-                        help='Fasta file to read',
+                        help='Fasta file to read. Must be aligned to Wuhan-Hu-1',
                         required=True,
                         dest='fasta_in',
                         metavar='input.fasta')
     required_distance_to_root.add_argument('--input-metadata',
-                        help='Metadata to read',
+                        help='Metadata to read. Must contain epi week information',
                         required=True,
                         dest='metadata_in',
                         metavar='input.csv')
