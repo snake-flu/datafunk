@@ -1,0 +1,2 @@
+include datafunk/resources/cities50000.tsv
+include datafunk/resources/WH04_aligned.fa
