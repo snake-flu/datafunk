@@ -182,7 +182,7 @@ def get_json_order_and_record_dict(json_file, fields_list_required, fields_list_
             d = fix_gisaid_json_dict(json.loads(jsonObj))
             d = fix_seq_in_gisaid_json_dict(d)
 
-            extra_fields = extra_fields + list(set(list(d.keys())) - set(fields_list_required + fields_list_optional))
+            extra_fields = extra_fields + list(set(list(d.keys())) - set(fields_list_required + fields_list_optional + extra_fields))
 
             ID = d['covv_accession_id']
             record_order.append(ID)
@@ -631,7 +631,6 @@ def process_gisaid_data(input_json,
 
     if input_metadata != 'False':
 
-
         # repopulate the old records with sequence from the new dump:
         old_records_dict = {x: repopulate_sequence_from_new_dump(temp_old_records_dict[x], all_records_dict) for x in set(old_records_list)}
 
@@ -660,7 +659,7 @@ def process_gisaid_data(input_json,
     new_records_dict = {x: all_records_dict[x] for x in new_records_list}
 
     # expand dict to include any extra columns
-    new_records_dict = {x: expand_dict(new_records_dict[x], fields_list_required = _fields_edin + _fields_gisaid, fields_list_optional = fields) for x in old_records_dict.keys()}
+    new_records_dict = {x: expand_dict(new_records_dict[x], fields_list_required = _fields_edin + _fields_gisaid, fields_list_optional = fields) for x in new_records_dict.keys()}
 
     # FIRST THING TO DO: WIPE EDIN_OMITTED
     new_records_dict = {x: wipe_edin_omit_field(new_records_dict[x]) for x in new_records_dict.keys()}
