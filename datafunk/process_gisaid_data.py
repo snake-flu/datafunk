@@ -25,7 +25,7 @@ _fields_gisaid = ['covv_accession_id', 'covv_virus_name', 'covv_location', 'covv
 
 _fields_edin = ['edin_header', 'edin_admin_0', 'edin_admin_1', 'edin_admin_2',
                 'edin_travel', 'edin_date_stamp', 'edin_omitted', 'edin_epi_week',
-                'edin_flag', 'is_uk', 'lineage', 'uk_lineage']
+                'edin_flag', 'is_uk']
 
 """You can edit this list:
 """
@@ -353,7 +353,7 @@ def fix_header(header):
         .replace("UPLOADED", "")\
         .replace("None", "")
 
-    fixed_header = re.sub('^Wuhan-Hu-1','China/Wuhan-Hu-1',fixed_header)  
+    fixed_header = re.sub('^Wuhan-Hu-1','China/Wuhan-Hu-1',fixed_header)
 
     return(fixed_header)
 
