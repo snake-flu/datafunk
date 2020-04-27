@@ -598,13 +598,11 @@ def process_gisaid_data(input_json,
 
     all_records_list = all_records[0]
     all_records_dict = all_records[1]
-    extra_fields = all_records[2]
-    
-    if len(extra_fields) > 0:
+    new_fields = all_records[2]
+
+    if len(new_fields) > 0:
         eprint('new fields in gisaid dump: ' + '\t'.join(extra_fields))
 
-    for x in extra_fields:
-        fields.append(x)
 
     # for each old record:
     # if the info in the csv doesn't match the info in the new json dump,
