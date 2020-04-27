@@ -117,7 +117,7 @@ def distance_to_root(fasta_file, metadata_file, plot = False):
     stats = get_epi_week_distance_stats(metadata)
 
     fasta = SeqIO.parse(fasta_file, 'fasta')
-    out = open('distances.txt', 'w')
+    out = open('distances.tsv', 'w')
     out.write('sequence_name\tepi_week\tepi_week_mean_distance\tepi_week_stdev_distance\tsample_distance\tdistance_stdevs\n')
     for record in fasta:
         id = record.id
