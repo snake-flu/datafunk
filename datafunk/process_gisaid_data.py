@@ -25,7 +25,7 @@ _fields_gisaid = ['covv_accession_id', 'covv_virus_name', 'covv_location', 'covv
 
 _fields_edin = ['edin_header', 'edin_admin_0', 'edin_admin_1', 'edin_admin_2',
                 'edin_travel', 'edin_date_stamp', 'edin_omitted', 'edin_epi_week',
-                'edin_flag', 'is_uk']
+                'edin_flag', 'is_uk', 'lineage', 'uk_lineage']
 
 """You can edit this list:
 """
@@ -119,6 +119,7 @@ def expand_dict(dict, fields_list_required, fields_list_optional):
 
     return(dict)
 
+
 def add_edin_flag_if_dict_key_true(dictionary, key):
     if key in dictionary:
         if dictionary[key] == "True" or dictionary[key] == "true" or dictionary[key] == True:
@@ -141,6 +142,7 @@ def get_csv_order_and_record_dict(csv_file, fields_list_required, fields_list_op
     first = True
     old_records = {}
     record_order = []
+    extra_fields = []
     with open(csv_file, 'r') as f:
         for line in f:
             l = line.strip().split(',')
@@ -153,14 +155,17 @@ def get_csv_order_and_record_dict(csv_file, fields_list_required, fields_list_op
                 sys.exit('Badly formatted csv file: ' + csv_file.csv + ', exiting program')
 
             d = {x: y for x,y in zip(keys, l)}
+
             d = expand_dict(dict = d, fields_list_required = fields_list_required, fields_list_optional = fields_list_optional)
+
+            extra_fields = extra_fields + list(set(list(d.keys())) - set(fields_list_required + fields_list_optional + extra_fields))
 
             ID = d['covv_accession_id']
             record_order.append(ID)
             d = add_edin_flag_if_dict_key_true(d, "subsample_omit")
             old_records[ID] = d
 
-    return(record_order, old_records)
+    return(record_order, old_records, extra_fields)
 
 
 def get_json_order_and_record_dict(json_file, fields_list_required, fields_list_optional):
@@ -572,6 +577,9 @@ def process_gisaid_data(input_json,
 
         temp_old_records_list = old_records[0]
         temp_old_records_dict = old_records[1]
+        extra_fields = old_records[2]
+
+        fields = fields + extra_fields
 
 
     else:
@@ -579,8 +587,8 @@ def process_gisaid_data(input_json,
         old_records_dict = {}
 
 
-    all_records = get_json_order_and_record_dict(input_json, \
-                                                fields_list_required = _fields_gisaid + _fields_edin, \
+    all_records = get_json_order_and_record_dict(input_json,
+                                                fields_list_required = _fields_gisaid + _fields_edin,
                                                 fields_list_optional = fields)
 
     all_records_list = all_records[0]
