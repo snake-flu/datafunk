@@ -579,7 +579,8 @@ def process_gisaid_data(input_json,
         temp_old_records_dict = old_records[1]
         extra_fields = old_records[2]
 
-        fields = fields + extra_fields
+        for x in extra_fields:
+            fields.append(x)
 
 
     else:
