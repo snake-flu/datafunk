@@ -598,10 +598,10 @@ def process_gisaid_data(input_json,
 
     all_records_list = all_records[0]
     all_records_dict = all_records[1]
-    new_fields = all_records[2]
+    new_fields = set(all_records[2]) - set(['sequence_length', 'sequence'])
 
     if len(new_fields) > 0:
-        eprint('new fields in gisaid dump: ' + '\t'.join(extra_fields))
+        eprint('new fields in gisaid dump: ' + '\t'.join(new_fields))
 
 
     # for each old record:
