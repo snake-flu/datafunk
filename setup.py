@@ -17,7 +17,8 @@ setup(
         "pycountry>=pycountry-19.8.18",
         "pysam>=0.15.4",
         "datapackage",
-        "epiweeks"
+        "epiweeks",
+        "matplotlib"
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
