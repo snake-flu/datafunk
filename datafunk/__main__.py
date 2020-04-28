@@ -750,6 +750,36 @@ def main(args=None):
 
     subparser_distance_to_root.set_defaults(func=datafunk.subcommands.distance_to_root.run)
 
+    # ___________________________ mask _____________________________________#
+
+    subparser_mask = subparsers.add_parser(
+        """mask""",
+        usage="""datafunk mask -i <file.fasta> -m <mask.txt> -o <file.masked.fasta>""",
+        description="""mask regions of a fasta file using information in an external file""",
+        help="""mask regions of a fasta file using information in an external file""")
+
+    subparser_mask._action_groups.pop()
+    required_mask = subparser_mask.add_argument_group('required arguments')
+
+    required_mask.add_argument('-i', '--input-fasta',
+                        help='Fasta file to mask',
+                        required=True,
+                        dest='fasta_in',
+                        metavar='input.fasta')
+    required_mask.add_argument('-o', '--output-fasta',
+                            help='Fasta file to write',
+                            required=True,
+                            dest='fasta_out',
+                            metavar='output.fasta')
+    required_mask.add_argument('-m,','--mask-file',
+                        help='File with mask instructions to parse',
+                        required=True,
+                        dest='mask_file',
+                        metavar='mask.txt')
+
+
+    subparser_mask.set_defaults(func=datafunk.subcommands.mask.run)
+
     # ___________________________________________________________________________#
 
     args = parser.parse_args()
