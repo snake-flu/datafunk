@@ -17,6 +17,8 @@ class lineage():
         self.taxa = taxa
         self.acctrans_designations = set()
 
+        self.split = False
+
 
 def make_taxon_objects(input_dir):
 
@@ -48,6 +50,7 @@ def make_taxon_objects(input_dir):
                         introduction_int_list.append(int(intro_name.lstrip("UK")))
 
     introduction_int_list = sorted(introduction_int_list)
+
     return introduction_int_list, taxon_list, intros_to_taxa, acctrans_to_intro, intro_acctrans
 
 
@@ -57,7 +60,7 @@ def deal_with_new_lineages(introduction_int_list, taxon_list, intros_to_taxa, ac
     unclear_taxa = []
 
     for tax in taxon_list: #Assigning taxa to lineages that hasn't been done in the tree
-        if tax.introduction == "":
+        if tax.lineage== "":
                 
                 possible_intro = acctrans_to_intro[tax.acctrans]
                 
@@ -70,7 +73,7 @@ def deal_with_new_lineages(introduction_int_list, taxon_list, intros_to_taxa, ac
 
                         new_acctrans_to_lineage[tax.acctrans] = introduction
 
-                        tax.introduction = introduction
+                        tax.lineage = introduction
                         intros_to_taxa[introduction].append(tax)
                         intro_acctrans[introduction].add(tax.acctrans)
                     
@@ -78,7 +81,7 @@ def deal_with_new_lineages(introduction_int_list, taxon_list, intros_to_taxa, ac
 
                         introduction = new_acctrans_to_lineage[tax.acctrans]
 
-                        tax.introduction = introduction
+                        tax.lineage = introduction
                         intros_to_taxa[introduction].append(tax)
                         intro_acctrans[introduction].add(tax.acctrans)
 
@@ -89,7 +92,7 @@ def deal_with_new_lineages(introduction_int_list, taxon_list, intros_to_taxa, ac
                 else: #if it just hasn't been labelled but it's clear it belongs to an existing lineage
                     introduction = list(possible_intro)[0]
                     
-                    tax.introduction = introduction
+                    tax.lineage = introduction
                     intros_to_taxa[introduction].append(tax)
                     intro_acctrans[introduction].add(tax.acctrans)
 
@@ -102,6 +105,9 @@ def deal_with_new_lineages(introduction_int_list, taxon_list, intros_to_taxa, ac
         i_o.acctrans_designations = intro_acctrans[i_o.id]
         
         lineage_objects.append(i_o)
+
+        if len(i_o.acctrans_designations) > 1:
+            i_o.split = True
 
         lineage_dict[intro] = i_o
 
@@ -173,7 +179,7 @@ def deal_with_merged(acctran_to_merge, lineage_object_dict, unclear_taxa, lineag
 
         for tax in unclear_taxa:
             if tax.acctrans == acctran:
-                tax.introduction = new_uk
+                tax.lineage= new_uk
                 taxa.append(tax)
 
         i_o = lineage(new_uk, taxa)
@@ -200,7 +206,7 @@ def write_to_file(lineage_objects):
 
     for lin in lineage_objects:
         for tax in lin.taxa:
-            fw.write(tax.id + "," + tax.introduction)
+            fw.write(tax.id + "," + tax.lineage + "\n")
 
     fw.close()
 
@@ -213,6 +219,6 @@ def merge_lineages(input_dir):
 
     merged, acctran_dict, acctran_to_merge, merge_count = find_merged(lineage_objects)
 
-    lineage_object_dict, lineage_objects = deal_with_merged(acctran_to_merge, lineage_object_dict, unclear_taxa, lineage_objects)
+    lineage_object_dict, lineage_objects = deal_with_merged(acctran_to_merge, lineage_dict, unclear_taxa, lineage_objects)
 
     write_to_file(lineage_objects)
