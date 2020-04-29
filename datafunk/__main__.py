@@ -780,6 +780,25 @@ def main(args=None):
 
     subparser_mask.set_defaults(func=datafunk.subcommands.mask.run)
 
+    # _________________________________ merge_lineages ____________________________#
+
+    subparser_merge_lineages = subparsers.add_parser(
+        "merge_lineages",
+        description="Find new lineages and merge ones that need merging",
+        help="Find new lineages and merge ones that need merging",
+        usage="datafunk merge_lineages -i <input_directory>",
+    )
+
+    subparser_merge_lineages.add_argument(
+        "-i", "--input-directory",
+        dest="input_directory",
+        required=True,
+        type=str,
+        help="Path to input directory containing traits.csv files",
+    )
+
+    subparser_merge_lineages.set_defaults(func=datafunk.subcommands.merge_lineages.run)
+
     # ___________________________________________________________________________#
 
     args = parser.parse_args()

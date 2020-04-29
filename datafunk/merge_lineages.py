@@ -1,11 +1,10 @@
 from collections import defaultdict
 import os
-import argparse
+import glob
 
 class taxon():
 
     def __init__(self,name, lineage, acctrans):
-
         self.id = name
         self.lineage = lineage
         self.acctrans = acctrans
@@ -14,10 +13,8 @@ class taxon():
 class lineage():
 
     def __init__(self, name, taxa):
-
         self.id = name
         self.taxa = taxa
-
         self.acctrans_designations = set()
 
 
@@ -30,39 +27,27 @@ def make_taxon_objects(input_dir):
     intro_acctrans = defaultdict(set)
     acctrans_to_intro = defaultdict(set)
 
-    for f in os.listdir(input_dir):
-        if f != ".DS_Store" and f != "overall_trees" and f!= "alignments":
-            lin_name = f 
-            input_file = input_dir + f + "/traits.csv"
+    list_traits_files = glob.glob('%s/**/*traits.csv' %input_dir, recursive=True)
+    print("Found traits files:", list_traits_files)
+    for input_file in list_traits_files:
+        with open(input_file) as f:
+            next(f)
+            for l in f:
+                toks = l.strip("\n").split(",")
+                if toks[1] == "UK": #this is in the traits.csv
+                    seq_name = toks[0]
+                    intro_name = toks[3]
+                    acctrans = toks[4]
+                    new_taxon = taxon(seq_name, intro_name, acctrans)
+                    taxon_list.append(new_taxon)
 
-            with open(input_file) as f:
-                next(f)
-                for l in f:
-                    toks = l.strip("\n").split(",")
-                    if toks[1] == "UK": #this is in the traits.csv
-                        
-                        seq_name = toks[0]
-                        
-                        intro_name = toks[3]
-
-                        acctrans = toks[4]
-
-                        new_taxon = taxon(seq_name, intro_name, acctrans)
-
-                        taxon_list.append(new_taxon)
-
-                        if intro_name != "":
-                            
-                            intro_acctrans[intro_name].add(acctrans)
-                            acctrans_to_intro[acctrans].add(intro_name)
-                            
-                            intros_to_taxa[intro_name].append(new_taxon)
-
-                            introduction_int_list.append(int(intro_name.lstrip("UK")))
-
+                    if intro_name != "":
+                        intro_acctrans[intro_name].add(acctrans)
+                        acctrans_to_intro[acctrans].add(intro_name)
+                        intros_to_taxa[intro_name].append(new_taxon)
+                        introduction_int_list.append(int(intro_name.lstrip("UK")))
 
     introduction_int_list = sorted(introduction_int_list)
-
     return introduction_int_list, taxon_list, intros_to_taxa, acctrans_to_intro, intro_acctrans
 
 
@@ -231,18 +216,3 @@ def merge_lineages(input_dir):
     lineage_object_dict, lineage_objects = deal_with_merged(acctran_to_merge, lineage_object_dict, unclear_taxa, lineage_objects)
 
     write_to_file(lineage_objects)
-
-
-
-
-
-parser = argparse.ArgumentParser(description="Find new lineages and merge ones that need merging")
-
-parser.add_argument("--i", required=True, help="path to input directory containing traits files")
-
-args=parser.parse_args()
-
-input_dir = args.i 
-
-merge_lineages(input_dir)
-
