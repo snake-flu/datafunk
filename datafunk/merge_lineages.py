@@ -203,7 +203,7 @@ def deal_with_merged(acctran_to_merge, lineage_object_dict, unclear_taxa, lineag
 def write_to_file(lineage_objects, outfile):
 
     fw = open(outfile, 'w')
-
+    fw.write("taxon,uk_lineage\n")
     for lin in lineage_objects:
         for tax in lin.taxa:
             fw.write(tax.id + "," + tax.lineage + "\n")
