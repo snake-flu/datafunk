@@ -797,6 +797,15 @@ def main(args=None):
         help="Path to input directory containing traits.csv files",
     )
 
+    subparser_merge_lineages.add_argument(
+        "-o", "--output_file",
+        dest="output_file",
+        required=False,
+        default="updated_lineage_assignments.csv",
+        type=str,
+        help="Name of output CSV",
+    )
+
     subparser_merge_lineages.set_defaults(func=datafunk.subcommands.merge_lineages.run)
 
     # ___________________________________________________________________________#

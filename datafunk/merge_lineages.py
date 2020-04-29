@@ -200,9 +200,9 @@ def deal_with_merged(acctran_to_merge, lineage_object_dict, unclear_taxa, lineag
     return lineage_object_dict, lineage_objects
 
 
-def write_to_file(lineage_objects):
+def write_to_file(lineage_objects, outfile):
 
-    fw = open("updated_lineage_assignments.csv", 'w')
+    fw = open(outfile, 'w')
 
     for lin in lineage_objects:
         for tax in lin.taxa:
@@ -211,7 +211,7 @@ def write_to_file(lineage_objects):
     fw.close()
 
 
-def merge_lineages(input_dir):
+def merge_lineages(input_dir, outfile):
 
     introduction_int_list, taxon_list, intros_to_taxa, acctrans_to_intro, intro_acctrans = make_taxon_objects(input_dir)
 
@@ -221,4 +221,4 @@ def merge_lineages(input_dir):
 
     lineage_object_dict, lineage_objects = deal_with_merged(acctran_to_merge, lineage_dict, unclear_taxa, lineage_objects)
 
-    write_to_file(lineage_objects)
+    write_to_file(lineage_objects, outfile)
