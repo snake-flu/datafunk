@@ -84,7 +84,7 @@ def get_admin_levels_from_json_dict(gisaid_json_dict, warnings = True):
             try:
                 pycountry.countries.lookup(country)
             except LookupError:
-                warnings.warn('Check country flagged for ' + gisaid_json_dict['covv_accession_id'] + \
+                eprint('Check country flagged for ' + gisaid_json_dict['covv_accession_id'] + \
                               '  ("' + country + '")')
 
                 if len(gisaid_json_dict['edin_flag']) == 0:
