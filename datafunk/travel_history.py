@@ -44,11 +44,20 @@ def get_travel_history(json_dict):
     add_host_info = json_dict['covv_add_host_info']
     add_host_info_split = add_host_info.split()
 
+    if 'United Kingdom' in add_host_info:
+        country.append(('UK', ''))
+
+    if 'Saudi Arabia' in add_host_info:
+        country.append(('Saudia_Arabia', ''))
+
+    if 'New York' in add_host_info:
+        country.append(('USA', 'New_York'))
+
     for word in add_host_info_split:
         word = word.rstrip(",.:;!?-'\"").lstrip(",.:;!?-'\"")
 
         # These are valid cities, which will be excluded because they match other words:
-        if word.lower() in ['of', 'holiday', 'asia', 'northern', 'sur']:
+        if word.lower() in ['of', 'holiday', 'asia', 'northern', 'sur', 'york']:
             continue
 
         if word.lower() in countries_list:
