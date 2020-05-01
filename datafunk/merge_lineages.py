@@ -1,4 +1,5 @@
 from collections import defaultdict
+from collections import Counter
 import os
 import glob
 
@@ -18,6 +19,7 @@ class lineage():
         self.acctrans_designations = set()
 
         self.split = False
+        self.merge = False
 
 
 def make_taxon_objects(input_dir):
@@ -126,63 +128,83 @@ def find_merged(lineage_objects):
             acctran_dict[i].append(lin)
            
     for key, value in acctran_dict.items():
-        if key not in skip_list:
-            if len(value) > 1:
-                for i in value:
-                    merged[i.id] = True
-                    merge_count += 1
-                    if i not in acctran_to_merge[key]:
-                        acctran_to_merge[key].append(i)
-
-                    if i.split:
-                        others = []
-                        for j in i.acctrans_designations:
-                            skip_list.append(j)
-                            for k in acctran_dict[j]:
-                                if k not in others and k not in acctran_to_merge[key]:
-                                    others.append(k) #get the other lineages that need to go in
-                        
-                        acctran_to_merge[key].extend(others)
-            else:
-                if not i.split:
-                    for i in value: #there will be one
-                        merged[i.id] = False
-        else:
-            pass
+        if len(value) > 1:
+            for i in value:
+                merged[i.id] = True
+                i.merge = True
+                merge_count += 1
+                if i not in acctran_to_merge[key]:
+                    acctran_to_merge[key].append(i)
 
     return merged, acctran_dict, acctran_to_merge, merge_count
 
-def deal_with_merged(acctran_to_merge, lineage_object_dict, unclear_taxa, lineage_objects):
-
+def deal_with_merged(acctran_to_merge, lineage_object_dict, unclear_taxa, lineage_objects, introduction_int_list):
+    #selecting new names and making new lineage object and also updating taxon defs
     remove_list = []
-    keep_ids = []
+    already_used = set()
 
     for acctran, lineages in acctran_to_merge.items():
-
+        
         taxa = []
         numbers = []
-        for_df = []
+        lineages_present = []
+       
     
         for lin in lineages:
-            taxa.extend(lin.taxa)
+            for tax in lin.taxa:
+                if tax.acctrans == acctran:
+                    taxa.append(tax)
+            
             remove_list.append(lin)
-            for_df.append(lin.id)
             numbers.append(int(lin.id.lstrip("UK")))
+            
+            
+        for tax in taxa:
+            lineages_present.append(tax.lineage)
+        
+        lineage_count = Counter(lineages_present)
+        freq_order = lineage_count.most_common()
+        
+        #if two equal sized lineages
+        possibles = []
+        highest_count = freq_order[0][1]
+        for i in freq_order:
+            if i[1] == highest_count:
+                number = int(i[0].lstrip("UK"))
+                possibles.append(number)
+        
+        if len(possibles) > 1:
+            new_name = "UK" + str(min(numbers))      
+        else:
+            new_name = freq_order[0][0]
+          
+        #Check it hasn't already been used
+        count = 0
+        new_name = lineage_count.most_common()[count][0]
+        while new_name in already_used and count <= len(lineage_count)-1:
+            count += 1
+            new_name = lineage_count.most_common()[count][0]
+        
+        #If all of the lineage names have been used before
+        if count > len(lineage_count)-1:
+            introduction_prep = (introduction_int_list[-1] + 1)
+            new_name = "UK" + str(introduction_prep)
+            introduction_int_list.append(introduction_prep)
+        
+        
+        already_used.add(new_name)
 
         test_taxa = set(taxa)
         if len(test_taxa) != len(taxa):
             print("error in merging" + str(lineages) + " " + str(len(test_taxa)) + " " + str(len(taxa)))
-        
 
-        new_uk = "UK" + str(min(numbers))
-        keep_ids.append(new_uk)
 
         for tax in unclear_taxa:
             if tax.acctrans == acctran:
-                tax.lineage= new_uk
+                tax.lineage= new_name
                 taxa.append(tax)
 
-        i_o = lineage(new_uk, taxa)
+        i_o = lineage(new_name, taxa)
         i_o.acctrans_designations = acctran
 
         for tax in i_o.taxa:
@@ -195,9 +217,8 @@ def deal_with_merged(acctran_to_merge, lineage_object_dict, unclear_taxa, lineag
     for i in remove_list:
         if i in lineage_objects:
             lineage_objects.remove(i)
-
        
-    return lineage_object_dict, lineage_objects
+    return lineage_object_dict, lineage_objects, introduction_int_list
 
 
 def write_to_file(lineage_objects, outfile):
