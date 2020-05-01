@@ -780,16 +780,16 @@ def main(args=None):
 
     subparser_mask.set_defaults(func=datafunk.subcommands.mask.run)
 
-    # _________________________________ merge_lineages ____________________________#
+    # _________________________________ curate_lineages ____________________________#
 
-    subparser_merge_lineages = subparsers.add_parser(
-        "merge_lineages",
-        description="Find new lineages and merge ones that need merging",
-        help="Find new lineages and merge ones that need merging",
-        usage="datafunk merge_lineages -i <input_directory>",
+    subparser_curate_lineages = subparsers.add_parser(
+        "curate_lineages",
+        description="Find new lineages, merge ones that need merging, split ones that need splitting",
+        help="Find new lineages, merge ones that need merging, split ones that need splitting",
+        usage="datafunk curate_lineages -i <input_directory>",
     )
 
-    subparser_merge_lineages.add_argument(
+    subparser_curate_lineages.add_argument(
         "-i", "--input-directory",
         dest="input_directory",
         required=True,
@@ -797,7 +797,7 @@ def main(args=None):
         help="Path to input directory containing traits.csv files",
     )
 
-    subparser_merge_lineages.add_argument(
+    subparser_curate_lineages.add_argument(
         "-o", "--output_file",
         dest="output_file",
         required=False,
@@ -806,7 +806,7 @@ def main(args=None):
         help="Name of output CSV",
     )
 
-    subparser_merge_lineages.set_defaults(func=datafunk.subcommands.merge_lineages.run)
+    subparser_curate_lineages.set_defaults(func=datafunk.subcommands.curate_lineages.run)
 
     # ___________________________________________________________________________#
 

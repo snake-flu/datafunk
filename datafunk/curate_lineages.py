@@ -2,6 +2,7 @@ from collections import defaultdict
 from collections import Counter
 import os
 import glob
+import operator
 
 class taxon():
 
@@ -98,6 +99,10 @@ def deal_with_new_lineages(introduction_int_list, taxon_list, intros_to_taxa, ac
                     intros_to_taxa[introduction].append(tax)
                     intro_acctrans[introduction].add(tax.acctrans)
 
+    return intros_to_taxa, intro_acctrans, unclear_taxa
+
+def make_lineage_objects(intros_to_taxa, intro_acctrans):
+
     lineage_objects = []
     lineage_dict = {}
 
@@ -108,12 +113,12 @@ def deal_with_new_lineages(introduction_int_list, taxon_list, intros_to_taxa, ac
         
         lineage_objects.append(i_o)
 
-        if len(i_o.acctrans_designations) > 1:
-            i_o.split = True
+        # if len(i_o.acctrans_designations) > 1:
+        #     i_o.split = True
 
         lineage_dict[intro] = i_o
 
-    return lineage_objects, lineage_dict, unclear_taxa
+    return lineage_objects, lineage_dict
 
 def find_merged(lineage_objects):
 
@@ -124,7 +129,7 @@ def find_merged(lineage_objects):
     skip_list = []
 
     for lin in lineage_objects:         
-        for i in lin.acctrans_designations: #should be only one
+        for i in lin.acctrans_designations: 
             acctran_dict[i].append(lin)
            
     for key, value in acctran_dict.items():
@@ -140,8 +145,9 @@ def find_merged(lineage_objects):
 
 def deal_with_merged(acctran_to_merge, lineage_object_dict, unclear_taxa, lineage_objects, introduction_int_list):
     #selecting new names and making new lineage object and also updating taxon defs
-    remove_list = []
+    remove_list = set()
     already_used = set()
+    taxa_already_assigned = []
 
     for acctran, lineages in acctran_to_merge.items():
         
@@ -155,7 +161,7 @@ def deal_with_merged(acctran_to_merge, lineage_object_dict, unclear_taxa, lineag
                 if tax.acctrans == acctran:
                     taxa.append(tax)
             
-            remove_list.append(lin)
+            remove_list.add(lin)
             numbers.append(int(lin.id.lstrip("UK")))
             
             
@@ -203,9 +209,11 @@ def deal_with_merged(acctran_to_merge, lineage_object_dict, unclear_taxa, lineag
             if tax.acctrans == acctran:
                 tax.lineage= new_name
                 taxa.append(tax)
+                
+        taxa_already_assigned.extend(taxa)
 
         i_o = lineage(new_name, taxa)
-        i_o.acctrans_designations = acctran
+        i_o.acctrans_designations.add(acctran)
 
         for tax in i_o.taxa:
             tax.lineage = i_o.id
@@ -213,12 +221,70 @@ def deal_with_merged(acctran_to_merge, lineage_object_dict, unclear_taxa, lineag
         lineage_object_dict[i_o.id] = i_o      
 
         lineage_objects.append(i_o)
-
-    for i in remove_list:
-        if i in lineage_objects:
-            lineage_objects.remove(i)
        
-    return lineage_object_dict, lineage_objects, introduction_int_list
+    return lineage_object_dict, lineage_objects, introduction_int_list, taxa_already_assigned, remove_list
+
+def deal_with_split(lineage_objects, lineage_dict, acctran_dict, taxa_already_assigned, introduction_int_list, remove_list):
+    
+    acctran_for_split = defaultdict(list)
+    lin_to_acctran = defaultdict(list)
+    lin_to_size = defaultdict(dict)
+    acc_to_count = {}
+    max_acc_to_lin = {}
+    
+    lin_to_biggest_acctran = {}
+    
+    relevant_lineages = set()
+    
+    for lin in lineage_objects:
+        if len(lin.acctrans_designations) > 1:
+            lin.split = True
+         
+    
+        
+    for acc, lins in acctran_dict.items():
+        if len(lins) == 1 and lins[0].split:
+            remove_list.add(lins[0])
+            relevant_lineages.add(lins[0])
+            for tax in lins[0].taxa:
+                if tax not in taxa_already_assigned:
+                    acctran_for_split[tax.acctrans].append(tax)
+                    taxa_already_assigned.append(tax)
+                    
+ 
+            acc_to_count[acc] = len(acctran_for_split[acc])
+             
+    for lin in relevant_lineages:
+        acc_dict = {}
+        for acc in lin.acctrans_designations:
+            if acc in acc_to_count.keys():
+                acc_dict[acc] = acc_to_count[acc]
+        lin_to_size[lin] = acc_dict
+        
+        max_acc = max(acc_dict.items(), key=operator.itemgetter(1))[0]
+        
+        lin_to_biggest_acctran[lin] = max_acc
+        max_acc_to_lin[max_acc] = lin.id
+                    
+    for acc, taxa in acctran_for_split.items():
+        
+        if acc in max_acc_to_lin.keys():
+            new_name = max_acc_to_lin[acc]
+        else:
+            introduction_prep = (introduction_int_list[-1] + 1)
+            new_name = "UK" + str(introduction_prep)
+            introduction_int_list.append(introduction_prep)
+        
+        i_o = lineage(new_name, taxa)
+        i_o.acctrans_designations.add(acc)
+        
+        lineage_objects.append(i_o)
+        lineage_dict[new_name] = i_o
+        
+        for tax in i_o.taxa:
+            tax.lineage = i_o.id
+    
+    return lineage_objects, lineage_dict, remove_list, acctran_for_split
 
 
 def write_to_file(lineage_objects, outfile):
@@ -232,7 +298,7 @@ def write_to_file(lineage_objects, outfile):
     fw.close()
 
 
-def merge_lineages(input_dir, outfile):
+def curate_lineages(input_dir, outfile):
 
     introduction_int_list, taxon_list, intros_to_taxa, acctrans_to_intro, intro_acctrans = make_taxon_objects(input_dir)
 
@@ -240,6 +306,12 @@ def merge_lineages(input_dir, outfile):
 
     merged, acctran_dict, acctran_to_merge, merge_count = find_merged(lineage_objects)
 
-    lineage_object_dict, lineage_objects = deal_with_merged(acctran_to_merge, lineage_dict, unclear_taxa, lineage_objects)
+    lineage_object_dict, lineage_objects, introduction_int_list, taxa_already_assigned, remove_list = deal_with_merged(acctran_to_merge, lineage_dict, unclear_taxa, lineage_objects, introduction_int_list)
+
+    lineage_objects, lineage_dict, remove_list, acctran_for_split = deal_with_split(lineage_objects, lineage_dict, acctran_dict, taxa_already_assigned, introduction_int_list, remove_list)
+
+    for i in remove_list:
+        if i in lineage_objects:
+            lineage_objects.remove(i)
 
     write_to_file(lineage_objects, outfile)
