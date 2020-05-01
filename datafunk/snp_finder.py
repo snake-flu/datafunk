@@ -34,14 +34,15 @@ def get_all_snps(alignment_file, snp, position, outfile, label_dict):
     if type(reference) == str:
         sys.stderr.write('Error: couldnt find ref in file')
         sys.exit(-1)
-
+    snp_dict = {}
     for record in aln:
         if record.id != reference.id:
             nucleotide = find_snp(reference.seq, record.seq, position)
             if nucleotide in label_dict:
-                outfile.write(f"{record.id},{snp},{nucleotide},{label_dict[nucleotide]}\n")
+                snp_dict[record.id] = label_dict[nucleotide]
             else:
-                outfile.write(f"{record.id},{snp},{nucleotide},\n")
+                snp_dict[record.id] = ""
+    return snp_dict
 
 
 def read_alignment_and_get_snps(alignment, snp_csv, outfile):
@@ -61,7 +62,10 @@ def read_alignment_and_get_snps(alignment, snp_csv, outfile):
         print(f"Reading in snp file {snp_file}.")
 
     with open(outfile, "w") as fw:
-        fw.write("name,location,nucleotide,label\n")
+
+        tax_dict = collections.defaultdict(list)
+        header = "name,"
+        
         with open(snp_file, newline="") as csvfile:
             """
             name,location,nuc1,label1,nuc2,label2
@@ -69,12 +73,25 @@ def read_alignment_and_get_snps(alignment, snp_csv, outfile):
             """
             reader = csv.DictReader(csvfile)
             for row in reader:
-
+                
                 label_dict = {
                     row["nuc1"]: row["label1"],
                     row["nuc2"]: row["label2"]
                 }
+                header += row["name"] + ','
+
                 for k in label_dict:
                     print(f"Nuc: {k}, Label:{label_dict[k]}")
+
                 location = int(row["location"])
-                get_all_snps(alignment_file, row["name"], location, fw, label_dict)
+                snp_dict = get_all_snps(alignment_file, row["name"], location, fw, label_dict)
+                for record in snp_dict:
+                    tax_dict[record].append(snp_dict[record])
+        
+            header = header.rstrip(',')
+            fw.write(f"{header}\n")
+            for record in tax_dict:
+                snps = ",".join(tax_dict[record])
+                line = f"{record},{snps}\n"
+                fw.write(line)
+        
