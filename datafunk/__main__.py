@@ -808,6 +808,20 @@ def main(args=None):
 
     subparser_curate_lineages.set_defaults(func=datafunk.subcommands.curate_lineages.run)
 
+    # _________________________________ snp_finder ____________________________#
+
+    subparser_snp_finder = subparsers.add_parser(
+        "snp_finder",
+        description="Query an alignment position for informative SNP",
+        help="Query an alignment position for informative SNP",
+        usage="datafunk snp_finder -i <input_directory>",
+    )
+
+    subparser_snp_finder.add_argument("-a", action="store", type=str, dest="a")
+    subparser_snp_finder.add_argument("--snp-csv", action="store", type=str, dest="snp")
+    subparser_snp_finder.add_argument("-o", action="store", type=str, dest="o")
+
+    subparser_snp_finder.set_defaults(func=datafunk.subcommands.snp_finder.run)
     # ___________________________________________________________________________#
 
     args = parser.parse_args()
