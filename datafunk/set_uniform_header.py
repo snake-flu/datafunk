@@ -68,26 +68,47 @@ def parse_date(header):
         return ""
 
 def get_new_header(header, extended=False):
-    name = parse_virus_name(header)
-    if extended:
-        country = parse_country(header)
-        if country == "":
-            country = parse_country_from_virus_name(name)
-        new_header = name + '|' + country + '|' + parse_date(header)
-        new_header = strip_nasties(new_header)
+    if header[0:3] == 'hCo' or header[0:3] == 'EPI':
+        name = parse_virus_name(header)
+        if extended:
+            country = parse_country(header)
+            if country == "":
+                country = parse_country_from_virus_name(name)
+            new_header = name + '|' + country + '|' + parse_date(header)
+            new_header = strip_nasties(new_header)
+        else:
+            new_header = strip_nasties(name)
+
+    elif header[0:3] == 'COG':
+        country = header.split('|')[3]
+        virusname = header.split('/')[1]
+        year = header.split('|')[7][0:4]
+        new_header = country + '/' + virusname + '/' + year
     else:
-        new_header = strip_nasties(name)
-    return new_header
+        return('')
+    return(new_header)
+
 
 def get_new_header_second_attempt(header, extended=False):
-    name = parse_virus_name(header)
-    if extended:
-        country = parse_country_from_virus_name(name)
-        new_header = name + '|' + country + '|' + parse_date(header)
-        new_header = strip_nasties(new_header)
+    if header[0:3] == 'hCo' or header[0:3] == 'EPI':
+        name = parse_virus_name(header)
+        if extended:
+            country = parse_country_from_virus_name(name)
+            new_header = name + '|' + country + '|' + parse_date(header)
+            new_header = strip_nasties(new_header)
+        else:
+            new_header = strip_nasties(name)
+
+    elif header[0:3] == 'COG':
+        country = header.split('|')[3]
+        virusname = header.split('/')[1]
+        year = header.split('|')[7][0:4]
+        new_header = country + '/' + virusname + '/' + year
     else:
-        new_header = strip_nasties(name)
-    return new_header
+        return('')
+
+    return(new_header)
+
 
 def header_found_in_column(header, df, column):
     return (df[column] == header).any()
@@ -136,6 +157,10 @@ def set_uniform_header(input_fasta, input_metadata, output_fasta, output_metadat
     with open(input_fasta) as in_fasta, open(output_fasta, 'w') as out_fasta:
         for record in SeqIO.parse(in_fasta, "fasta"):
             header = get_new_header(record.description, extended)
+            print(header)
+            if len(header) == 0:
+                log_handle.write("Bad header %s in input fasta\n" % (record.id))
+                continue
             if not header_found_in_column(header, metadata, column_name):
                 header = get_new_header_second_attempt(record.description, extended)
             if cog_uk and not header_found_in_column(header, metadata, column_name) \
@@ -152,6 +177,7 @@ def set_uniform_header(input_fasta, input_metadata, output_fasta, output_metadat
                 record.description = ""
                 if record.id != '':
                     SeqIO.write(record, out_fasta, "fasta-2line")
+
 
     metadata.to_csv(output_metadata, index=False)
 
