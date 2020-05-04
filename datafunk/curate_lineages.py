@@ -69,7 +69,7 @@ def deal_with_new_lineages(introduction_int_list, taxon_list, intros_to_taxa, ac
                 
                 if len(possible_intro) == 0: #this will be if the introduction is genuinely new
                     if tax.acctrans not in new_acctrans_to_lineage.keys():
-                    
+
                         introduction_prep = (introduction_int_list[-1] + 1)
                         introduction = "UK" + str(introduction_prep)
                         introduction_int_list.append(introduction_prep)
@@ -81,14 +81,15 @@ def deal_with_new_lineages(introduction_int_list, taxon_list, intros_to_taxa, ac
                         intro_acctrans[introduction].add(tax.acctrans)
                     
                     else: #if it's not the sequence to be added to a new lineage
-
+    
                         introduction = new_acctrans_to_lineage[tax.acctrans]
 
                         tax.lineage = introduction
+                        
                         intros_to_taxa[introduction].append(tax)
                         intro_acctrans[introduction].add(tax.acctrans)
 
-                elif len(possible_intro) > 1: #usually a merged or split UK lineage
+                elif len(possible_intro) > 1: #usually a merged or split UK lineage 
                     tax.unclear = True
                     unclear_taxa.append(tax)
                 
@@ -302,7 +303,9 @@ def curate_lineages(input_dir, outfile):
 
     introduction_int_list, taxon_list, intros_to_taxa, acctrans_to_intro, intro_acctrans = make_taxon_objects(input_dir)
 
-    lineage_objects, lineage_dict, unclear_taxa = deal_with_new_lineages(introduction_int_list, taxon_list, intros_to_taxa, acctrans_to_intro, intro_acctrans)
+    intros_to_taxa, intro_acctrans, unclear_taxa = deal_with_new_lineages(introduction_int_list, taxon_list, intros_to_taxa, acctrans_to_intro, intro_acctrans)
+
+    lineage_objects, lineage_dict = make_lineage_objects(intros_to_taxa, intro_acctrans)
 
     merged, acctran_dict, acctran_to_merge, merge_count = find_merged(lineage_objects)
 

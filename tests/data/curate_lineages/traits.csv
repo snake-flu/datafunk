@@ -1,0 +1,10 @@
+taxon,country,lineage,uk_lineage,acc_lineage,del_lineage,max_lineage
+England/SHEF-D0731/2020,UK,A,,A_54,A_54,A_1
+England/SHEF-D0732/2020,UK,A,,A_54,A_54,A_1
+England/CAMB-7763F/2020,UK,A,,A_55,A_55,A_1
+England/02/2020,UK,A,UK301,A_56,A_56,A_1
+England/04/2020,UK,A,,A_56,A_1
+Wales/PHWC-24B32/2020,UK,B.2,UK1354,B.2_980,B.2_1015,B.2_1
+England/CAMB-7580E/2020,UK,B.2,UK1023,B.2_980,B.2_1016,B.2_1
+England/CAMB-7580F/2020,UK,B.2,UK1023,B.2_980,B.2_1016,B.2_1
+England/05/2020,UK,B.2,,B.2_980,,B.2_1
