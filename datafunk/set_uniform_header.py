@@ -67,8 +67,8 @@ def parse_date(header):
     else:
         return ""
 
-def get_new_header(header, extended=False):
-    if header[0:3] == 'hCo' or header[0:3] == 'EPI':
+def get_new_header(header, extended=False, gisaid = False):
+    if header[0:3] == 'hCo' or header[0:3] == 'EPI' or gisaid:
         name = parse_virus_name(header)
         if extended:
             country = parse_country(header)
@@ -89,8 +89,8 @@ def get_new_header(header, extended=False):
     return(new_header)
 
 
-def get_new_header_second_attempt(header, extended=False):
-    if header[0:3] == 'hCo' or header[0:3] == 'EPI':
+def get_new_header_second_attempt(header, extended=False, gisaid = False):
+    if header[0:3] == 'hCo' or header[0:3] == 'EPI' or gisaid:
         name = parse_virus_name(header)
         if extended:
             country = parse_country_from_virus_name(name)
@@ -156,13 +156,13 @@ def set_uniform_header(input_fasta, input_metadata, output_fasta, output_metadat
 
     with open(input_fasta) as in_fasta, open(output_fasta, 'w') as out_fasta:
         for record in SeqIO.parse(in_fasta, "fasta"):
-            header = get_new_header(record.description, extended)
-            print(header)
+            header = get_new_header(record.description, extended, gisaid = gisaid)
+            # print(header)
             if len(header) == 0:
                 log_handle.write("Bad header %s in input fasta\n" % (record.id))
                 continue
             if not header_found_in_column(header, metadata, column_name):
-                header = get_new_header_second_attempt(record.description, extended)
+                header = get_new_header_second_attempt(record.description, extended, gisaid = gisaid)
             if cog_uk and not header_found_in_column(header, metadata, column_name) \
                     and id_found_in_column(header, metadata, "central_sample_id"):
                 metadata = update_df_if_id_found_in_column(header, metadata, "central_sample_id", column_name)
