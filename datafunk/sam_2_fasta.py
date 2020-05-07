@@ -251,10 +251,20 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, log_all_ins
         log = False
         insertions = None
 
+    # for x in samfile:
+    #     temp = parse_sam_line(x)
+    #     print(temp)
+    #     get_seq_from_block(sam_block = [x], rlen = RLEN, log_inserts = log, pad = pad)
+    #     continue
 
     for query_seq_name, one_querys_alignment_lines in itertools.groupby(samfile, lambda x: parse_sam_line(x)['QNAME']):
         # one_querys_alignment_lines is an iterator corresponding to all the lines
         # in the SAM file for one query sequence
+
+        one_querys_alignment_lines = [x for x in one_querys_alignment_lines if parse_sam_line(x)['SEQ'] != 'None']
+        if len(one_querys_alignment_lines) == 0:
+            continue
+
         seq = get_seq_from_block(sam_block = one_querys_alignment_lines, rlen = RLEN, log_inserts = log, pad = pad)
 
         if trim and not pad:
