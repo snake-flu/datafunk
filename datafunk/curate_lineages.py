@@ -33,7 +33,12 @@ def make_taxon_objects(input_dir):
     intro_acctrans = defaultdict(set)
     acctrans_to_intro = defaultdict(set)
 
-    list_traits_files = glob.glob('%s/**/*traits.csv' %input_dir, recursive=True)
+    if input_dir.endswith("traits.csv"):
+        list_traits_files = [input_dir]
+    else:
+        in_dir = os.path.dirname(input_dir)
+        list_traits_files = glob.glob('%s/**/*traits.csv' %in_dir, recursive=True) \
+                            + glob.glob('%s/*traits.csv' %in_dir, recursive=True)
     if len(list_traits_files) == 0:
         sys.exit("Found no traits files!!")
     print("Found traits files:", list_traits_files)
