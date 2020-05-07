@@ -1,6 +1,7 @@
 from collections import defaultdict
 from collections import Counter
 import os
+import sys
 import glob
 import operator
 
@@ -33,6 +34,8 @@ def make_taxon_objects(input_dir):
     acctrans_to_intro = defaultdict(set)
 
     list_traits_files = glob.glob('%s/**/*traits.csv' %input_dir, recursive=True)
+    if len(list_traits_files) == 0:
+        sys.exit("Found no traits files!!")
     print("Found traits files:", list_traits_files)
     for input_file in list_traits_files:
         with open(input_file) as f:
