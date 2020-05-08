@@ -25,6 +25,11 @@ def get_reference(aln):
     for record in aln:
         if "WH04" in record.id:
             reference = record
+    if reference == '':
+        reference = SeqIO.read(os.path.dirname(os.path.realpath(__file__)) + '/resources/WH04_aligned.fa', 'fasta')
+    if aln.get_alignment_length() != len(reference.seq):
+        sys.stderr.write('Error: reference length is different from alignment length - have you trimmed already?!')
+        sys.exit(-1)
     return reference
 
 
