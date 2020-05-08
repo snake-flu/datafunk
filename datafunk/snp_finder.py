@@ -21,11 +21,11 @@ def find_snp(ref, member, position):
 
 
 def get_reference(aln):
-    reference = ''
+    reference = None
     for record in aln:
         if "WH04" in record.id:
             reference = record
-    if reference == '':
+    if reference is None:
         reference = SeqIO.read(os.path.dirname(os.path.realpath(__file__)) + '/resources/WH04_aligned.fa', 'fasta')
     if aln.get_alignment_length() != len(reference.seq):
         sys.stderr.write('Error: reference length is different from alignment length - have you trimmed already?!')
@@ -37,7 +37,7 @@ def get_all_snps(alignment_file, snp, position, outfile, label_dict):
     aln = AlignIO.read(alignment_file, "fasta")
 
     reference = get_reference(aln)
-    if type(reference) == str:
+    if reference is None:
         sys.stderr.write('Error: couldnt find ref in file')
         sys.exit(-1)
     snp_dict = {}
