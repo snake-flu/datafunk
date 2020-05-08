@@ -263,6 +263,7 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, log_all_ins
 
         one_querys_alignment_lines = [x for x in one_querys_alignment_lines if parse_sam_line(x)['SEQ'] != 'None']
         if len(one_querys_alignment_lines) == 0:
+            sys.stderr.write(query_seq_name + ' has 0-length SEQ field in alignment\n')
             continue
 
         seq = get_seq_from_block(sam_block = one_querys_alignment_lines, rlen = RLEN, log_inserts = log, pad = pad)
