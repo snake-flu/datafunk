@@ -8,12 +8,16 @@ import re
 def date_string_to_epi_week(date_string, weeks):
     if date_string is None:
         return None
-    
+
     # check the date:
     regex = re.compile('\d{4}-\d{2}-\d{2}')
-    match = re.search(regex, date_string)
+    try:
+        match = re.search(regex, date_string)
+    except:
+        print(date_string)
+        return None
     if not match:
-        return(None)
+        return None
 
     date = datetime.strptime(date_string, '%Y-%m-%d').date()
 
