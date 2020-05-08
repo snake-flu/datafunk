@@ -3,6 +3,7 @@ import collections
 from Bio import AlignIO
 import os
 import csv
+import sys
 
 cwd = os.getcwd()
 
