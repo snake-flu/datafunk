@@ -14,7 +14,6 @@ def date_string_to_epi_week(date_string, weeks):
     try:
         match = re.search(regex, date_string)
     except:
-        print(date_string)
         return None
     if not match:
         return None
@@ -50,6 +49,9 @@ def add_epi_week_column(in_metadata, out_metadata, date_column, epi_column_name=
         date_string = row[date_column]
         epi_week = date_string_to_epi_week(date_string, weeks)
         epi_column.append(epi_week)
-    metadata[epi_column_name].update(epi_column)
+    if epi_column_name in metadata.columns:
+        metadata[epi_column_name].update(epi_column)
+    else:
+        metadata[epi_column_name]
 
     metadata.to_csv(out_metadata, index=False)
