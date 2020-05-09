@@ -49,7 +49,7 @@ def add_epi_week_column(in_metadata, out_metadata, date_column, epi_column_name=
         date_string = row[date_column]
         epi_week = date_string_to_epi_week(date_string, weeks)
         epi_column.append(epi_week)
-    print(epi_column)
+    
     metadata[epi_column_name] = pd.Series(epi_column)
 
     metadata.to_csv(out_metadata, index=False)
