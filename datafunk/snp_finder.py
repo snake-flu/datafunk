@@ -1,6 +1,7 @@
 import argparse
 import collections
 from Bio import AlignIO
+from Bio import SeqIO
 import os
 import csv
 import sys
@@ -71,7 +72,7 @@ def read_alignment_and_get_snps(alignment, snp_csv, outfile):
 
         tax_dict = collections.defaultdict(list)
         header = "name,"
-        
+
         with open(snp_file, newline="") as csvfile:
             """
             name,location,nuc1,label1,nuc2,label2
@@ -79,7 +80,7 @@ def read_alignment_and_get_snps(alignment, snp_csv, outfile):
             """
             reader = csv.DictReader(csvfile)
             for row in reader:
-                
+
                 label_dict = {
                     row["nuc1"]: row["label1"],
                     row["nuc2"]: row["label2"]
@@ -93,11 +94,10 @@ def read_alignment_and_get_snps(alignment, snp_csv, outfile):
                 snp_dict = get_all_snps(alignment_file, row["name"], location, fw, label_dict)
                 for record in snp_dict:
                     tax_dict[record].append(snp_dict[record])
-        
+
             header = header.rstrip(',')
             fw.write(f"{header}\n")
             for record in tax_dict:
                 snps = ",".join(tax_dict[record])
                 line = f"{record},{snps}\n"
                 fw.write(line)
-        
