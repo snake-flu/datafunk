@@ -48,7 +48,7 @@ def get_all_snps(alignment_file, snp, position, outfile, label_dict):
             if nucleotide in label_dict:
                 snp_dict[record.id] = label_dict[nucleotide]
             else:
-                snp_dict[record.id] = ""
+                snp_dict[record.id] = "X"
     return snp_dict
 
 
