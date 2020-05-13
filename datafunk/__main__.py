@@ -884,7 +884,7 @@ def main(args=None):
         "--column-name",
         dest="column_name",
         required=False,
-        default='sequence_name',
+        default='header',
         help="Name of column in metadata corresponding to fasta header"
     )
     subparser_add_header_column.add_argument(
