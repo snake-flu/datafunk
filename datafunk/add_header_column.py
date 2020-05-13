@@ -36,7 +36,6 @@ def add_header_entry(df, header_name, columns, log_handle, column_name='header',
                 for column in columns:
                     if "/"+str(row[column])+"/" not in header_name \
                         and "|"+str(row[column]) not in header_name:
-                        #print(column, row[column], header_name)
                         found = False
                         break
                 if found:
@@ -45,15 +44,33 @@ def add_header_entry(df, header_name, columns, log_handle, column_name='header',
         for i, row in enumerate(df['secondary_identifier'].values):
             if sample_id in str(row):
                 indexes.append(i)
+        if len(indexes) > 1:
+            df_subset = df.loc[indexes,:]
+            indexes = []
+            for i, row in df_subset.iterrows():
+                found = True
+                for column in columns[1:]:
+                    if "/" + str(row[column]) + "/" not in header_name \
+                            and "|" + str(row[column]) not in header_name:
+                        found = False
+                        break
+                if found:
+                    indexes.append(i)
 
-    if len(indexes) == 0:
+    if len(indexes) > 10:
+        log_handle.write(
+            "Found %i rows corresponding to sample_id %s and header %s which must be wrong\n" % (len(indexes),
+                                                                                            sample_id, header_name))
+        indexes = []
+    elif len(indexes) == 0:
         log_handle.write("Could not find corresponding row for %s\n" % header_name)
         return
-    #elif len(indexes) > 1:
-    #    log_handle.write("Found %i rows corresponding to sample_id %s and header %s\n" %(len(indexes), sample_id, header_name))
-    if count > 0:
-        indexes = indexes[1:]
+    if count > 0 and len(indexes) > count:
+        indexes = indexes[count:]
         header_name += "_" + str(count)
+    for index in indexes:
+        if df.loc[index, column_name] != None:
+            log_handle.write("Overwriting %s with %s\n" % (df.loc[index, column_name], header_name))
     df.loc[indexes, column_name] = header_name
     return
 
@@ -63,7 +80,8 @@ gisaid_columns = ['covv_virus_name', 'edin_admin_0', 'covv_collection_date', 'co
 #COG-UK: secondary_accession adm1 collection_date
 coguk_columns = ['central_sample_id', 'sequencing_org_code', "sequencing_submission_date"]
 
-def add_header_column(input_fasta, input_metadata, output_fasta, output_metadata, log_file, column_name, columns, gisaid, cog_uk):
+def add_header_column(input_fasta, input_metadata, output_fasta, output_metadata, log_file, column_name, columns,
+                      gisaid, cog_uk):
 
     metadata = load_dataframe(input_metadata)
     metadata[column_name] = None
@@ -100,6 +118,9 @@ def add_header_column(input_fasta, input_metadata, output_fasta, output_metadata
             if record.id != '':
                 SeqIO.write(record, out_fasta, "fasta-2line")
 
+    if len(found_headers) != len(metadata[column_name].unique().tolist()):
+        log_handle.write("Warning: there were %i entries in input fasta, but only %i unique headers have been added to "
+                         "metadata" %(len(found_headers),len(metadata[column_name].unique().tolist())))
     metadata.to_csv(output_metadata, index=False)
 
     if log_handle:
