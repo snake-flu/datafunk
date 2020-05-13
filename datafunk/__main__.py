@@ -452,7 +452,6 @@ def main(args=None):
     # _________________________________ set_uniform_header ____________________________#
     subparser_set_uniform_header = subparsers.add_parser(
         "set_uniform_header",
-        usage="datafunk set_uniform_header -i <input_fasta> -t <threshold> [-o <output_fasta>]",
         help="Adds a header column to metadata table and converts fasta to have a uniform header",
     )
 
@@ -828,8 +827,7 @@ def main(args=None):
     subparser_add_header_column = subparsers.add_parser(
         "add_header_column",
         description="Add header column to metadata table corresponding to fasta record ids",
-        help="Add header column to metadata table corresponding to fasta record ids",
-        usage="datafunk add_header_column -i <input_directory>",
+        help="Add header column to metadata table corresponding to fasta record ids"
     )
 
     subparser_add_header_column.add_argument(
