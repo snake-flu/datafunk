@@ -822,6 +822,80 @@ def main(args=None):
     subparser_snp_finder.add_argument("-o", action="store", type=str, dest="o")
 
     subparser_snp_finder.set_defaults(func=datafunk.subcommands.snp_finder.run)
+
+    # _________________________________ add_header_column ____________________________#
+
+    subparser_add_header_column = subparsers.add_parser(
+        "add_header_column",
+        description="Add header column to metadata table corresponding to fasta record ids",
+        help="Add header column to metadata table corresponding to fasta record ids",
+        usage="datafunk add_header_column -i <input_directory>",
+    )
+
+    subparser_add_header_column.add_argument(
+        "--input-fasta",
+        dest="input_fasta",
+        required=True,
+        type=str,
+        help="Input FASTA",
+    )
+    subparser_add_header_column.add_argument(
+        "--input-metadata",
+        dest="input_metadata",
+        required=True,
+        type=str,
+        help="Input CSV or TSV",
+    )
+    subparser_add_header_column.add_argument(
+        "--output-metadata",
+        dest="output_metadata",
+        required=True,
+        type=str,
+        help="Output CSV",
+    )
+    subparser_add_header_column.add_argument(
+        "--output-fasta",
+        dest="output_fasta",
+        required=True,
+        type=str,
+        help="Output FASTA",
+    )
+    subparser_add_header_column.add_argument(
+        "--gisaid",
+        dest="gisaid",
+        action="store_true",
+        required=False,
+        help="Input data is from GISAID",
+    )
+    subparser_add_header_column.add_argument(
+        "--cog-uk",
+        dest="cog_uk",
+        action="store_true",
+        required=False,
+        help="Input data is from COG-UK",
+    )
+    subparser_add_header_column.add_argument(
+        "--log",
+        dest="log_file",
+        required=False,
+        help="Log file to use (otherwise uses stdout)"
+    )
+    subparser_add_header_column.add_argument(
+        "--column-name",
+        dest="column_name",
+        required=False,
+        default='sequence_name',
+        help="Name of column in metadata corresponding to fasta header"
+    )
+    subparser_add_header_column.add_argument(
+        "--columns",
+        dest="columns",
+        nargs='+',
+        required=False,
+        help="List of columns in metadata to parse for string matching with fasta header"
+    )
+
+    subparser_add_header_column.set_defaults(func=datafunk.subcommands.add_header_column.run)
     # ___________________________________________________________________________#
 
     args = parser.parse_args()
