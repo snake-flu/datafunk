@@ -155,8 +155,8 @@ def check_and_get_flattened_site(site):
 
     check = sum([x.isalpha() for x in site])
     if check > 1:
-        warnings.warn('ambiguous overlapping alignment - grep alignment for "&"s')
-        return('&')
+        warnings.warn('ambiguous overlapping alignment')
+        return('N')
 
     # because {A, C, G, T} > {-} > {*}, we can use max()
     base = max(site)
