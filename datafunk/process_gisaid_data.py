@@ -198,7 +198,7 @@ def get_json_order_and_record_dict(json_file, fields_list_required, fields_list_
 
 def check_gisaid_date(dict):
     """
-
+    Exclude dates that are incomplete or impossible (in the future)
     """
     date = dict['covv_collection_date']
     regex = re.compile('\d{4}-\d{2}-\d{2}')
@@ -210,6 +210,16 @@ def check_gisaid_date(dict):
             dict['edin_flag'] = 'omitted_date'
         elif len(dict['edin_flag']) > 0:
             dict['edin_flag'] = dict['edin_flag'] + ':omitted_date'
+
+    else:
+        today = datetime.today().date()
+        gisaid_date_as_python_date = datetime.strptime(date, '%Y-%m-%d').date()
+        if gisaid_date_as_python_date > today or gisaid_date_as_python_date < datetime.strptime('2019-11-30','%Y-%m-%d').date():
+            print(today, gisaid_date_as_python_date)
+            if len(dict['edin_flag']) == 0:
+                dict['edin_flag'] = 'omitted_date'
+            elif len(dict['edin_flag']) > 0:
+                dict['edin_flag'] = dict['edin_flag'] + ':omitted_date'
 
     return(dict)
 
