@@ -18,7 +18,6 @@ setup(
         "pysam>=0.15.4",
         "datapackage",
         "epiweeks",
-        "matplotlib"
     ],
     classifiers=[
         "Development Status :: 4 - Beta",

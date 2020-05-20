@@ -1,7 +1,6 @@
 from Bio import SeqIO
 import numpy as np
 import sys, os
-import matplotlib.pyplot as plt
 
 
 WH04_align = SeqIO.read(os.path.dirname(os.path.realpath(__file__)) + '/resources/WH04_aligned.fa', 'fasta')
@@ -94,7 +93,7 @@ def get_epi_week_distance_stats(metadata):
     return(epi_weeks)
 
 
-def distance_to_root(fasta_file, metadata_file, plot = False):
+def distance_to_root(fasta_file, metadata_file):
     metadata = read_metadata(metadata_file)
     fasta = SeqIO.parse(fasta_file, 'fasta')
 
@@ -139,23 +138,6 @@ def distance_to_root(fasta_file, metadata_file, plot = False):
         out.write(record.id + '\t' + epi_week + '\t' + str(round(epi_week_mean_dist, 4)) + '\t' + str(round(epi_week_std_dist, 4)) + '\t' + str(round(dist, 4)) + '\t' + str(round(distance_std_units, 4)) + '\n')
 
     out.close()
-
-
-    if plot:
-        names = [str(x) for x in sorted([int(x) for x in stats.keys()])]
-        means_plot = [stats[x]['mean'] for x in names]
-        stds_plot = [stats[x]['std'] for x in names]
-
-        plt.errorbar(x = names,
-                     y = means_plot,
-                     yerr = [2 * x for x in stds_plot],
-                     fmt = 'o')
-        x1,x2,y1,y2 = plt.axis()
-        plt.axis((x1,x2,0,y2))
-        plt.ylabel('distance (+/- 2 * s.d.)')
-        plt.xlabel('epi week')
-
-        plt.savefig('distances.png')
 
     pass
 

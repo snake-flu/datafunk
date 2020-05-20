@@ -723,9 +723,9 @@ def main(args=None):
 
     subparser_distance_to_root = subparsers.add_parser(
         """distance_to_root""",
-        usage="""datafunk distance_to_root -i <file> -o <file> [--plot]""",
-        description="""calculates the genetic distance to WH04""",
-        help="""calculates the genetic distance to WH04""")
+        usage="""datafunk distance_to_root --input-fasta <file> --input-metadata <file>""",
+        description="""calculates per sample genetic distance to WH04 and writes it to 'distances.tsv'""",
+        help="""calculates per sample genetic distance to WH04 and writes it to 'distances.tsv""")
 
     subparser_distance_to_root._action_groups.pop()
     required_distance_to_root = subparser_distance_to_root.add_argument_group('required arguments')
@@ -741,10 +741,6 @@ def main(args=None):
                         required=True,
                         dest='metadata_in',
                         metavar='input.csv')
-    optional_distance_to_root.add_argument('--plot',
-                        help='plot distance by epi-week',
-                        required=False,
-                        action='store_true')
 
 
     subparser_distance_to_root.set_defaults(func=datafunk.subcommands.distance_to_root.run)
