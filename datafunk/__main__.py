@@ -18,7 +18,6 @@ def main(args=None):
 
     # _________________________________ repair_names ____________________________#
     subparser_repair_names = subparsers.add_parser("repair_names",
-        aliases=['rename_dat_punk'],
         usage="datafunk repair_names --fasta <fasta> --tree <tree> --out <outfile>",
         help="Returns iqtree taxa names to their former glory",
     )
@@ -32,7 +31,6 @@ def main(args=None):
     # _________________________________ remove_fasta ____________________________#
     subparser_remove_fasta = subparsers.add_parser(
         "remove_fasta",
-        aliases=['remove_dat_fasta'],
         usage="datafunk remove_fasta -i <input_fasta_file> -f <filter_file> -o <output_file>",
         help="Removing sequences based on a filtering file",
     )
@@ -78,7 +76,6 @@ def main(args=None):
     # _________________________________ clean_names ____________________________#
     subparser_clean_names = subparsers.add_parser(
         "clean_names",
-        aliases=['clean_dat_name'],
         usage="datafunk clean_names -i <input_metadata> -t <trait> -o <output_file>",
         help="Standardizing country names based on trait given",
     )
@@ -124,7 +121,6 @@ def main(args=None):
     # _________________________________ merge_fasta ____________________________#
     subparser_merge_fasta = subparsers.add_parser(
         "merge_fasta",
-        aliases=['merge_dat_fasta'],
         usage="datafunk merge_fasta -f <folder> -i <input_metadata> -o <output_file>",
         help="Merge fasta file into one single file with removal of duplicates",
     )
@@ -170,7 +166,6 @@ def main(args=None):
     # _________________________________ filter_fasta_by_covg_and_length ____________________________#
     subparser_filter_fasta_by_covg_and_length = subparsers.add_parser(
         "filter_fasta_by_covg_and_length",
-        aliases=['filter_dat_fasta'],
         usage="datafunk filter_fasta_by_covg_and_length -i <input_fasta> -t <threshold> [-o <output_fasta>]",
         help="Removes sequences where the fraction of non-N bases falls below the threshold",
     )
@@ -228,7 +223,6 @@ def main(args=None):
     # _________________________________ process_gisaid_sequence_data ____________________________#
     subparser_process_gisaid_sequence_data = subparsers.add_parser(
         "process_gisaid_sequence_data",
-        aliases=['get_new_horrors'],
         usage="datafunk process_gisaid_sequence_data -i <input.json OR input.fasta> [-o <output.fasta>] [-e file1 -e file2 ...] [--stdout]",
         help="Process raw sequence data in fasta or json format",
         description="Process raw sequence data in fasta or json format",
@@ -356,7 +350,6 @@ def main(args=None):
     # _________________________________ phylotype_consensus ____________________________#
     subparser_phylotype_consensus = subparsers.add_parser(
         "phylotype_consensus",
-        aliases=['phylotype_consensus'],
         usage="datafunk phylotype_consensus -i <input_fasta> -m <input_metadata> -c <clade_file> -o <output_folder>",
         help="Split sequences according to lineage and create an consensus",
     )
