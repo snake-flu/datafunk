@@ -16,9 +16,9 @@ def get_pairwise_difference(seq1, seq2):
     total=0
     diff=0
     for i in range(len(seq1)):
-        a = seq1[i]
-        b = seq2[i]
-        if a in ['A','C', 'G', 'T'] and b in ['A','C', 'G', 'T']:
+        a = seq1[i].upper()
+        b = seq2[i].upper()
+        if a in ['A', 'C', 'G', 'T'] and b in ['A', 'C', 'G', 'T']:
             total +=1
             if a != b:
                 diff+=1
