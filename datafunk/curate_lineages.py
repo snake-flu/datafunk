@@ -296,16 +296,23 @@ def deal_with_split(lineage_objects, lineage_dict, acctran_dict, taxa_already_as
     return lineage_objects, lineage_dict, remove_list, acctran_for_split
 
 
-def write_to_file(lineage_objects, outfile):
+def write_to_file(lineage_objects, outfile, top_20):
 
     fw = open(outfile, 'w')
-    fw.write("taxon,uk_lineage\n")
+    fw.write("taxon,uk_lineage,microreact_lineage\n")
     for lin in lineage_objects:
         for tax in lin.taxa:
-            fw.write(tax.id + "," + tax.lineage + "\n")
+            if lin in top_20:
+                new_line = tax.id + "," + tax.lineage + "," + tax.lineage + "\n"
+            else:
+                new_line = tax.id + "," + tax.lineage + ",other\n"
+            
+            fw.write(new_line)
 
     fw.close()
 
+def sortkey(lineage):
+    return len(lineage.taxa)
 
 def curate_lineages(input_dir, outfile):
 
@@ -325,4 +332,14 @@ def curate_lineages(input_dir, outfile):
         if i in lineage_objects:
             lineage_objects.remove(i)
 
-    write_to_file(lineage_objects, outfile)
+    
+    sorted_lins = sorted(lineage_objects, key=sortkey, reverse=True)
+    top_20 = []
+    count = 0
+    
+    for lin in sorted_lins.values():
+        if count < 20:
+            top_20.append(lin)
+            count += 1
+
+    write_to_file(lineage_objects, outfile, top_20)
