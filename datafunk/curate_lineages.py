@@ -50,7 +50,7 @@ def make_taxon_objects(input_dir):
                 if toks[1] == "UK": #this is in the traits.csv
                     seq_name = toks[0]
                     intro_name = toks[3]
-                    acctrans = toks[4]
+                    acctrans = toks[5]
                     new_taxon = taxon(seq_name, intro_name, acctrans)
                     taxon_list.append(new_taxon)
 
