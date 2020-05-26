@@ -215,7 +215,6 @@ def check_gisaid_date(dict):
         today = datetime.today().date()
         gisaid_date_as_python_date = datetime.strptime(date, '%Y-%m-%d').date()
         if gisaid_date_as_python_date > today or gisaid_date_as_python_date < datetime.strptime('2019-11-30','%Y-%m-%d').date():
-            print(today, gisaid_date_as_python_date)
             if len(dict['edin_flag']) == 0:
                 dict['edin_flag'] = 'omitted_date'
             elif len(dict['edin_flag']) > 0:
