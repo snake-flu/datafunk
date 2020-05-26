@@ -883,6 +883,42 @@ def main(args=None):
     )
 
     subparser_add_header_column.set_defaults(func=datafunk.subcommands.add_header_column.run)
+
+
+    # ___________________________ anonymize_microreact ____________________________________#
+
+    subparser_anonymize_microreact = subparsers.add_parser(
+        """anonymize_microreact""",
+        usage="""datafunk anonymize_microreact --input-tree <file.tree> --input-metadata <file.csv> --output-tree <file.tree> --output-metadata <file.csv>""",
+        description="""anonymize matching public microreact tree and metadata""",
+        help="""anonymize matching public microreact tree and metadata""")
+
+    subparser_anonymize_microreact._action_groups.pop()
+    required_anonymize_microreact = subparser_anonymize_microreact.add_argument_group('required arguments')
+
+    required_anonymize_microreact.add_argument('--input-tree',
+                        help='newick format tree whose UK labels will be anonymized',
+                        required=True,
+                        dest='tree_in',
+                        metavar='input.tree')
+    required_anonymize_microreact.add_argument('--input-metadata',
+                        help='metadata whose UK sequence names and rare admn2 values will be anonymized',
+                        required=True,
+                        dest='metadata_in',
+                        metavar='input.csv')
+    required_anonymize_microreact.add_argument('--output-tree',
+                        help='anonymized newick format tree to write',
+                        required=True,
+                        dest='tree_out',
+                        metavar='output.tree')
+    required_anonymize_microreact.add_argument('--output-metadata',
+                        help='anonymized metadata file to write',
+                        required=True,
+                        dest='metadata_out',
+                        metavar='output.csv')
+
+    subparser_anonymize_microreact.set_defaults(func=datafunk.subcommands.anonymize_microreact.run)
+
     # ___________________________________________________________________________#
 
     args = parser.parse_args()
