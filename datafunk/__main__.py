@@ -919,7 +919,45 @@ def main(args=None):
 
     subparser_anonymize_microreact.set_defaults(func=datafunk.subcommands.anonymize_microreact.run)
 
-    # ___________________________________________________________________________#
+        # ___________________________ extract_unannotated_seqs ____________________________________#
+
+    subparser_extract_unannotated_seqs = subparsers.add_parser(
+        """extract_unannotated_seqs""",
+        usage="""datafunk extract_unannotated_seqs --input-tree <file.tree> --input-metadata <file.csv> --output-tree <file.tree> --output-metadata <file.csv>""",
+        description="""extract sequences with an empty cell in a specified cell in a metadata table""",
+        help="""extract sequences with an empty cell in a specified cell in a metadata table""")
+
+    subparser_extract_unannotated_seqs._action_groups.pop()
+    required_extract_unannotated_seqs = subparser_extract_unannotated_seqs.add_argument_group('required arguments')
+
+    required_extract_unannotated_seqs.add_argument('--input-fasta',
+                        help='fasta file to extract sequences from',
+                        required=True,
+                        dest='fasta_in',
+                        metavar='input.fasta')
+    required_extract_unannotated_seqs.add_argument('--input-metadata',
+                        help='metadata whose columns and rows will be checked',
+                        required=True,
+                        dest='metadata_in',
+                        metavar='input.csv')
+    required_extract_unannotated_seqs.add_argument('--null-column',
+                        help='metadata column which will be checked as empty',
+                        required=True,
+                        dest='null_column')
+    required_extract_unannotated_seqs.add_argument('--index-column',
+                        help='metadata column to match to fasta file',
+                        required=True,
+                        dest='index_column')
+    required_extract_unannotated_seqs.add_argument('--output-fasta',
+                        help='fasta file to write',
+                        required=True,
+                        dest='fasta_out',
+                        metavar='output.fasta')
+
+
+    subparser_extract_unannotated_seqs.set_defaults(func=datafunk.subcommands.extract_unannotated_seqs.run)
+
+        # ___________________________________________________________________________#
 
     args = parser.parse_args()
 
