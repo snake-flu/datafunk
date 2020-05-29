@@ -9,29 +9,14 @@ class taxon():
 
     def __init__(self,name, lineage, acctrans):
         self.id = name
-        self.lineage = lineage
+        self.old_lineage = lineage
         self.acctrans = acctrans
-
-
-class lineage():
-
-    def __init__(self, name, taxa):
-        self.id = name
-        self.taxa = taxa
-        self.acctrans_designations = set()
-
-        self.split = False
-        self.merge = False
 
 
 def make_taxon_objects(input_dir):
 
     taxon_list = []
-    introduction_int_list = []
-    intros_to_taxa = defaultdict(list)
-
-    intro_acctrans = defaultdict(set)
-    acctrans_to_intro = defaultdict(set)
+    acc_list = set()
 
     if input_dir.endswith("traits.csv"):
         list_traits_files = [input_dir]
@@ -42,6 +27,8 @@ def make_taxon_objects(input_dir):
     if len(list_traits_files) == 0:
         sys.exit("Found no traits files!!")
     print("Found traits files:", list_traits_files)
+    list_traits_files = ["resources/all_traits.csv"]
+
     for input_file in list_traits_files:
         with open(input_file) as f:
             next(f)
@@ -54,292 +41,237 @@ def make_taxon_objects(input_dir):
                     new_taxon = taxon(seq_name, intro_name, acctrans)
                     taxon_list.append(new_taxon)
 
-                    if intro_name != "":
-                        intro_acctrans[intro_name].add(acctrans)
-                        acctrans_to_intro[acctrans].add(intro_name)
-                        intros_to_taxa[intro_name].append(new_taxon)
-                        introduction_int_list.append(int(intro_name.lstrip("UK")))
+                    acc_list.add(acctrans)
 
-    introduction_int_list = sorted(introduction_int_list)
+    acc_to_tax = defaultdict(list)
 
-    return introduction_int_list, taxon_list, intros_to_taxa, acctrans_to_intro, intro_acctrans
+    for tax in taxon_list:
+        acc_to_tax[tax.acctrans].append(tax)
 
+    acc_to_poss_lins = defaultdict(list)
+    lins_to_acc = defaultdict(list)
 
-def deal_with_new_lineages(introduction_int_list, taxon_list, intros_to_taxa, acctrans_to_intro, intro_acctrans):
+    for k,v in acc_to_tax.items():
+        for tax in v:
+            acc_to_poss_lins[k].append(tax.old_lineage)
+            
+    for k,v in acc_to_poss_lins.items():
+        for lineage in v:
+            lins_to_acc[lineage].append(k)
 
-    new_acctrans_to_lineage = {}
-    unclear_taxa = []
+    acc_name_counts = defaultdict(list)
+    lin_acc_counts = defaultdict(list)
 
-    for tax in taxon_list: #Assigning taxa to lineages that hasn't been done in the tree
-        if tax.lineage== "":
+    for k,v in acc_to_poss_lins.items():
+        new = Counter(v)
+        acc_name_counts[k] = new
 
-                possible_intro = acctrans_to_intro[tax.acctrans]
-
-                if len(possible_intro) == 0: #this will be if the introduction is genuinely new
-                    if tax.acctrans not in new_acctrans_to_lineage.keys():
-
-                        introduction_prep = (introduction_int_list[-1] + 1)
-                        introduction = "UK" + str(introduction_prep)
-                        introduction_int_list.append(introduction_prep)
-
-                        new_acctrans_to_lineage[tax.acctrans] = introduction
-
-                        tax.lineage = introduction
-                        intros_to_taxa[introduction].append(tax)
-                        intro_acctrans[introduction].add(tax.acctrans)
-
-                    else: #if it's not the sequence to be added to a new lineage
-
-                        introduction = new_acctrans_to_lineage[tax.acctrans]
-
-                        tax.lineage = introduction
-
-                        intros_to_taxa[introduction].append(tax)
-                        intro_acctrans[introduction].add(tax.acctrans)
-
-                elif len(possible_intro) > 1: #usually a merged or split UK lineage
-                    tax.unclear = True
-                    unclear_taxa.append(tax)
-
-                else: #if it just hasn't been labelled but it's clear it belongs to an existing lineage
-                    introduction = list(possible_intro)[0]
-
-                    tax.lineage = introduction
-                    intros_to_taxa[introduction].append(tax)
-                    intro_acctrans[introduction].add(tax.acctrans)
-
-    return intros_to_taxa, intro_acctrans, unclear_taxa
-
-def make_lineage_objects(intros_to_taxa, intro_acctrans):
-
-    lineage_objects = []
-    lineage_dict = {}
-
-    for intro, taxa in intros_to_taxa.items():
-
-        i_o = lineage(intro, taxa)
-        i_o.acctrans_designations = intro_acctrans[i_o.id]
-
-        lineage_objects.append(i_o)
-
-        # if len(i_o.acctrans_designations) > 1:
-        #     i_o.split = True
-
-        lineage_dict[intro] = i_o
-
-    return lineage_objects, lineage_dict
-
-def find_merged(lineage_objects):
-
-    acctran_dict = defaultdict(list)
-    acctran_to_merge = defaultdict(list)
-    merged = {}
-    merge_count = 0
-    skip_list = []
-
-    for lin in lineage_objects:
-        for i in lin.acctrans_designations:
-            acctran_dict[i].append(lin)
-
-    for key, value in acctran_dict.items():
-        if len(value) > 1:
-            for i in value:
-                merged[i.id] = True
-                i.merge = True
-                merge_count += 1
-                if i not in acctran_to_merge[key]:
-                    acctran_to_merge[key].append(i)
-
-    return merged, acctran_dict, acctran_to_merge, merge_count
-
-def deal_with_merged(acctran_to_merge, lineage_object_dict, unclear_taxa, lineage_objects, introduction_int_list):
-    #selecting new names and making new lineage object and also updating taxon defs
-    remove_list = set()
-    already_used = set()
-    taxa_already_assigned = []
-
-    for acctran, lineages in acctran_to_merge.items():
-
-        taxa = []
-        numbers = []
-        lineages_present = []
+        
+    for k,v in lins_to_acc.items():
+        new = Counter(v)
+        lin_acc_counts[k] = new  
 
 
-        for lin in lineages:
-            for tax in lin.taxa:
-                if tax.acctrans == acctran:
-                    taxa.append(tax)
 
-            remove_list.add(lin)
-            numbers.append(int(lin.id.lstrip("UK")))
+    return taxon_list, acc_list, acc_name_counts, lin_acc_counts, acc_to_tax
 
+def rename_lineages(acc_name_counts, lin_acc_counts):
 
-        for tax in taxa:
-            lineages_present.append(tax.lineage)
+    acc_final_name_dict = defaultdict(list) #this will all go into one, just for testing
 
-        lineage_count = Counter(lineages_present)
-        freq_order = lineage_count.most_common()
+    new_names = []
 
-        #if two equal sized lineages
-        possibles = []
-        highest_count = freq_order[0][1]
-        for i in freq_order:
-            if i[1] == highest_count:
-                number = int(i[0].lstrip("UK"))
-                possibles.append(number)
-
-        if len(possibles) > 1:
-            new_name = "UK" + str(min(numbers))
+    for acc, poss_lins in acc_name_counts.items():
+        
+        relevant_lin = next(iter(poss_lins.items()))[0]
+        
+        if len(poss_lins) == 1 and relevant_lin != "" and len(lin_acc_counts[relevant_lin]) == 1:
+                
+            acc_final_name_dict[acc].append(relevant_lin)
+        
+        #For new lineages, so they have no old lineage to fall back on
+        elif len(poss_lins) == 1 and relevant_lin == "":
+            acc_final_name_dict[acc].append(relevant_lin) 
         else:
-            new_name = freq_order[0][0]
+            new_name = None 
+            
+            for i in range(1, len(poss_lins)+1):
+                more_deserving = False
+                if new_name == None:
+                    other_deserving = {}
 
-        #Check it hasn't already been used
-        count = 0
-        new_name = lineage_count.most_common()[count][0]
-        while new_name in already_used and count <= len(lineage_count)-1:
-            count += 1
-            new_name = lineage_count.most_common()[count][0]
+                    query_lin = poss_lins.most_common(i)[i-1][0]
+                    count = poss_lins.most_common(i)[i-1][1]
 
-        #If all of the lineage names have been used before
-        if count > len(lineage_count)-1:
-            introduction_prep = (introduction_int_list[-1] + 1)
-            new_name = "UK" + str(introduction_prep)
-            introduction_int_list.append(introduction_prep)
+                    if query_lin == "": #so skip any empty strings here
+                        continue
 
+                    else:
 
-        already_used.add(new_name)
+                        for inner_acc, inner_poss_lins in acc_name_counts.items():
 
-        test_taxa = set(taxa)
-        if len(test_taxa) != len(taxa):
-            print("error in merging" + str(lineages) + " " + str(len(test_taxa)) + " " + str(len(taxa)))
+                            test_against_other = inner_poss_lins.most_common(1)[0][0]
+                                        
+                            if query_lin == test_against_other and acc != inner_acc:
 
+                                other_deserving[inner_acc] = inner_poss_lins.most_common(1)[0][1]                          
 
-        for tax in unclear_taxa:
-            if tax.acctrans == acctran:
-                tax.lineage= new_name
-                taxa.append(tax)
+                        if len(other_deserving) == 0:
+                            new_name = query_lin
 
-        taxa_already_assigned.extend(taxa)
-
-        i_o = lineage(new_name, taxa)
-        i_o.acctrans_designations.add(acctran)
-
-        for tax in i_o.taxa:
-            tax.lineage = i_o.id
-
-        lineage_object_dict[i_o.id] = i_o
-
-        lineage_objects.append(i_o)
-
-    return lineage_object_dict, lineage_objects, introduction_int_list, taxa_already_assigned, remove_list
-
-def deal_with_split(lineage_objects, lineage_dict, acctran_dict, taxa_already_assigned, introduction_int_list, remove_list):
-
-    acctran_for_split = defaultdict(list)
-    lin_to_acctran = defaultdict(list)
-    lin_to_size = defaultdict(dict)
-    acc_to_count = {}
-    max_acc_to_lin = {}
-
-    lin_to_biggest_acctran = {}
-
-    relevant_lineages = set()
-
-    for lin in lineage_objects:
-        if len(lin.acctrans_designations) > 1:
-            lin.split = True
+                        else:
+                            for other_acc, other_count in other_deserving.items():
+                                if other_count > count:
+                                    more_deserving = True
+                                    count = other_count
 
 
+                        if more_deserving:
+                            continue
 
-    for acc, lins in acctran_dict.items():
-        if len(lins) == 1 and lins[0].split:
-            remove_list.add(lins[0])
-            relevant_lineages.add(lins[0])
-            for tax in lins[0].taxa:
-                if tax not in taxa_already_assigned:
-                    acctran_for_split[tax.acctrans].append(tax)
-                    taxa_already_assigned.append(tax)
+                        else:
+                            new_name = query_lin
+                            
+                    
+            if new_name == None: #if we loop to the end of the thing and all the names are taken
+                new_name = ""
+                
+            acc_final_name_dict[acc].append(new_name)
+            
+            
+            new_names.append(new_name)
 
+    return acc_final_name_dict, new_names
 
-            acc_to_count[acc] = len(acctran_for_split[acc])
+def deal_with_issues(acc_final_name_dict, new_names, lin_acc_counts, acc_name_counts):
 
-    for lin in relevant_lineages:
-        acc_dict = {}
-        for acc in lin.acctrans_designations:
-            if acc in acc_to_count.keys():
-                acc_dict[acc] = acc_to_count[acc]
-        lin_to_size[lin] = acc_dict
+    name_counter = Counter(new_names)
+    problem_lins = []
 
-        max_acc = max(acc_dict.items(), key=operator.itemgetter(1))[0]
+    for name, count in name_counter.items():
+        if count > 1 and name != "":
+            problem_lins.append(name)
 
-        lin_to_biggest_acctran[lin] = max_acc
-        max_acc_to_lin[max_acc] = lin.id
+    problem_lin = defaultdict(list)
 
-    for acc, taxa in acctran_for_split.items():
+    for lin in problem_lins:
+        for acc, count in acc_name_counts.items():
+            if lin in count:
+                problem_lin[lin] = lin_acc_counts[lin]
+        
+        
+    for lin, acc_options in problem_lin.items():
+        
+        for acc in acc_options.keys():
+            acc_final_name_dict[acc] = []
 
-        if acc in max_acc_to_lin.keys():
-            new_name = max_acc_to_lin[acc]
+        winner = acc_options.most_common(1)[0][0]
+        
+        acc_final_name_dict[winner].append(lin)
+
+        
+        for other_acc in acc_options:
+            if other_acc != winner:
+                for other_options in acc_name_counts[other_acc]:
+                    if other_options != "" and other_options not in new_names:
+                        new_name = other_options
+                    else:
+                        new_name = ""
+                    
+                acc_final_name_dict[other_acc].append(new_name)
+
+    return acc_final_name_dict
+
+def name_new_lineages(acc_final_name_dict):
+
+    used_names = []
+    for key, value in acc_final_name_dict.items():
+        if value[0] != "":
+            used_names.append(int(value[0].lstrip("UK")))
+
+    sorted_names = (sorted(used_names))
+    test_counter = Counter(sorted_names)
+
+    full_list = []
+    usable_names = []
+
+    for i in range(1,len(used_names)+1):
+        full_list.append(i)
+        
+    for i in full_list:
+        if i not in used_names:
+            usable_names.append(i)
+
+    acc_final = {}
+
+    for acc, lin in acc_final_name_dict.items():
+        if lin[0] == "":
+            new_name_prep = usable_names[0]
+            usable_names.remove(new_name_prep)
+            new_name = "UK" + str(new_name_prep)
+            acc_final[acc] = new_name
         else:
-            introduction_prep = (introduction_int_list[-1] + 1)
-            new_name = "UK" + str(introduction_prep)
-            introduction_int_list.append(introduction_prep)
-
-        i_o = lineage(new_name, taxa)
-        i_o.acctrans_designations.add(acc)
-
-        lineage_objects.append(i_o)
-        lineage_dict[new_name] = i_o
-
-        for tax in i_o.taxa:
-            tax.lineage = i_o.id
-
-    return lineage_objects, lineage_dict, remove_list, acctran_for_split
+            acc_final[acc] = lin[0]
 
 
-def write_to_file(lineage_objects, outfile, top_20):
+    return acc_final, test_counter
+
+
+
+def write_to_file(acc_to_tax, acc_final, outfile):
+
+    new_tax_list = []
+    for acc, tax_list in acc_to_tax.items():
+        for tax in tax_list:
+            tax.uk_lineage = acc_final[acc]
+            new_tax_list.append(tax)
+
+    for_counting_lin_size = defaultdict(list)
+
+    for tax in new_tax_list:
+        for_counting_lin_size[tax.uk_lineage].append(tax)
+
+    lin_counts = {}
+    for i,v in for_counting_lin_size.items():
+        lin_counts[i] = len(v)
+
+    counter_lin_counts = Counter(lin_counts)
+
+    top_20_prep = counter_lin_counts.most_common(20)
+    top_20 = []
+    for i in top_20_prep:
+        top_20.append(i[0])
+    
 
     fw = open(outfile, 'w')
-    fw.write("taxon,uk_lineage,microreact_lineage\n")
-    for lin in lineage_objects:
-        for tax in lin.taxa:
-            if lin in top_20:
-                new_line = tax.id + "," + tax.lineage + "," + tax.lineage + "\n"
-            else:
-                new_line = tax.id + "," + tax.lineage + ",other\n"
+    fw.write("taxon,uk_lineage,acctrans,microreact_lineage\n")
+    for tax in new_tax_list:
+        if tax.uk_lineage in top_20:
+            new_line = tax.id + "," + tax.uk_lineage + "," + tax.acctrans + "," + tax.uk_lineage + "\n"
+        else:
+            new_line = tax.id + ","  + tax.uk_lineage + "," + tax.acctrans + ",other\n"
 
             fw.write(new_line)
 
     fw.close()
 
-def sortkey(lineage):
-    return len(lineage.taxa)
 
 def curate_lineages(input_dir, outfile):
 
-    introduction_int_list, taxon_list, intros_to_taxa, acctrans_to_intro, intro_acctrans = make_taxon_objects(input_dir)
+    taxon_list, acc_list, acc_name_counts, lin_acc_counts, acc_to_tax = make_taxon_objects(input_dir)
 
-    intros_to_taxa, intro_acctrans, unclear_taxa = deal_with_new_lineages(introduction_int_list, taxon_list, intros_to_taxa, acctrans_to_intro, intro_acctrans)
+    acc_final_name_dict, new_names = rename_lineages(acc_name_counts, lin_acc_counts)
 
-    lineage_objects, lineage_dict = make_lineage_objects(intros_to_taxa, intro_acctrans)
+    acc_final_name_dict = deal_with_issues(acc_final_name_dict, new_names, lin_acc_counts, acc_name_counts)
 
-    merged, acctran_dict, acctran_to_merge, merge_count = find_merged(lineage_objects)
+    acc_final, test_counter = name_new_lineages(acc_final_name_dict)
 
-    lineage_object_dict, lineage_objects, introduction_int_list, taxa_already_assigned, remove_list = deal_with_merged(acctran_to_merge, lineage_dict, unclear_taxa, lineage_objects, introduction_int_list)
+    for k,v in test_counter.items():
+        if v > 1:
+            print("ERROR IN LINEAGE RENAMING")
+    for acc, lin in acc_final_name_dict.items():
+        if len(lin) > 1:
+            print("ERROR IN LINEAGE RENAMING")
+        
+    write_to_file(acc_to_tax, acc_final, outfile)
 
-    lineage_objects, lineage_dict, remove_list, acctran_for_split = deal_with_split(lineage_objects, lineage_dict, acctran_dict, taxa_already_assigned, introduction_int_list, remove_list)
-
-    for i in remove_list:
-        if i in lineage_objects:
-            lineage_objects.remove(i)
-
-
-    sorted_lins = sorted(lineage_objects, key=sortkey, reverse=True)
-    top_20 = []
-    count = 0
-
-    for lin in sorted_lins:
-        if count < 20:
-            top_20.append(lin)
-            count += 1
-
-    write_to_file(lineage_objects, outfile, top_20)
