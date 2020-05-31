@@ -27,7 +27,7 @@ def make_taxon_objects(input_dir):
     if len(list_traits_files) == 0:
         sys.exit("Found no traits files!!")
     print("Found traits files:", list_traits_files)
-    list_traits_files = ["resources/all_traits.csv"]
+#    list_traits_files = ["resources/all_traits.csv"]
 
     for input_file in list_traits_files:
         with open(input_file) as f:
