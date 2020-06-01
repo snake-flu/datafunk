@@ -254,7 +254,7 @@ def write_to_file(acc_to_tax, acc_final, outfile):
         else:
             new_line = tax.id + ","  + tax.uk_lineage + "," + tax.acctrans + ",other\n"
 
-            fw.write(new_line)
+    fw.write(new_line)
 
     fw.close()
 
