@@ -27,7 +27,6 @@ def make_taxon_objects(input_dir):
     if len(list_traits_files) == 0:
         sys.exit("Found no traits files!!")
     print("Found traits files:", list_traits_files)
-    list_traits_files = ["resources/all_traits.csv"]
 
     for input_file in list_traits_files:
         with open(input_file) as f:
@@ -94,7 +93,7 @@ def rename_lineages(acc_name_counts, lin_acc_counts):
             acc_final_name_dict[acc].append(relevant_lin) 
         else:
             new_name = None 
-            
+
             for i in range(1, len(poss_lins)+1):
                 more_deserving = False
                 if new_name == None:
@@ -206,8 +205,14 @@ def name_new_lineages(acc_final_name_dict):
 
     for acc, lin in acc_final_name_dict.items():
         if lin[0] == "":
-            new_name_prep = usable_names[0]
-            usable_names.remove(new_name_prep)
+            if len(usable_names) > 0:
+                new_name_prep = usable_names[0]
+                usable_names.remove(new_name_prep)
+            else:
+                new_name_prep = len(full_list) + 1
+                full_list.append(new_name_prep)
+                
+            
             new_name = "UK" + str(new_name_prep)
             acc_final[acc] = new_name
         else:
@@ -251,7 +256,7 @@ def write_to_file(acc_to_tax, acc_final, outfile):
         else:
             new_line = tax.id + ","  + tax.uk_lineage + "," + tax.acctrans + ",other\n"
 
-            fw.write(new_line)
+        fw.write(new_line)
 
     fw.close()
 
