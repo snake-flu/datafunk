@@ -205,13 +205,16 @@ def name_new_lineages(acc_final_name_dict):
     acc_final = {}
 
     for acc, lin in acc_final_name_dict.items():
-        if lin[0] == "":
-            new_name_prep = usable_names[0]
-            usable_names.remove(new_name_prep)
-            new_name = "UK" + str(new_name_prep)
-            acc_final[acc] = new_name
-        else:
-            acc_final[acc] = lin[0]
+            if lin[0] == "":
+                if len(usable_names) > 0:
+                    new_name_prep = usable_names[0]
+                    usable_names.remove(new_name_prep)
+                else:
+                    new_name_prep = len(full_list) + 1
+                new_name = "UK" + str(new_name_prep)
+                acc_final[acc] = new_name
+            else:
+                acc_final[acc] = lin[0]
 
 
     return acc_final, test_counter
