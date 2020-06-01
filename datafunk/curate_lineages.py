@@ -36,8 +36,8 @@ def make_taxon_objects(input_dir):
                 toks = l.strip("\n").split(",")
                 if toks[1] == "UK": #this is in the traits.csv
                     seq_name = toks[0]
-                    intro_name = toks[3]
-                    acctrans = toks[5]
+                    intro_name = toks[2]
+                    acctrans = toks[4]
                     new_taxon = taxon(seq_name, intro_name, acctrans)
                     taxon_list.append(new_taxon)
 
