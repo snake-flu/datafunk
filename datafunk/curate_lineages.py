@@ -271,12 +271,10 @@ def curate_lineages(input_dir, outfile):
 
     acc_final, test_counter = name_new_lineages(acc_final_name_dict)
 
-    for k,v in test_counter.items():
-        if v > 1:
-            print("ERROR IN LINEAGE RENAMING")
-    for acc, lin in acc_final_name_dict.items():
-        if len(lin) > 1:
-            print("ERROR IN LINEAGE RENAMING")
+    for k,v in test_counter.items(): #Tests if a UK lineage name has been used more than once
+        assert v == 1
+    for acc, lin in acc_final_name_dict.items(): #Tests if a UK lineage has more than one acctrans assigned to it
+        assert len(lin) == 1
         
     write_to_file(acc_to_tax, acc_final, outfile)
 
