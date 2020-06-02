@@ -4,6 +4,8 @@ import random
 import copy
 
 
+random.seed(5050)
+
 def get_random_name():
     r = random.randint(0, 999999)
     num_str = "{:06d}".format(r)
