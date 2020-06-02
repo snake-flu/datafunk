@@ -186,8 +186,8 @@ def name_new_lineages(acc_final_name_dict):
     used_names = []
     for key, value in acc_final_name_dict.items():
         if value[0] != "":
-            used_names.append(int(value[0].lstrip("UK")))
-
+             used_names.append(int(value[0].lstrip("UK")))
+                
     sorted_names = (sorted(used_names))
     test_counter = Counter(sorted_names)
 
@@ -211,8 +211,7 @@ def name_new_lineages(acc_final_name_dict):
             else:
                 new_name_prep = len(full_list) + 1
                 full_list.append(new_name_prep)
-                
-            
+          
             new_name = "UK" + str(new_name_prep)
             acc_final[acc] = new_name
         else:
