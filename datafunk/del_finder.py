@@ -53,6 +53,9 @@ def del_finder(fasta_in, fasta_out, del_file, genotypes_file, append_snp = False
         ID = record.id
         seq = str(record.seq).upper()
 
+        if len(seq) != len(WuhanHu1):
+            sys.exit("reference and query sequences are not the same length!")
+
         for entry in dels:
             pos = entry[0]
             len = entry[1]
