@@ -811,6 +811,46 @@ def main(args=None):
 
     subparser_snp_finder.set_defaults(func=datafunk.subcommands.snp_finder.run)
 
+    # _________________________________ del_finder ____________________________#
+
+    subparser_del_finder = subparsers.add_parser(
+        "del_finder",
+        description="Query an alignment position for deletions",
+        help="Query an alignment position for deletions",
+        usage="datafunk del_finder -i <input.fasta>",
+    )
+    subparser_del_finder._action_groups.pop()
+    required_del_finder = subparser_del_finder.add_argument_group('required arguments')
+    optional_del_finder = subparser_del_finder.add_argument_group('optional arguments')
+
+    required_del_finder.add_argument('-i', '--input-fasta',
+                        help='Fasta file to mask',
+                        required=True,
+                        dest='fasta_in',
+                        metavar='input.fasta')
+    optional_del_finder.add_argument('-o', '--output-fasta',
+                            help='Fasta file to write',
+                            required=False,
+                            dest='fasta_out',
+                            metavar='output.fasta')
+    required_del_finder.add_argument('--deletions-file',
+                        help='File with deletion locations to parse',
+                        required=True,
+                        dest='del_file',
+                        metavar='deletions.txt')
+    required_del_finder.add_argument('--genotypes-table',
+                        help='CSV file with deletion typing results to write',
+                        required=True,
+                        dest='genotypes_file',
+                        metavar='results.csv')
+    optional_del_finder.add_argument('--append-as-SNP',
+                        help='If invoked, then append the genotype of the deletion as a SNP on the end of the alignment',
+                        required=False,
+                        dest='append_snp',
+                        action='store_true')
+
+    subparser_del_finder.set_defaults(func=datafunk.subcommands.del_finder.run)
+
     # _________________________________ add_header_column ____________________________#
 
     subparser_add_header_column = subparsers.add_parser(
