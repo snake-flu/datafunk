@@ -24,9 +24,9 @@ def parse_del_file(file):
     with open(file, 'r') as f:
         for line in f:
             l = line.rstrip().split(',')
-            pos, len = l
+            pos, length = l
 
-            ls = ls + [(int(pos), int(len))]
+            ls = ls + [(int(pos), int(length))]
 
     return(ls)
 
@@ -53,19 +53,19 @@ def del_finder(fasta_in, fasta_out, del_file, genotypes_file, append_snp = False
         ID = record.id
         seq = str(record.seq).upper()
 
-        if len(seq) != len(WuhanHu1):
+        if len(seq) != len(str(WuhanHu1.seq)):
             sys.exit("reference and query sequences are not the same length!")
 
         for entry in dels:
             pos = entry[0]
-            len = entry[1]
+            length = entry[1]
 
-            REF_allele = str(WuhanHu1.seq).upper()[pos - 1: pos - 1 + len]
+            REF_allele = str(WuhanHu1.seq).upper()[pos - 1: pos - 1 + length]
 
-            if seq[pos - 1: pos - 1 + len] == '-' * len:
+            if seq[pos - 1: pos - 1 + length] == '-' * length:
                 nuc = 'C'
                 genotype = 'del'
-            elif seq[pos - 1: pos - 1 + len] == REF_allele:
+            elif seq[pos - 1: pos - 1 + length] == REF_allele:
                 nuc = 'A'
                 genotype = 'ref'
             else:
@@ -75,7 +75,7 @@ def del_finder(fasta_in, fasta_out, del_file, genotypes_file, append_snp = False
             if append_snp:
                 seq = seq + nuc
 
-            # print(seq[pos - 1: pos - 1 + len], genotype, nuc)
+            # print(seq[pos - 1: pos - 1 + length], genotype, nuc)
 
         if fasta_out:
             f_out.write('>' + ID + '\n')
