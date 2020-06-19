@@ -828,9 +828,9 @@ def main(args=None):
                         required=True,
                         dest='fasta_in',
                         metavar='input.fasta')
-    required_del_finder.add_argument('-o', '--output-fasta',
+    optional_del_finder.add_argument('-o', '--output-fasta',
                             help='Fasta file to write',
-                            required=True,
+                            required=False,
                             dest='fasta_out',
                             metavar='output.fasta')
     required_del_finder.add_argument('--deletions-file',
