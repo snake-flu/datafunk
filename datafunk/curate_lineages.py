@@ -53,7 +53,7 @@ def make_taxon_objects(input_dir):
     for k,v in acc_to_tax.items():
         for tax in v:
             acc_to_poss_lins[k].append(tax.old_lineage)
-            
+
     for k,v in acc_to_poss_lins.items():
         for lineage in v:
             lins_to_acc[lineage].append(k)
@@ -65,10 +65,10 @@ def make_taxon_objects(input_dir):
         new = Counter(v)
         acc_name_counts[k] = new
 
-        
+
     for k,v in lins_to_acc.items():
         new = Counter(v)
-        lin_acc_counts[k] = new  
+        lin_acc_counts[k] = new
 
 
 
@@ -81,18 +81,18 @@ def rename_lineages(acc_name_counts, lin_acc_counts):
     new_names = []
 
     for acc, poss_lins in acc_name_counts.items():
-        
+
         relevant_lin = next(iter(poss_lins.items()))[0]
-        
+
         if len(poss_lins) == 1 and relevant_lin != "" and len(lin_acc_counts[relevant_lin]) == 1:
-                
+
             acc_final_name_dict[acc].append(relevant_lin)
-        
+
         #For new lineages, so they have no old lineage to fall back on
         elif len(poss_lins) == 1 and relevant_lin == "":
-            acc_final_name_dict[acc].append(relevant_lin) 
+            acc_final_name_dict[acc].append(relevant_lin)
         else:
-            new_name = None 
+            new_name = None
 
             for i in range(1, len(poss_lins)+1):
                 more_deserving = False
@@ -110,10 +110,10 @@ def rename_lineages(acc_name_counts, lin_acc_counts):
                         for inner_acc, inner_poss_lins in acc_name_counts.items():
 
                             test_against_other = inner_poss_lins.most_common(1)[0][0]
-                                        
+
                             if query_lin == test_against_other and acc != inner_acc:
 
-                                other_deserving[inner_acc] = inner_poss_lins.most_common(1)[0][1]                          
+                                other_deserving[inner_acc] = inner_poss_lins.most_common(1)[0][1]
 
                         if len(other_deserving) == 0:
                             new_name = query_lin
@@ -130,14 +130,14 @@ def rename_lineages(acc_name_counts, lin_acc_counts):
 
                         else:
                             new_name = query_lin
-                            
-                    
+
+
             if new_name == None: #if we loop to the end of the thing and all the names are taken
                 new_name = ""
-                
+
             acc_final_name_dict[acc].append(new_name)
-            
-            
+
+
             new_names.append(new_name)
 
     return acc_final_name_dict, new_names
@@ -151,43 +151,90 @@ def deal_with_issues(acc_final_name_dict, new_names, lin_acc_counts, acc_name_co
         if count > 1 and name != "":
             problem_lins.append(name)
 
-    problem_lin = defaultdict(list)
 
+    ###########################################################################
+    ###########################################################################
+    # Ben wrote this:
+
+    problem_lin={}
     for lin in problem_lins:
-        for acc, count in acc_name_counts.items():
-            if lin in count:
-                problem_lin[lin] = lin_acc_counts[lin]
-        
-        
-    for lin, acc_options in problem_lin.items():
-        
-        for acc in acc_options.keys():
-            acc_final_name_dict[acc] = []
+        # print(lin)
+        problem_lin[lin] = []
+        for a,l in acc_final_name_dict.items():
+            if lin == l[0]:
+                problem_lin[lin].append((a, lin_acc_counts[lin][a]))
 
-        winner = acc_options.most_common(1)[0][0]
-        
-        acc_final_name_dict[winner].append(lin)
 
-        
-        for other_acc in acc_options:
-            if other_acc != winner:
-                for other_options in acc_name_counts[other_acc]:
-                    if other_options != "" and other_options not in new_names:
-                        new_name = other_options
+    for uk_lineage, list_of_tuples in problem_lin.items():
+        winner = max(list_of_tuples, key=itemgetter(1))[0]
+        # print(winner)
+        contenders = [x[0] for x in list_of_tuples]
+        # print(contenders)
+        for contender in contenders:
+            if contender == winner:
+                continue
+            else:
+                acc_final_name_dict[contender] = []
+                # print(acc_name_counts[contender])
+                for other_option in acc_name_counts[contender]:
+                    # print(other_option)
+                    if other_option != "" and other_option not in new_names:
+                        # I think there might still be a problem here: because if the second
+                        # highest option is already designated to a deltrans lineage,
+                        # there is no further test for which deltrans_lineage should be given
+                        # the uk_lineage out of the two - we just assume that the deltrans lineage
+                        # that already has the uk lineage can keep it
+                        new_name = other_option
+                        break
                     else:
-                        new_name = ""
-                    
-                acc_final_name_dict[other_acc].append(new_name)
+                        new_name = ''
+
+                # print('newname='+new_name)
+                # print()
+
+                acc_final_name_dict[contender].append(new_name)
+
+    ###########################################################################
+    ###########################################################################
+    # and removed this:
+
+    # problem_lin = defaultdict(list)
+    #
+    # for lin in problem_lins:
+    #     for acc, count in acc_name_counts.items():
+    #         if lin in count:
+    #             problem_lin[lin] = lin_acc_counts[lin]
+    #
+    #
+    # for lin, acc_options in problem_lin.items():
+    #
+    #     for acc in acc_options.keys():
+    #         # This line is definitely wrong because it removes the link between valid uk and import lineages:
+    #         acc_final_name_dict[acc] = []
+    #
+    #     winner = acc_options.most_common(1)[0][0]
+    #
+    #     acc_final_name_dict[winner].append(lin)
+    #
+    #
+    #     for other_acc in acc_options:
+    #         if other_acc != winner:
+    #             for other_options in acc_name_counts[other_acc]:
+    #                 if other_options != "" and other_options not in new_names:
+    #                     new_name = other_options
+    #                 else:
+    #                     new_name = ""
+    #
+    #             acc_final_name_dict[other_acc].append(new_name)
 
     return acc_final_name_dict
-
 def name_new_lineages(acc_final_name_dict):
 
     used_names = []
     for key, value in acc_final_name_dict.items():
         if value[0] != "":
              used_names.append(int(value[0].lstrip("UK")))
-                
+
     sorted_names = (sorted(used_names))
     test_counter = Counter(sorted_names)
 
@@ -196,7 +243,7 @@ def name_new_lineages(acc_final_name_dict):
 
     for i in range(1,len(used_names)+1):
         full_list.append(i)
-        
+
     for i in full_list:
         if i not in used_names:
             usable_names.append(i)
@@ -211,7 +258,7 @@ def name_new_lineages(acc_final_name_dict):
             else:
                 new_name_prep = len(full_list) + 1
                 full_list.append(new_name_prep)
-          
+
             new_name = "UK" + str(new_name_prep)
             acc_final[acc] = new_name
         else:
@@ -245,7 +292,7 @@ def write_to_file(acc_to_tax, acc_final, outfile):
     top_20 = []
     for i in top_20_prep:
         top_20.append(i[0])
-    
+
 
     fw = open(outfile, 'w')
     fw.write("taxon,uk_lineage,acctrans,microreact_lineage\n")
@@ -274,6 +321,5 @@ def curate_lineages(input_dir, outfile):
         assert v == 1
     for acc, lin in acc_final_name_dict.items(): #Tests if a UK lineage has more than one acctrans assigned to it
         assert len(lin) == 1
-        
-    write_to_file(acc_to_tax, acc_final, outfile)
 
+    write_to_file(acc_to_tax, acc_final, outfile)
