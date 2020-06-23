@@ -21,10 +21,11 @@ from datafunk.travel_history import cities_dict, countries_list, subdivisions_di
 _fields_gisaid = ['covv_accession_id', 'covv_virus_name', 'covv_location', 'covv_collection_date',
                  'covv_add_host_info', 'covv_assembly_method', 'covv_gender', 'covv_host',
                  'covv_passage', 'covv_patient_age', 'covv_seq_technology',
-                 'covv_specimen', 'covv_subm_date']
+                 'covv_specimen', 'covv_subm_date',
+                 'covv_patient_status', 'covv_patient_status', 'covv_lineage', 'covv_add_location', 'covv_clade']
 
 _fields_edin = ['edin_header', 'edin_admin_0', 'edin_admin_1', 'edin_admin_2',
-                'edin_travel', 'edin_date_stamp', 'edin_omitted', 'edin_epi_week',
+                'edin_travel', 'edin_date_stamp', 'edin_omitted', 'edin_epi_week', 'edin_epi_day',
                 'edin_flag', 'is_uk']
 
 """You can edit this list:
@@ -291,6 +292,11 @@ def update_edin_date_stamp_field(gisaid_json_dict):
 
 
 def date_string_to_epi_week(date_string, weeks):
+    """
+    parse the gisaid date and return epi week as
+    a string. Epi-week 0 is the week beginning
+    2019-12-22
+    """
     # check the date:
     regex = re.compile('\d{4}-\d{2}-\d{2}')
     match = re.search(regex, date_string)
@@ -310,9 +316,37 @@ def date_string_to_epi_week(date_string, weeks):
         return(None)
 
 
-def update_edin_epi_week_field(gisaid_json_dict):
+def date_string_to_epi_day(date_string, weeks):
     """
-    record epi week by parsing sample collection date
+    parse the gisaid date and return epi day as
+    a string. Epi-day 1 is day 1 of epi-week 0,
+    which is 2019-12-22
+    """
+    # check the date:
+    regex = re.compile('\d{4}-\d{2}-\d{2}')
+    match = re.search(regex, date_string)
+    if not match:
+        return(None)
+
+    date = datetime.strptime(date_string, '%Y-%m-%d').date()
+
+    week = Week.fromdate(date)
+
+    # this is day 1 of epi-week 0:
+    day_one = datetime.strptime("2019-12-22", '%Y-%m-%d').date()
+
+    if week in weeks:
+        epi_day = (date - day_one).days + 1
+        return(str(epi_day))
+    else:
+        return(None)
+
+
+def update_edin_epi_date_fields(gisaid_json_dict):
+    """
+    record epi week and epi day by parsing sample
+    collection date
+
     NB this will break in 2021!
     """
     if 'omitted_date' in gisaid_json_dict['edin_flag']:
@@ -326,9 +360,13 @@ def update_edin_epi_week_field(gisaid_json_dict):
 
     # returns None if nothing found
     epi_week = date_string_to_epi_week(collection_date, weeks)
+    epi_day = date_string_to_epi_day(collection_date, weeks)
 
     if epi_week:
         gisaid_json_dict['edin_epi_week'] = epi_week
+
+    if epi_day:
+        gisaid_json_dict['edin_epi_day'] = epi_day
 
     return(gisaid_json_dict)
 
@@ -465,6 +503,9 @@ def write_fasta_output(output,
                       new_records_dict,
                       old_records_list,
                       old_records_dict):
+    """
+    write the sequences to a fasta file
+    """
     if output:
         out = open(output, 'w')
     else:
@@ -500,7 +541,8 @@ def write_fasta_output(output,
 def compare_records(metadata_gisaid_dict, json_gisaid_dict):
     """
     check for equality between gisaid fields in the new dump
-    vs. the last iteration of the metadata
+    vs. the last iteration of the metadata. If equality == False
+    then we reprocess this record
     """
     equality = True
     for field in _fields_gisaid:
@@ -700,8 +742,8 @@ def process_gisaid_data(input_json,
     # get travel history
     new_records_dict = {x: get_travel_history(new_records_dict[x]) for x in new_records_dict.keys()}
 
-    # if gisaid collection date formatted correctly, we can add epi week
-    new_records_dict = {x: update_edin_epi_week_field(new_records_dict[x]) for x in new_records_dict.keys()}
+    # if gisaid collection date formatted correctly, we can add epi week and epi day
+    new_records_dict = {x: update_edin_epi_date_fields(new_records_dict[x]) for x in new_records_dict.keys()}
 
     # check gisaid collection date formatted correctly
     new_records_dict = {x: check_gisaid_date(new_records_dict[x]) for x in new_records_dict.keys()}
