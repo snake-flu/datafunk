@@ -20,6 +20,7 @@ def date_string_to_epi_week(date_string, weeks):
 
     date = datetime.strptime(date_string, '%Y-%m-%d').date()
 
+    # this is epi-week week:
     week = Week.fromdate(date)
 
     if week in weeks:
@@ -30,6 +31,35 @@ def date_string_to_epi_week(date_string, weeks):
     else:
         return(None)
 
+
+def date_string_to_epi_day(date_string, weeks):
+    if date_string is None:
+        return None
+
+    # check the date:
+    regex = re.compile('\d{4}-\d{2}-\d{2}')
+    try:
+        match = re.search(regex, date_string)
+    except:
+        return None
+    if not match:
+        return None
+
+    date = datetime.strptime(date_string, '%Y-%m-%d').date()
+
+    # this is epi-week week:
+    week = Week.fromdate(date)
+
+    # this is day 1 of epi-week 0:
+    day_one = datetime.strptime("2019-12-22", '%Y-%m-%d').date()
+
+    if week in weeks:
+        epi_day = (date - day_one).days + 1
+        return(str(epi_day))
+    else:
+        return(None)
+
+
 def load_dataframe(metadata_file):
     sep = ','
     if metadata_file.endswith('tsv'):
@@ -37,22 +67,35 @@ def load_dataframe(metadata_file):
     df = pd.read_csv(metadata_file, sep=sep)
     return df
 
-def add_epi_week_column(in_metadata, out_metadata, date_column, epi_column_name="edin_epi_week"):
+
+def add_epi_week_column(in_metadata, out_metadata, date_column,
+                        epi_week_column_name="edin_epi_week",
+                        epi_day_column_name=None):
+
     metadata = load_dataframe(in_metadata)
 
     last_2019 = Week(2019, 52)
     weeks = list(Year(2020).iterweeks())
     weeks.append(last_2019)
 
-    epi_column = []
+    epi_week_column = []
+    epi_day_column = []
     for i,row in metadata.iterrows():
         date_string = row[date_column]
         epi_week = date_string_to_epi_week(date_string, weeks)
-        epi_column.append(epi_week)
+        epi_day = date_string_to_epi_day(date_string, weeks)
+        epi_week_column.append(epi_week)
+        epi_day_column.append(epi_day)
 
-    if epi_column_name in metadata.columns:
-        metadata[epi_column_name].update(pd.Series(epi_column))
+    if epi_week_column_name in metadata.columns:
+        metadata[epi_week_column_name].update(pd.Series(epi_week_column))
     else:
-        metadata[epi_column_name] = epi_column
+        metadata[epi_week_column_name] = epi_week_column
+
+    if epi_day_column_name:
+        if epi_day_column_name in metadata.columns:
+            metadata[epi_day_column_name].update(pd.Series(epi_day_column))
+        else:
+            metadata[epi_day_column_name] = epi_day_column
 
     metadata.to_csv(out_metadata, index=False)

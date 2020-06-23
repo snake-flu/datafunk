@@ -523,7 +523,7 @@ def main(args=None):
     subparser_add_epi_week = subparsers.add_parser(
         "add_epi_week",
         usage="datafunk add_epi_week -i <input_metadata> -o <output_metadata> --date_column <column> [--epi-column-name <column>]",
-        help="Adds a column for epi week to metadata table",
+        help="Adds a column for epi week to metadata table, and optionally a column for epi day",
     )
 
     subparser_add_epi_week.add_argument(
@@ -547,13 +547,18 @@ def main(args=None):
         help="Column name to convert to epi week",
     )
     subparser_add_epi_week.add_argument(
-        "--epi-column-name",
-        dest="epi_column_name",
+        "--epi-week-column-name",
+        dest="epi_week_column_name",
         default="edin_epi_week",
         required=False,
         help="Column name for epi week column",
     )
-
+    subparser_add_epi_week.add_argument(
+        "--epi-day-column-name",
+        dest="epi_day_column_name",
+        required=False,
+        help="Column name for epi day column",
+    )
     subparser_add_epi_week.set_defaults(func=datafunk.subcommands.add_epi_week.run)
 
     # _______________________________ process_gisaid_data ____________________________________________#
