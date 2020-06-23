@@ -14,34 +14,26 @@ class taxon():
         self.acctrans = acctrans
 
 
-def make_taxon_objects(input_dir):
+def make_taxon_objects(traits_file):
 
     taxon_list = []
     acc_list = set()
 
-    if input_dir.endswith("traits.csv"):
-        list_traits_files = [input_dir]
-    else:
-        in_dir = os.path.dirname(input_dir)
-        list_traits_files = glob.glob('%s/**/*traits.csv' %in_dir, recursive=True) \
-                            + glob.glob('%s/*traits.csv' %in_dir, recursive=True)
-    if len(list_traits_files) == 0:
-        sys.exit("Found no traits files!!")
-    print("Found traits files:", list_traits_files)
+    count = 0
 
-    for input_file in list_traits_files:
-        with open(input_file) as f:
-            next(f)
-            for l in f:
-                toks = l.strip("\n").split(",")
-                if toks[1] == "UK": #this is in the traits.csv
-                    seq_name = toks[0]
-                    intro_name = toks[2]
-                    acctrans = toks[6] #This is actually now deltrans_lineage, but easier to keep the names the same
-                    new_taxon = taxon(seq_name, intro_name, acctrans)
-                    taxon_list.append(new_taxon)
+    with open(traits_file) as f:
+        next(f)
+        for l in f:
+            toks = l.strip("\n").split(",")
+            if toks[1] == "UK": #this is in the traits.csv
+                count += 1
+                seq_name = toks[0]
+                intro_name = toks[2]
+                acctrans = toks[6] #This is actually now deltrans_lineage, but easier to keep the names the same
+                new_taxon = taxon(seq_name, intro_name, acctrans)
+                taxon_list.append(new_taxon)
 
-                    acc_list.add(acctrans)
+                acc_list.add(acctrans)
 
     acc_to_tax = defaultdict(list)
 
@@ -138,7 +130,6 @@ def rename_lineages(acc_name_counts, lin_acc_counts):
 
             acc_final_name_dict[acc].append(new_name)
 
-
             new_names.append(new_name)
 
     return acc_final_name_dict, new_names
@@ -146,16 +137,12 @@ def rename_lineages(acc_name_counts, lin_acc_counts):
 def deal_with_issues(acc_final_name_dict, new_names, lin_acc_counts, acc_name_counts):
 
     name_counter = Counter(new_names)
+
     problem_lins = []
 
     for name, count in name_counter.items():
         if count > 1 and name != "":
             problem_lins.append(name)
-
-
-    ###########################################################################
-    ###########################################################################
-    # Ben wrote this:
 
     problem_lin={}
     for lin in problem_lins:
@@ -165,70 +152,40 @@ def deal_with_issues(acc_final_name_dict, new_names, lin_acc_counts, acc_name_co
             if lin == l[0]:
                 problem_lin[lin].append((a, lin_acc_counts[lin][a]))
 
+    # print(problem_lin)
 
     for uk_lineage, list_of_tuples in problem_lin.items():
+        print(uk_lineage)
         winner = max(list_of_tuples, key=itemgetter(1))[0]
-        # print(winner)
+        print(winner)
         contenders = [x[0] for x in list_of_tuples]
-        # print(contenders)
         for contender in contenders:
             if contender == winner:
                 continue
-            else:
+            else: #to assign the other deltrans options a different uk lineage name
                 acc_final_name_dict[contender] = []
                 # print(acc_name_counts[contender])
                 for other_option in acc_name_counts[contender]:
-                    # print(other_option)
+                    print(contender)
+                    print("other option=" + other_option)
                     if other_option != "" and other_option not in new_names:
-                        # I think there might still be a problem here: because if the second
+                        # NB: if the second
                         # highest option is already designated to a deltrans lineage,
                         # there is no further test for which deltrans_lineage should be given
-                        # the uk_lineage out of the two - we just assume that the deltrans lineage
+                        # the uk_lineage out of the two - we assume that the deltrans lineage
                         # that already has the uk lineage can keep it
                         new_name = other_option
                         break
                     else:
                         new_name = ''
 
-                # print('newname='+new_name)
+                print('newname='+new_name)
                 # print()
 
                 acc_final_name_dict[contender].append(new_name)
 
-    ###########################################################################
-    ###########################################################################
-    # and removed this:
-
-    # problem_lin = defaultdict(list)
-    #
-    # for lin in problem_lins:
-    #     for acc, count in acc_name_counts.items():
-    #         if lin in count:
-    #             problem_lin[lin] = lin_acc_counts[lin]
-    #
-    #
-    # for lin, acc_options in problem_lin.items():
-    #
-    #     for acc in acc_options.keys():
-    #         # This line is definitely wrong because it removes the link between valid uk and import lineages:
-    #         acc_final_name_dict[acc] = []
-    #
-    #     winner = acc_options.most_common(1)[0][0]
-    #
-    #     acc_final_name_dict[winner].append(lin)
-    #
-    #
-    #     for other_acc in acc_options:
-    #         if other_acc != winner:
-    #             for other_options in acc_name_counts[other_acc]:
-    #                 if other_options != "" and other_options not in new_names:
-    #                     new_name = other_options
-    #                 else:
-    #                     new_name = ""
-    #
-    #             acc_final_name_dict[other_acc].append(new_name)
-
     return acc_final_name_dict
+
 def name_new_lineages(acc_final_name_dict):
 
     used_names = []
@@ -308,9 +265,9 @@ def write_to_file(acc_to_tax, acc_final, outfile):
     fw.close()
 
 
-def curate_lineages(input_dir, outfile):
+def curate_lineages(traits_file, outfile):
 
-    taxon_list, acc_list, acc_name_counts, lin_acc_counts, acc_to_tax = make_taxon_objects(input_dir)
+    taxon_list, acc_list, acc_name_counts, lin_acc_counts, acc_to_tax = make_taxon_objects(traits_file)
 
     acc_final_name_dict, new_names = rename_lineages(acc_name_counts, lin_acc_counts)
 
