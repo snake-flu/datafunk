@@ -406,7 +406,8 @@ def fix_header(header):
     """
     parse fasta header and remove problems
     """
-    fixed_header = header.replace(' ', '_')\
+    fixed_header = header.lstrip()\
+        .replace(' ', '_')\
         .replace("hCoV-19/","")\
         .replace("hCov-19/","")\
         .replace("PENDING", "")\
