@@ -16,9 +16,9 @@ def remove_fasta(input_fasta, filter_dictionary, output_file="filtered_file.fast
     log_file = open(output_file+".log","w")
     for record in SeqIO.parse(input_fasta, "fasta"):
         if record.id not in filter_dictionary.keys():
-            SeqIO.write(record, filtered_file, "fasta")
+            filtered_file.write(">" + record.id + "\n")
+            filtered_file.write(str(record.seq) + "\n")
         else:
             log_file.write("Filtered Sequence: " + record.id + " due to " + filter_dictionary[record.id] + "\n")
     filtered_file.close()
     log_file.close()
-                
