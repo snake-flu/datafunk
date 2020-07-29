@@ -30,7 +30,7 @@ _fields_edin = ['edin_header', 'edin_admin_0', 'edin_admin_1', 'edin_admin_2',
 
 """You can edit this list:
 """
-fields = []
+fields = ['lineage', 'lineage_support', 'lineages_version']
 
 
 """Functions
