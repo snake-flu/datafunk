@@ -221,7 +221,7 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, log_all_ins
     RLEN = samfile.header['SQ'][0]['LN']
 
     if output == 'stdout':
-        out = sys.stdout()
+        out = sys.stdout
     else:
         out = open(output, 'w')
 
