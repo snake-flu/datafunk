@@ -58,7 +58,7 @@ def split_sam_cigar_operation(one_operation):
 
 def split_sam_cigar(cigar):
     """
-    m is a list of strings (e.g. ['1000M', '4I'])
+    l is a list of strings (e.g. ['1000M', '4I'])
     """
     r = re.compile('\d{1,}[A-Z]{1}')
     l = re.findall(r, cigar)
@@ -103,9 +103,9 @@ def get_one_string(sam_line, rlen, log_inserts = False):
 
     # According to the SAM spec:
     # "If POS < 1, unmapped read, no assumptions can be made about RNAME and CIGAR"
-    # But note that pysam converts POS to 0-bsaed coordinates for us (as above)
+    # But note that pysam converts POS to 0-bsaed coordinates for us (as above),
+    # and -1 represent an unmapped read
     if POS < 0:
-        # TO DO: SOME SENSIBLE RETURN HERE
         return(None)
 
     # parse the CIGAR string to get the operations:
@@ -155,7 +155,7 @@ def check_and_get_flattened_site(site):
 
     check = sum([x.isalpha() for x in site])
     if check > 1:
-        warnings.warn('ambiguous overlapping alignment')
+        sys.stderr.write('ambiguous overlapping alignment')
         return('N')
 
     # because {A, C, G, T} > {-} > {*}, we can use max()
@@ -196,6 +196,7 @@ def swap_in_gaps_Ns(seq, pad):
 def get_seq_from_block(sam_block, rlen, log_inserts, pad):
 
     block_lines_sites_list = [get_one_string(sam_line, rlen, log_inserts = log_inserts) for sam_line in sam_block]
+    block_lines_sites_list = [x for x in block_lines_sites_list if x]
 
     if len(block_lines_sites_list) == 1:
         seq_flat_no_internal_gaps = swap_in_gaps_Ns(block_lines_sites_list[0], pad = pad)
@@ -212,6 +213,9 @@ def get_seq_from_block(sam_block, rlen, log_inserts, pad):
         # replace central '*'s with 'N's, and external '*'s with '-'s
         seq_flat_no_internal_gaps = swap_in_gaps_Ns(seq_flat, pad = pad)
         return(seq_flat_no_internal_gaps)
+
+    else:
+        return(None)
 
 
 def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, log_all_inserts, \
@@ -267,6 +271,9 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, log_all_ins
             continue
 
         seq = get_seq_from_block(sam_block = one_querys_alignment_lines, rlen = RLEN, log_inserts = log, pad = pad)
+
+        if seq == None:
+            continue
 
         if trim and not pad:
             out.write('>' + query_seq_name + '\n')
