@@ -1002,7 +1002,36 @@ def main(args=None):
 
     subparser_extract_unannotated_seqs.set_defaults(func=datafunk.subcommands.extract_unannotated_seqs.run)
 
-        # ___________________________________________________________________________#
+    # _________________________________ del_finder ____________________________#
+
+    subparser_AA_finder = subparsers.add_parser(
+        "AA_finder",
+        description="Query a codon position for amino acids",
+        help="Query a codon position for amino acids",
+        usage="datafunk AA_finder -i <input.fasta> --codons-file codons.txt",
+    )
+    subparser_AA_finder._action_groups.pop()
+    required_AA_finder = subparser_AA_finder.add_argument_group('required arguments')
+
+    required_AA_finder.add_argument('-i', '--input-fasta',
+                        help='Fasta file to mask',
+                        required=True,
+                        dest='fasta_in',
+                        metavar='input.fasta')
+    required_AA_finder.add_argument('--codons-file',
+                        help='File with codon locations to parse',
+                        required=True,
+                        dest='AA_file',
+                        metavar='codons.txt')
+    required_AA_finder.add_argument('--genotypes-table',
+                        help='CSV file with amino acid typing results to write',
+                        required=True,
+                        dest='genotypes_file',
+                        metavar='results.csv')
+
+    subparser_AA_finder.set_defaults(func=datafunk.subcommands.AA_finder.run)
+
+    # ___________________________________________________________________________#
 
     args = parser.parse_args()
 
