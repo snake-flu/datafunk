@@ -56,6 +56,8 @@ def del_finder(fasta_in, fasta_out, del_file, genotypes_file, append_snp = False
         if len(seq) != len(str(WuhanHu1.seq)):
             sys.exit("reference and query sequences are not the same length!")
 
+        genotypes = []
+
         for entry in dels:
             pos = entry[0]
             length = entry[1]
@@ -75,13 +77,13 @@ def del_finder(fasta_in, fasta_out, del_file, genotypes_file, append_snp = False
             if append_snp:
                 seq = seq + nuc
 
-            # print(seq[pos - 1: pos - 1 + length], genotype, nuc)
+            genotypes.append(genotype)
 
         if fasta_out:
             f_out.write('>' + ID + '\n')
             f_out.write(seq + '\n')
 
-        g_out.write(ID + "," + genotype + "\n")
+        g_out.write(ID + "," + ",".join(genotypes) + "\n")
 
     if fasta_out:
         f_out.close()
