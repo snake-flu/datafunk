@@ -829,7 +829,7 @@ def main(args=None):
     optional_del_finder = subparser_del_finder.add_argument_group('optional arguments')
 
     required_del_finder.add_argument('-i', '--input-fasta',
-                        help='Fasta file to mask',
+                        help='Fasta file to type',
                         required=True,
                         dest='fasta_in',
                         metavar='input.fasta')
@@ -1014,7 +1014,7 @@ def main(args=None):
     required_AA_finder = subparser_AA_finder.add_argument_group('required arguments')
 
     required_AA_finder.add_argument('-i', '--input-fasta',
-                        help='Fasta file to mask',
+                        help='Fasta file to type',
                         required=True,
                         dest='fasta_in',
                         metavar='input.fasta')
