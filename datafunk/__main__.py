@@ -1002,7 +1002,7 @@ def main(args=None):
 
     subparser_extract_unannotated_seqs.set_defaults(func=datafunk.subcommands.extract_unannotated_seqs.run)
 
-    # _________________________________ del_finder ____________________________#
+    # _________________________________ AA_finder ____________________________#
 
     subparser_AA_finder = subparsers.add_parser(
         "AA_finder",
@@ -1030,6 +1030,38 @@ def main(args=None):
                         metavar='results.csv')
 
     subparser_AA_finder.set_defaults(func=datafunk.subcommands.AA_finder.run)
+
+    # _________________________________ bootstrap ____________________________#
+
+    subparser_bootstrap = subparsers.add_parser(
+        "bootstrap",
+        description="boostrap an alignment",
+        help="bootstrap an alignment",
+        usage="datafunk bootstrap -i <input.fasta> --output-prefix boot -n 100",
+    )
+    subparser_bootstrap._action_groups.pop()
+    required_bootstrap = subparser_bootstrap.add_argument_group('required arguments')
+    optional_bootstrap = subparser_bootstrap.add_argument_group('optional arguments')
+
+    required_bootstrap.add_argument('-i', '--input-fasta',
+                        help='Alignment in fasta format to bootstrap',
+                        required=True,
+                        dest='fasta_in',
+                        metavar='input.fasta')
+    optional_bootstrap.add_argument('-p', '--output-prefix',
+                        help='Prefix for output files (default is "bootstrap_")',
+                        required=False,
+                        default="bootstrap_",
+                        dest='output_prefix',
+                        metavar='boot')
+    optional_bootstrap.add_argument('-n',
+                        help='Number of boostraps to generate (default is 1)',
+                        required=False,
+                        default=1,
+                        metavar='1',
+                        type=int)
+
+    subparser_bootstrap.set_defaults(func=datafunk.subcommands.bootstrap.run)
 
     # ___________________________________________________________________________#
 
