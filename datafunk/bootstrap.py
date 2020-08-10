@@ -1,7 +1,7 @@
 from Bio import SeqIO
 import sys, random
 
-def bootstrap(fasta_in, n = 1, output_prefix = "boostrap_"):
+def bootstrap(fasta_in, n = 1, output_prefix = "bootstrap_"):
     temp_alignment = SeqIO.parse(fasta_in, "fasta")
     temp_record = next(temp_alignment)
 
