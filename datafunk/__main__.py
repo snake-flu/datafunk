@@ -1035,7 +1035,7 @@ def main(args=None):
 
     subparser_bootstrap = subparsers.add_parser(
         "bootstrap",
-        description="boostrap an alignment",
+        description="bootstrap an alignment",
         help="bootstrap an alignment",
         usage="datafunk bootstrap -i <input.fasta> --output-prefix boot -n 100",
     )
@@ -1055,7 +1055,7 @@ def main(args=None):
                         dest='output_prefix',
                         metavar='boot')
     optional_bootstrap.add_argument('-n',
-                        help='Number of boostraps to generate (default is 1)',
+                        help='Number of bootstraps to generate (default is 1)',
                         required=False,
                         default=1,
                         metavar='1',
