@@ -76,7 +76,7 @@ def get_sam_cigar_operations(cigar):
     return(operations)
 
 
-def get_one_string(sam_line, rlen, log_inserts = False):
+def get_one_string(sam_line, rlen, log_inserts = False, log_dels = False):
     """
     Transform one line of the SAM alignment into sample sequence in unpadded
     reference coordinates (insertions relative to the reference are omitted,
@@ -129,6 +129,13 @@ def get_one_string(sam_line, rlen, log_inserts = False):
                 else:
                   insertions[str(rstart)] = [(QNAME, SEQ[qstart:qstart + size])]
 
+        # logging deletions relative to the reference:
+        if log_dels:
+            if operation == 'D':
+                if str(rstart) in deletions:
+                  deletions[str(rstart)] = deletions[str(rstart)] + [(QNAME, size)]
+                else:
+                  deletions[str(rstart)] = [(QNAME, size)]
 
         # based on this CIGAR operation, call the relavent lambda function
         # from the dict of lambda functions, returns sequence to be appended
@@ -193,9 +200,9 @@ def swap_in_gaps_Ns(seq, pad):
     return(seq)
 
 
-def get_seq_from_block(sam_block, rlen, log_inserts, pad):
+def get_seq_from_block(sam_block, rlen, log_inserts, log_dels, pad):
 
-    block_lines_sites_list = [get_one_string(sam_line, rlen, log_inserts = log_inserts) for sam_line in sam_block]
+    block_lines_sites_list = [get_one_string(sam_line, rlen, log_inserts = log_inserts, log_dels = log_dels) for sam_line in sam_block]
     block_lines_sites_list = [x for x in block_lines_sites_list if x]
 
     if len(block_lines_sites_list) == 1:
@@ -218,9 +225,11 @@ def get_seq_from_block(sam_block, rlen, log_inserts, pad):
         return(None)
 
 
-def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, log_all_inserts, \
+def sam_2_fasta(samfile, reference, output, prefix_ref,
+                log_inserts, log_all_inserts, log_dels, log_all_dels,
                 trim = False, pad = False, trimstart = None, trimend = None):
     global insertions
+    global deletions
 
     RLEN = samfile.header['SQ'][0]['LN']
 
@@ -249,17 +258,18 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, log_all_ins
 
 
     if log_inserts or log_all_inserts:
-        log = True
         insertions = {}
+        log_i = True
     else:
-        log = False
         insertions = None
+        log_i = False
 
-    # for x in samfile:
-    #     temp = parse_sam_line(x)
-    #     print(temp)
-    #     get_seq_from_block(sam_block = [x], rlen = RLEN, log_inserts = log, pad = pad)
-    #     continue
+    if log_dels or log_all_dels:
+        deletions = {}
+        log_d = True
+    else:
+        deletions = None
+        log_d = False
 
     for query_seq_name, one_querys_alignment_lines in itertools.groupby(samfile, lambda x: parse_sam_line(x)['QNAME']):
         # one_querys_alignment_lines is an iterator corresponding to all the lines
@@ -270,7 +280,7 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, log_all_ins
             sys.stderr.write(query_seq_name + ' has 0-length SEQ field in alignment\n')
             continue
 
-        seq = get_seq_from_block(sam_block = one_querys_alignment_lines, rlen = RLEN, log_inserts = log, pad = pad)
+        seq = get_seq_from_block(sam_block = one_querys_alignment_lines, rlen = RLEN, log_inserts = log_i, log_dels = log_d, pad = pad)
 
         if seq == None:
             continue
@@ -296,40 +306,49 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, log_all_ins
         out.close()
 
 
-    def get_insertion_lines(entry):
+    def get_indel_lines(entry):
         """
-        entry is a list of tuples, format: [(query_name, insertion_sequence), (..., ...), ...]
-        matches is a list of tuples, format: [(insertion_seq, [qname1, qname2]), (...,[...]), ...]
+        entry is a list of tuples, format: [(query_name, insertion_sequence/length), (..., ...), ...]
+        matches is a list of tuples, format: [(insertion_seq/length, [qname1, qname2]), (...,[...]), ...]
         matches contains all insertions
         """
         d = {}
         for y in entry:
             qname = y[0]
-            insert = str(y[1])
-            if insert in d:
-                d[insert] = d[insert] + [qname]
+            indel = str(y[1])
+            if indel in d:
+                d[indel] = d[indel] + [qname]
             else:
-                d[insert] = [qname]
+                d[indel] = [qname]
         matches = [(x, d[x]) for x in d]
         return(matches)
 
-    # if we are logging insertions
+    # if we are logging insertions...
+    # first thing to do is set each entry to remove possible duplicates from
+    # samples having more than one alignment line in the sam file
+    if log_inserts or log_all_inserts:
+        for key in insertions.keys():
+            insertions[key] = set(insertions[key])
+
     if log_inserts and not log_all_inserts:
         l = []
         for x in insertions:
             refstart = int(x)
-            lines = get_insertion_lines(insertions[x])
+            lines = get_indel_lines(insertions[x])
             # if there are non-singleton insertions to log
             if len(lines) > 0:
+                temp = []
                 for line in lines:
                     if len(line[1]) > 1:
-                        l.append((refstart, lines))
+                        temp.append(line)
+                if len(temp) > 0:
+                    l.append((refstart, temp))
 
     elif log_all_inserts:
         l = []
         for x in insertions:
             refstart = int(x)
-            lines = get_insertion_lines(insertions[x])
+            lines = get_indel_lines(insertions[x])
             # if there are any singleton insertions to log
             if len(lines) > 0:
                 l.append((refstart, lines))
@@ -350,6 +369,48 @@ def sam_2_fasta(samfile, reference, output, prefix_ref, log_inserts, log_all_ins
         out_insertions.close()
 
 
+    # same again for deletions
+    if log_dels or log_all_dels:
+        for key in deletions.keys():
+            deletions[key] = set(deletions[key])
+
+    if log_dels and not log_all_dels:
+        d = []
+        for x in deletions:
+            refstart = int(x)
+            lines = get_indel_lines(deletions[x])
+            # if there are non-singleton insertions to log
+            if len(lines) > 0:
+                temp = []
+                for line in lines:
+                    if len(line[1]) > 1:
+                        temp.append(line)
+                if len(temp) > 0:
+                    d.append((refstart, temp))
+
+    elif log_all_dels:
+        d = []
+        for x in deletions:
+            refstart = int(x)
+            lines = get_indel_lines(deletions[x])
+            # if there are any singleton insertions to log
+            if len(lines) > 0:
+                d.append((refstart, lines))
+
+
+    if 'd' in locals() and len(d) > 0:
+        # order d:
+        d.sort(key = operator.itemgetter(0))
+        # write a file
+        out_deletions = open('deletions.txt', 'w')
+        out_deletions.write('ref_start\tlength\tsamples\n')
+        for x in d:
+            refstart = x[0]
+            for y in x[1]:
+                deletion = y[0]
+                names_list = y[1]
+                out_deletions.write(str(refstart) + '\t' + str(deletion) + '\t' + ':'.join(names_list) + '\n')
+        out_deletions.close()
 
 
 
