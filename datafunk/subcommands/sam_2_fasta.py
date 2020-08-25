@@ -21,24 +21,6 @@ def run(options):
     else:
         output = options.output_fasta
 
-
-    if options.log_inserts:
-        log_inserts = True
-    else:
-        log_inserts = False
-
-
-    if options.log_all_inserts:
-        log_all_inserts = True
-    else:
-        log_all_inserts = False
-
-
-    if options.prefix_ref:
-        prefix_ref = True
-    else:
-        prefix_ref = False
-
     trim = False
     if options.trim:
         trim = True
@@ -65,30 +47,34 @@ def run(options):
             trim = False
 
     if options.trim and not trim:
-        warnings.warn('Trim argument not formatted properly. Ignoring trimming.')
+        sys.stderr.write('Trim argument not formatted properly. Ignoring trimming.')
     if options.trim and trim:
         if trimstart > RLEN - 1 or trimend > RLEN:
             trim = False
-            warnings.warn('Trim values are larger than length of reference. Ignoring trimming.')
+            sys.stderr.write('Trim values are larger than length of reference. Ignoring trimming.')
         if trimstart > trimend:
             trim = False
-            warnings.warn('Trim argument not formatted properly. Ignoring trimming.')
+            sys.stderr.write('Trim argument not formatted properly. Ignoring trimming.')
 
     if trim:
-        sam_2_fasta(samfile = samfile, \
-                    reference = reference, \
-                    output = output, \
-                    prefix_ref = prefix_ref, \
-                    log_inserts = log_inserts, \
-                    log_all_inserts = log_all_inserts, \
-                    trim = True, \
-                    pad = options.pad, \
-                    trimstart = trimstart, \
+        sam_2_fasta(samfile = samfile,
+                    reference = reference,
+                    output = output,
+                    prefix_ref = options.prefix_ref,
+                    log_inserts = options.log_inserts,
+                    log_all_inserts = options.log_all_inserts,
+                    log_dels = options.log_dels,
+                    log_all_dels = options.log_all_dels,
+                    trim = True,
+                    pad = options.pad,
+                    trimstart = trimstart,
                     trimend = trimend)
     else:
-        sam_2_fasta(samfile = samfile, \
-                    reference = reference, \
-                    output = output, \
-                    prefix_ref = prefix_ref, \
-                    log_inserts = log_inserts,
-                    log_all_inserts = log_all_inserts)
+        sam_2_fasta(samfile = samfile,
+                    reference = reference,
+                    output = output,
+                    prefix_ref = options.prefix_ref,
+                    log_inserts = options.log_inserts,
+                    log_all_inserts = options.log_all_inserts,
+                    log_dels = options.log_dels,
+                    log_all_dels = options.log_all_dels)

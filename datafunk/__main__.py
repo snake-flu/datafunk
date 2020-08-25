@@ -339,6 +339,20 @@ def main(args=None):
         action='store_true'
                         )
     optional_sam_2_fasta.add_argument(
+        '--log-deletions',
+        dest='log_dels',
+        help='log non-singleton deletions relative to the reference',
+        required=False,
+        action='store_true'
+                        )
+    optional_sam_2_fasta.add_argument(
+        '--log-all-deletions',
+        help='log all (including singleton) deletions relative to the reference',
+        dest='log_all_dels',
+        required=False,
+        action='store_true'
+                        )
+    optional_sam_2_fasta.add_argument(
         '--stdout',
         help='Overides -o/--output-fasta if present and prints output to stdout',
         required=False,
