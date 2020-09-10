@@ -365,7 +365,7 @@ def sam_2_fasta(samfile, reference, output, prefix_ref,
             for y in x[1]:
                 insert = y[0]
                 names_list = y[1]
-                out_insertions.write(str(refstart) + '\t' + str(insert) + '\t' + ':'.join(names_list) + '\n')
+                out_insertions.write(str(refstart) + '\t' + str(insert) + '\t' + '|'.join(names_list) + '\n')
         out_insertions.close()
 
 
@@ -409,7 +409,7 @@ def sam_2_fasta(samfile, reference, output, prefix_ref,
             for y in x[1]:
                 deletion = y[0]
                 names_list = y[1]
-                out_deletions.write(str(refstart) + '\t' + str(deletion) + '\t' + ':'.join(names_list) + '\n')
+                out_deletions.write(str(refstart) + '\t' + str(deletion) + '\t' + '|'.join(names_list) + '\n')
         out_deletions.close()
 
 
