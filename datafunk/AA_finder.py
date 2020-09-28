@@ -1,6 +1,6 @@
 from Bio import SeqIO
 from Bio.Seq import Seq
-from Bio.Alphabet import generic_dna
+# from Bio.Alphabet import generic_dna
 import os, sys
 
 """
