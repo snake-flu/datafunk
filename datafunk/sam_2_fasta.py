@@ -162,7 +162,7 @@ def check_and_get_flattened_site(site):
 
     check = sum([x.isalpha() for x in site])
     if check > 1:
-        sys.stderr.write('ambiguous overlapping alignment')
+        sys.stderr.write('ambiguous overlapping alignment\n')
         return('N')
 
     # because {A, C, G, T} > {-} > {*}, we can use max()
