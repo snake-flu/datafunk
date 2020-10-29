@@ -22,7 +22,7 @@ _fields_gisaid = ['covv_accession_id', 'covv_virus_name', 'covv_location', 'covv
                  'covv_add_host_info', 'covv_assembly_method', 'covv_gender', 'covv_host',
                  'covv_passage', 'covv_patient_age', 'covv_seq_technology',
                  'covv_specimen', 'covv_subm_date',
-                 'covv_patient_status', 'covv_patient_status', 'covv_lineage', 'covv_add_location', 'covv_clade']
+                 'covv_patient_status', 'covv_lineage', 'covv_add_location', 'covv_clade']
 
 _fields_edin = ['edin_header', 'edin_admin_0', 'edin_admin_1', 'edin_admin_2',
                 'edin_travel', 'edin_date_stamp', 'edin_omitted', 'edin_epi_week', 'edin_epi_day',
