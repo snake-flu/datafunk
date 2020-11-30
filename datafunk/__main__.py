@@ -836,14 +836,14 @@ def main(args=None):
         "del_finder",
         description="Query an alignment position for deletions",
         help="Query an alignment position for deletions",
-        usage="datafunk del_finder -i <input.fasta>",
+        usage="datafunk del_finder -i <input.fasta> --deletions-file <deletions.csv> --genotypes-table <results.csv>",
     )
     subparser_del_finder._action_groups.pop()
     required_del_finder = subparser_del_finder.add_argument_group('required arguments')
     optional_del_finder = subparser_del_finder.add_argument_group('optional arguments')
 
     required_del_finder.add_argument('-i', '--input-fasta',
-                        help='Fasta file to type',
+                        help='Alignment (to Wuhan-Hu-1) in Fasta format to type',
                         required=True,
                         dest='fasta_in',
                         metavar='input.fasta')
@@ -853,12 +853,12 @@ def main(args=None):
                             dest='fasta_out',
                             metavar='output.fasta')
     required_del_finder.add_argument('--deletions-file',
-                        help='File with deletion locations to parse',
+                        help='Input CSV file with deletions type. Format is: 1-based start position of deletion,length of deletion (dont include a header line), eg: 1605,3',
                         required=True,
                         dest='del_file',
-                        metavar='deletions.txt')
+                        metavar='deletions.csv')
     required_del_finder.add_argument('--genotypes-table',
-                        help='CSV file with deletion typing results to write',
+                        help='CSV file with deletion typing results to write. Returns the genotype for each deletion in --deletions-file for each sequence in --input-fasta: either "ref", "del" or "X" (for missing data)',
                         required=True,
                         dest='genotypes_file',
                         metavar='results.csv')
@@ -988,23 +988,23 @@ def main(args=None):
         "AA_finder",
         description="Query a codon position for amino acids",
         help="Query a codon position for amino acids",
-        usage="datafunk AA_finder -i <input.fasta> --codons-file codons.txt",
+        usage="datafunk AA_finder -i <input.fasta> --codons-file <codons.csv> --genotypes-table <results.csv>",
     )
     subparser_AA_finder._action_groups.pop()
     required_AA_finder = subparser_AA_finder.add_argument_group('required arguments')
 
     required_AA_finder.add_argument('-i', '--input-fasta',
-                        help='Fasta file to type',
+                        help='Alignment (to Wuhan-Hu-1) in Fasta format to type',
                         required=True,
                         dest='fasta_in',
                         metavar='input.fasta')
     required_AA_finder.add_argument('--codons-file',
-                        help='File with codon locations to parse',
+                        help='Input CSV file with codon locations to parse. Format is: name,1-based start position of codon (dont include a header line), eg: d614g,23402',
                         required=True,
                         dest='AA_file',
-                        metavar='codons.txt')
+                        metavar='codons.csv')
     required_AA_finder.add_argument('--genotypes-table',
-                        help='CSV file with amino acid typing results to write',
+                        help='CSV file with amino acid typing results to write. Returns the amino acid at each position in --codons-file for each sequence in --input-fasta, or "X" for missing data',
                         required=True,
                         dest='genotypes_file',
                         metavar='results.csv')
