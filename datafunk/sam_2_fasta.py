@@ -124,18 +124,18 @@ def get_one_string(sam_line, rlen, log_inserts = False, log_dels = False):
         # logging insertions relative to the reference:
         if log_inserts:
             if operation == 'I':
-                if str(rstart) in insertions:
-                  insertions[str(rstart)] = insertions[str(rstart)] + [(QNAME, SEQ[qstart:qstart + size])]
+                if str(rstart + 1) in insertions:
+                  insertions[str(rstart + 1)] = insertions[str(rstart + 1)] + [(QNAME, SEQ[qstart:qstart + size])]
                 else:
-                  insertions[str(rstart)] = [(QNAME, SEQ[qstart:qstart + size])]
+                  insertions[str(rstart + 1)] = [(QNAME, SEQ[qstart:qstart + size])]
 
         # logging deletions relative to the reference:
         if log_dels:
             if operation == 'D':
-                if str(rstart) in deletions:
-                  deletions[str(rstart)] = deletions[str(rstart)] + [(QNAME, size)]
+                if str(rstart + 1) in deletions:
+                  deletions[str(rstart + 1)] = deletions[str(rstart + 1)] + [(QNAME, size)]
                 else:
-                  deletions[str(rstart)] = [(QNAME, size)]
+                  deletions[str(rstart + 1)] = [(QNAME, size)]
 
         # based on this CIGAR operation, call the relavent lambda function
         # from the dict of lambda functions, returns sequence to be appended
