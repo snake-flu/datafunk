@@ -154,7 +154,7 @@ def get_one_string(sam_line, rlen, log_inserts = False, log_dels = False):
     return(new_seq)
 
 
-def check_and_get_flattened_site(site):
+def check_and_get_flattened_site(site, QNAME):
     """
     A per-site check that there isn't any ambiguity between
     alignments within a single sequence
@@ -162,7 +162,7 @@ def check_and_get_flattened_site(site):
 
     check = sum([x.isalpha() for x in site])
     if check > 1:
-        sys.stderr.write('ambiguous overlapping alignment\n')
+        sys.stderr.write('ambiguous overlapping alignment: ' + QNAME + '\n')
         return('N')
 
     # because {A, C, G, T} > {-} > {*}, we can use max()
@@ -214,7 +214,10 @@ def get_seq_from_block(sam_block, rlen, log_inserts, log_dels, pad):
         # # the site with no checks (about three times as fast):
         # flattened_site_list = [max(x) for x in zip(*[list(x) for x in block_lines_sites_list])]
 
-        flattened_site_list = [check_and_get_flattened_site(x) for x in zip(*[list(x) for x in block_lines_sites_list])]
+        # adding QNAME in order to write more informative warnings from check_and_get_flattened_site()
+        QNAME = str(sam_block[0]).split()[0]
+
+        flattened_site_list = [check_and_get_flattened_site(x, QNAME) for x in zip(*[list(x) for x in block_lines_sites_list])]
         seq_flat = ''.join(flattened_site_list)
 
         # replace central '*'s with 'N's, and external '*'s with '-'s
