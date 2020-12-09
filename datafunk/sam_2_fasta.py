@@ -215,7 +215,7 @@ def get_seq_from_block(sam_block, rlen, log_inserts, log_dels, pad):
         # flattened_site_list = [max(x) for x in zip(*[list(x) for x in block_lines_sites_list])]
 
         # adding QNAME in order to write more informative warnings from check_and_get_flattened_site()
-        QNAME = sam_block[0].split()[0]
+        QNAME = str(sam_block[0]).split()[0]
 
         flattened_site_list = [check_and_get_flattened_site(x, QNAME) for x in zip(*[list(x) for x in block_lines_sites_list])]
         seq_flat = ''.join(flattened_site_list)
