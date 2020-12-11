@@ -72,7 +72,7 @@ def get_CDS(fasta_in, fasta_out, translate = False):
         out = sys.stdout
 
     # # test stuff with reference
-    # ref_aa_file = SeqIO.parse('/Users/ben/Dropbox/Biology_Edinburgh_2/Rambaut/cds/mn908947.3.aa', 'fasta')
+    # ref_aa_file = SeqIO.parse('mn908947.3.aa', 'fasta')
     # ref_aa = []
     # for record in ref_aa_file:
     #     ref_aa.append(str(record.seq))
