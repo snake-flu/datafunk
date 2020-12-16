@@ -94,11 +94,11 @@ def get_CDS(fasta_in, fasta_out, translate = False):
         nostops = [seq[:-3] for seq in seqs]
 
         if translate:
-            out.write(record.id + '\n')
+            out.write(">" + record.id + '\n')
             out.write(''.join([str(seq.translate()) for seq in nostops]) + '\n')
 
         else:
-            out.write(record.id + '\n')
+            out.write(">" + record.id + '\n')
             out.write(''.join([str(seq) for seq in nostops]) + '\n')
 
     if fasta_out:
