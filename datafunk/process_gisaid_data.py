@@ -12,6 +12,7 @@ import argparse
 import warnings
 import re
 import pycountry
+from itertools import chain
 
 from datafunk.travel_history import *
 from datafunk.travel_history import cities_dict, countries_list, subdivisions_dict, others
@@ -291,55 +292,45 @@ def update_edin_date_stamp_field(gisaid_json_dict):
     return(gisaid_json_dict)
 
 
-def date_string_to_epi_week(date_string, weeks):
+def date_string_to_epi_week(date_string):
     """
-    parse the gisaid date and return epi week as
-    a string. Epi-week 0 is the week beginning
-    2019-12-22
+    parse a date string in YYYY-MM-DD format and return
+    cumulative epi week which is cumulative total epidemiological
+    weeks since 2019-12-22. Week beginning 2019-12-22 is week 0
     """
-    # check the date:
-    regex = re.compile('\d{4}-\d{2}-\d{2}')
-    match = re.search(regex, date_string)
-    if not match:
-        return(None)
-
-    date = datetime.strptime(date_string, '%Y-%m-%d').date()
-
+    try:
+        date = datetime.strptime(date_string, '%Y-%m-%d').date()
+    except:
+        return ""
+    # this is epi-week:
     week = Week.fromdate(date)
-
-    if week in weeks:
-        if str(week)[0:4] == '2019':
-            return('0')
-        else:
-            return(str(week.weektuple()[1]))
+    if week.year < 2019 or (week.year == 2019 and week.week < 52):
+        return ""
+    elif week.year == 2019:
+        return("0")
     else:
-        return(None)
+        cum_epi_week = week.week + len(list(chain(*[[x for x in Year(y).iterweeks()] for y in range(2020, week.year)])))
+        return str(cum_epi_week)
 
 
-def date_string_to_epi_day(date_string, weeks):
+def date_string_to_epi_day(date_string):
     """
-    parse the gisaid date and return epi day as
-    a string. Epi-day 1 is day 1 of epi-week 0,
-    which is 2019-12-22
+    parse a date string in YYYY-MM-DD format and return
+    cumulative epi day which is cumulative total days since 2019-12-22
     """
-    # check the date:
-    regex = re.compile('\d{4}-\d{2}-\d{2}')
-    match = re.search(regex, date_string)
-    if not match:
-        return(None)
-
-    date = datetime.strptime(date_string, '%Y-%m-%d').date()
-
+    try:
+        date = datetime.strptime(date_string, '%Y-%m-%d').date()
+    except:
+        return ""
+    # this is epi-week week:
     week = Week.fromdate(date)
-
     # this is day 1 of epi-week 0:
     day_one = datetime.strptime("2019-12-22", '%Y-%m-%d').date()
-
-    if week in weeks:
-        epi_day = (date - day_one).days + 1
-        return(str(epi_day))
+    if week.year < 2019 or (week.year == 2019 and week.week < 52):
+        return ""
     else:
-        return(None)
+        cum_epi_day = (date - day_one).days + 1
+        return str(cum_epi_day)
 
 
 def update_edin_epi_date_fields(gisaid_json_dict):
@@ -354,13 +345,9 @@ def update_edin_epi_date_fields(gisaid_json_dict):
 
     collection_date = gisaid_json_dict['covv_collection_date']
 
-    last_2019 = Week(2019, 52)
-    weeks = list(Year(2020).iterweeks())
-    weeks.append(last_2019)
-
     # returns None if nothing found
-    epi_week = date_string_to_epi_week(collection_date, weeks)
-    epi_day = date_string_to_epi_day(collection_date, weeks)
+    epi_week = date_string_to_epi_week(collection_date)
+    epi_day = date_string_to_epi_day(collection_date)
 
     if epi_week:
         gisaid_json_dict['edin_epi_week'] = epi_week
