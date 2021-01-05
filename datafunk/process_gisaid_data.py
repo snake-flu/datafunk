@@ -13,6 +13,7 @@ import warnings
 import re
 import pycountry
 from itertools import chain
+from unidecode import unidecode
 
 from datafunk.travel_history import *
 from datafunk.travel_history import cities_dict, countries_list, subdivisions_dict, others
@@ -44,11 +45,13 @@ def eprint(*args, **kwargs):
 def fix_gisaid_json_dict(gisaid_json_dict):
     """
     Remove commas from fields inside json dict
+
+    And remove non-ascii characters
     """
 
     newDict = {}
     for x,y in gisaid_json_dict.items():
-        newDict[x] = str(y).replace(',', '')
+        newDict[x] = unidecode(str(y).replace(',', ''))
 
     return(newDict)
 

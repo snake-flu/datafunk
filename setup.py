@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="datafunk",
-    version="0.0.7",
+    version="0.0.8",
     packages=find_packages(),
     package_data={'datafunk':['datafunk/resources/*']},
     include_package_data=True,
@@ -18,6 +18,7 @@ setup(
         "pysam>=0.15.4",
         "datapackage",
         "epiweeks",
+        "unidecode",
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
