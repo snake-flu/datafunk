@@ -159,6 +159,7 @@ def check_and_get_flattened_site(site, QNAME):
     A per-site check that there isn't any ambiguity between
     alignments within a single sequence
     """
+    site = set(site)
 
     check = sum([x.isalpha() for x in site])
     if check > 1:
