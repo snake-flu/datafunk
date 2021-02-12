@@ -49,14 +49,16 @@ def read_metadata(file, sep = ','):
             l = line.rstrip().split(sep)
             if First:
                 header = l
-                if not all(x in l for x in ['edin_omitted', 'subsample_omit', 'sequence_name', 'edin_epi_week']):
+                if not all(x in l for x in ['sequence_name', 'edin_epi_week']):
                     sys.exit('required columns not found in metadata')
                 First = False
                 continue
             d = {x:y for x,y in zip(header, l)}
-            if d['edin_omitted'] == 'True':
+            if 'edin_omitted' in header and d['edin_omitted'] == 'True':
                 continue
-            if d['subsample_omit'] == 'True':
+            if 'subsample_omit' in header and d['subsample_omit'] == 'True':
+                continue
+            if 'why_excluded' in header and d['why_excluded']:
                 continue
             seq_name = d['sequence_name']
             if seq_name in metadata:
@@ -106,6 +108,7 @@ def distance_to_root(fasta_file, metadata_file):
         metadata_line = metadata[id]
 
         seq = record.seq
+        print(len(seq), len(WH04_align.seq))
 
         distance_info = get_pairwise_difference(WH04_align.seq, seq)
         distance = distance_per_genome(distance_info)
