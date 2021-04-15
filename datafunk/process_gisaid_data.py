@@ -14,6 +14,7 @@ import re
 import pycountry
 from itertools import chain
 from unidecode import unidecode
+import unicodedata
 
 from datafunk.travel_history import *
 from datafunk.travel_history import cities_dict, countries_list, subdivisions_dict, others
@@ -32,7 +33,7 @@ _fields_edin = ['edin_header', 'edin_admin_0', 'edin_admin_1', 'edin_admin_2',
 
 """You can edit this list:
 """
-fields = []
+fields = ['sample_date', 'safe_sample_date', 'is_cog_uk']
 
 
 """Functions
@@ -55,6 +56,16 @@ def fix_gisaid_json_dict(gisaid_json_dict):
 
     return(newDict)
 
+def clean_string(text, strip_symbols = False):
+    # strip accents
+    text = ''.join((c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn'))
+    # replace spaces with _
+    text = text.replace(' ', '_')
+    
+    if strip_symbols:
+        p = re.compile(r'[^a-zA-Z0-9_/-]')
+        text = p.sub('', text)
+    return text
 
 def get_admin_levels_from_json_dict(gisaid_json_dict, warnings = True):
     """
@@ -106,9 +117,9 @@ def get_admin_levels_from_json_dict(gisaid_json_dict, warnings = True):
     if country == 'Democratic Republic of the Congo':
         country = 'DRC'
 
-    gisaid_json_dict['edin_admin_0'] = country.replace(' ', '_')
-    gisaid_json_dict['edin_admin_1'] = subdivision.replace(' ', '_')
-    gisaid_json_dict['edin_admin_2'] = subsubdivision.replace(' ', '_')
+    gisaid_json_dict['edin_admin_0'] = clean_string(country)
+    gisaid_json_dict['edin_admin_1'] = clean_string(subdivision)
+    gisaid_json_dict['edin_admin_2'] = clean_string(subsubdivision)
 
     return(gisaid_json_dict)
 
@@ -273,6 +284,7 @@ def update_UK_sequence(gisaid_json_dict):
     Flag UK sequences
     """
     header = gisaid_json_dict['edin_header']
+    gisaid_json_dict["is_cog_uk"] = False
     for country in ['England/', 'Scotland/', 'Wales/', 'Northern_Ireland/']:
         if country.lower() in header.lower():
 
@@ -335,6 +347,23 @@ def date_string_to_epi_day(date_string):
         cum_epi_day = (date - day_one).days + 1
         return str(cum_epi_day)
 
+def date_string_to_safe_date_string(date_string):
+    """
+    parse a date string in YYYY-MM-DD format and return
+    date corresponding to the start of the epi-week in which it falls.
+    Week beginning 2019-12-22 is week 0
+    """
+    try:
+        date = datetime.strptime(date_string, '%Y-%m-%d').date()
+    except:
+        return ""
+    # this is epi-week:
+    week = Week.fromdate(date)
+
+    if week.year < 2019 or (week.year == 2019 and week.week < 52):
+        return ""
+    else:
+        return week.startdate().strftime('%Y-%m-%d')
 
 def update_edin_epi_date_fields(gisaid_json_dict):
     """
@@ -351,12 +380,17 @@ def update_edin_epi_date_fields(gisaid_json_dict):
     # returns None if nothing found
     epi_week = date_string_to_epi_week(collection_date)
     epi_day = date_string_to_epi_day(collection_date)
+    safe_date = date_string_to_safe_date_string(collection_date)
 
     if epi_week:
         gisaid_json_dict['edin_epi_week'] = epi_week
 
     if epi_day:
         gisaid_json_dict['edin_epi_day'] = epi_day
+
+    if safe_date:
+        gisaid_json_dict['sample_date'] = collection_date
+        gisaid_json_dict['safe_sample_date'] = safe_date
 
     return(gisaid_json_dict)
 
@@ -405,6 +439,7 @@ def fix_header(header):
         .replace("None", "")
 
     fixed_header = re.sub('^Wuhan-Hu-1','China/Wuhan-Hu-1',fixed_header)
+    fixed_header = clean_string(fixed_header)
 
     return(fixed_header)
 
