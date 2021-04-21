@@ -285,6 +285,7 @@ def update_UK_sequence(gisaid_json_dict):
     """
     header = gisaid_json_dict['edin_header']
     gisaid_json_dict["is_cog_uk"] = False
+    gisaid_json_dict["is_uk"] = False
     for country in ['England/', 'Scotland/', 'Wales/', 'Northern_Ireland/']:
         if country.lower() in header.lower():
 
