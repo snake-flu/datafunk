@@ -403,7 +403,7 @@ def get_one_metadata_line(dict, fields_list, sep = ','):
 
     l is a 'sep'-separated string formatted for printing
     """
-    l = sep.join([dict[x] for x in fields_list]) + '\n'
+    l = sep.join([str(dict[x]) for x in fields_list]) + '\n'
     return(l)
 
 
