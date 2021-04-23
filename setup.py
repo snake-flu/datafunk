@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="datafunk",
-    version="0.0.8",
+    version="0.0.9",
     packages=find_packages(),
     package_data={'datafunk':['datafunk/resources/*']},
     include_package_data=True,
