@@ -295,7 +295,11 @@ def update_UK_sequence(gisaid_json_dict):
                 gisaid_json_dict['edin_flag'] = gisaid_json_dict['edin_flag'] + ':uk_sequence'
 
             gisaid_json_dict['is_uk'] = 'True'
+            gisaid_json_dict['is_cog_uk'] = 'True'
 
+    for country in ['Falkland_Islands/', 'Gibraltar/', 'Jersey/', 'Isle_of_Man/', 'Guernsey/']:
+        if country.lower() in header.lower():
+            gisaid_json_dict['is_cog_uk'] = 'True'
     return(gisaid_json_dict)
 
 
