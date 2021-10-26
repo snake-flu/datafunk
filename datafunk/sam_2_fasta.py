@@ -3,8 +3,6 @@ import pysam
 import re, itertools, operator
 import sys, warnings
 
-print(pysam.__version__)
-
 """
 # SAM CIGAR operations
 
