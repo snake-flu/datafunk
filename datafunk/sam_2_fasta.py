@@ -34,14 +34,19 @@ lambda_dict = {'M': (lambda query_start, ref_start, length, seq: (query_start + 
                '=': (lambda query_start, ref_start, length, seq: (query_start + length, ref_start + length, seq[query_start:query_start + length] )),
                'X': (lambda query_start, ref_start, length, seq: (query_start + length, ref_start + length, seq[query_start:query_start + length] ))}
 
+
 def parse_sam_line(AlignedSegment):
     """
     d is a dictionary with SAM field names as keys and their value from
     one line of a SAM alignment as values
     """
-    line = str(AlignedSegment)
-    names = ['QNAME', 'FLAG', 'RNAME', 'POS', 'MAPQ', 'CIGAR', 'RNEXT', 'PNEXT', 'TLEN', 'SEQ', 'QUAL']
-    d = {x: y for x,y in zip(names, line.split()[0:11])}
+    d = {}
+
+    d["QNAME"] = AlignedSegment.query_name
+    d["POS"] = AlignedSegment.reference_start  # 0-based
+    d["CIGAR"] = AlignedSegment.cigarstring
+    d["SEQ"] = AlignedSegment.query_sequence
+
     return(d)
 
 
@@ -95,7 +100,7 @@ def get_one_string(sam_line, rlen, log_inserts = False, log_dels = False):
     # According to the SAM spec:
     # "POS: 1-based leftmost mapping POSition of the first CIGAR operation that
     # “consumes” a reference base (see table above)."
-    # But note that pysam converts this field to 0-bsaed coordinates for us
+    # But note that pysam converts this field to 0-based coordinates for us
     POS = int(aln_info_dict['POS'])
 
     # Query seq:
@@ -103,7 +108,7 @@ def get_one_string(sam_line, rlen, log_inserts = False, log_dels = False):
 
     # According to the SAM spec:
     # "If POS < 1, unmapped read, no assumptions can be made about RNAME and CIGAR"
-    # But note that pysam converts POS to 0-bsaed coordinates for us (as above),
+    # But note that pysam converts POS to 0-based coordinates for us (as above),
     # and -1 represent an unmapped read
     if POS < 0:
         return(None)
@@ -279,9 +284,10 @@ def sam_2_fasta(samfile, reference, output, prefix_ref,
         # one_querys_alignment_lines is an iterator corresponding to all the lines
         # in the SAM file for one query sequence
 
-        one_querys_alignment_lines = [x for x in one_querys_alignment_lines if parse_sam_line(x)['SEQ'] != 'None']
+        one_querys_alignment_lines = [x for x in one_querys_alignment_lines if not x.is_secondary]
+        one_querys_alignment_lines = [x for x in one_querys_alignment_lines if not x.is_unmapped]
         if len(one_querys_alignment_lines) == 0:
-            sys.stderr.write(query_seq_name + ' has 0-length SEQ field in alignment\n')
+            sys.stderr.write(query_seq_name + ' has no mapped lines\n')
             continue
 
         seq = get_seq_from_block(sam_block = one_querys_alignment_lines, rlen = RLEN, log_inserts = log_i, log_dels = log_d, pad = pad)
@@ -415,18 +421,3 @@ def sam_2_fasta(samfile, reference, output, prefix_ref,
                 names_list = y[1]
                 out_deletions.write(str(refstart) + '\t' + str(deletion) + '\t' + '|'.join(names_list) + '\n')
         out_deletions.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            #

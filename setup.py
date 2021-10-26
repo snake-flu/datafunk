@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="datafunk",
-    version="0.1.0",
+    version="0.1.1",
     packages=find_packages(),
     package_data={'datafunk':['datafunk/resources/*']},
     include_package_data=True,
@@ -15,7 +15,7 @@ setup(
         "biopython>=1.70",
         "pandas>=0.25.0",
         "pycountry>=pycountry-19.8.18",
-        "pysam>=0.15.4",
+        "pysam>=0.17.0",
         "datapackage",
         "epiweeks",
         "unidecode",
