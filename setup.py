@@ -14,7 +14,7 @@ setup(
     install_requires=[
         "biopython>=1.70",
         "pandas>=0.25.0",
-        "pycountry>=pycountry-19.8.18",
+        "pycountry",
         "pysam>=0.17.0",
         "datapackage",
         "epiweeks",
